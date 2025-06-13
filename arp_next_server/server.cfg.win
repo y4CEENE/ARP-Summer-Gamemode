@@ -1,0 +1,32 @@
+echo Executing Server Config...
+lanmode 0
+hostname Arabica Roleplay [Voice chat Enabled][Backup]
+weburl arabicarp.com
+mapname San Andreas
+language Arabic/English
+password
+rcon_password f7gqh8jg9fqhu4fqhjf
+maxplayers 500
+port 7770
+maxnpc 0
+rcon 0
+announce 1
+query 1
+lagcompmode 1
+messageholelimit 3000
+messageslimit 500
+ackslimit 3000
+useartwork 1
+gamemode0 arp_next
+filterscripts VoiceChat connectionbar
+plugins crashdetect Whirlpool streamer mysql_static pawncmd regex SKY sampvoice discord-connector sscanf nativechecker
+onfoot_rate 40
+incar_rate 40
+weapon_rate 40
+stream_distance 300.0
+stream_rate 2000
+chatlogging 0
+logtimeformat [%Y/%m/%d %H:%M:%S]
+discord_bot_token YOUR_BOT_TOKEN
+#crashdetect_log crash.log
+#trace n

@@ -1,0 +1,36 @@
+{
+    "cooldown_seconds" : 2700,
+    "cooldown_decrease_seconds" : 180,
+    "robbank" : {
+        "robbery_cooldown_hours" : 8,
+        "looting_cooldown_seconds" : 5,
+        "looting_base_cash" : 500,
+        "looting_random_cash" : 500,
+        "looting_limit" : 100000,
+        "minimal_level" : 7
+    },
+    "robhouse" : {
+        "looting_cooldown" : 5,
+        "looting_base_cash" : 100,
+        "looting_random_cash" : 300,
+        "looting_limit" : 2000,
+        "wanted_level" : 2,
+        "minimal_level" : 3
+    },
+    "robbiz" : {
+        "looting_cooldown" : 5,
+        "looting_base_cash" : 100,
+        "looting_random_cash" : 300,
+        "looting_limit" : 2000,
+        "wanted_level" : 2,
+        "minimal_level" : 3
+    },
+    "robatm" : {
+        "looting_cooldown" : 20,
+        "looting_base_cash" : 100,
+        "looting_random_cash" : 300,
+        "looting_limit" : 20000,
+        "wanted_level" : 2,
+        "minimal_level" : 5
+    }
+}

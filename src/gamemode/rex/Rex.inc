@@ -1,0 +1,23 @@
+#include "rex/RexConfig.pwn"
+
+#include "rex/level1/CrashHack.pwn"
+#include "rex/level1/MaxConnectionsPerIP.pwn"
+#include "rex/level1/MaxPing.pwn"
+#include "rex/level1/Proxy.pwn"
+#include "rex/level1/SyncFlood.pwn"
+#include "rex/level2/CBug.pwn"
+#include "rex/level2/FakeClient.pwn"
+#include "rex/level2/Fly.pwn"
+#include "rex/level2/RapidFire.pwn"
+#include "rex/level2/TrollBoss.pwn"
+#include "rex/level2/WeaponHack.pwn"
+#include "rex/level3/NameTag.pwn"
+#include "rex/level3/NOP.pwn"
+#include "rex/level3/ServerAd.pwn"
+#include "rex/level3/Slide.pwn"
+#include "rex/level3/Spam.pwn"
+#include "rex/level3/UnFreeze.pwn"
+
+//TODO: https://github.com/RogueDrifter/Anti_cheat_pack
+//#include "rex/level2/SpeedHack.pwn"
+//#include "rex/level2/TeleportHack.pwn"

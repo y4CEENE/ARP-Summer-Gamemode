@@ -1,0 +1,20 @@
+/// @file      SFFixes.map
+/// @author    BOURAOUI Al-Moez L.A
+/// @date      Created at 2021-06-06 15:56:00 +0100
+/// @copyright Copyright (c) 2022
+
+
+#include <YSI\y_hooks>
+
+hook OnGameModeInit()
+{
+    //Close Hotel parking
+    CreateDynamicObject(5706,-1741.1999500,985.7000100,22.3000000,0.0000000,0.0000000,270.0000000); //object(studiobld03_law) (1)
+    CreateDynamicObject(996,-1767.9000200,943.7999900,24.6000000,0.0000000,0.0000000,0.0000000); //object(lhouse_barrier1) (1)
+    CreateDynamicObject(996,-1759.6999500,943.7998000,24.6000000,0.0000000,0.0000000,0.0000000); //object(lhouse_barrier1) (2)
+    CreateDynamicObject(996,-1751.5000000,943.7998000,24.6000000,0.0000000,0.0000000,0.0000000); //object(lhouse_barrier1) (3)
+    CreateDynamicObject(1214,-1741.9000200,943.9000200,23.8000000,0.0000000,0.0000000,0.0000000); //object(bollard) (1)
+    CreateDynamicObject(1215,-1741.9000200,943.9000200,24.9000000,0.0000000,0.0000000,0.0000000); //object(bollardlight) (1)
+
+    return 1;
+}

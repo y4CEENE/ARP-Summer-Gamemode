@@ -1,0 +1,164 @@
+{
+    "armsdealer": {
+        "matrun_qty":            250,
+        "matrun_cost":           100,
+        "matrun_qty_per_level":  50,
+        "matrun_vip3_bonus":     250,
+        "matrun_notoriety":      10,
+        "matrun_illegal_points": 80
+    },
+    "bartender": {
+        "beer_cost":    60,
+        "vodka_cost":   100,
+        "whiskey_cost": 100,
+        "water_cost":   20,
+        "soda_cost":    20
+    },
+    "brinks": {
+        "respawn_delay":    1000,
+        "pc_payment":       3000,
+        "ls_payment":       5000,
+        "pc_rob_notoriety": 3000,
+        "ls_rob_notoriety": 4000,
+        "teleport_fine":    50000
+    },
+    "butcher": {
+        "skin_id":     168,
+        "min_payment": 60,
+        "max_payment": 120
+    },
+    "construction": {
+        "min_payment": 50,
+        "max_payment": 80
+    },
+    "craftman": {
+        "cooldown":                     120,
+        "cooldown_reduction_per_level": 120,
+        "max_sell_price":               100000,
+        "cost_pocketwatch":             500,
+        "cost_firstaid":                1000,
+        "cost_camera":                  250,
+        "cost_parachute":               50,
+        "cost_gps":                     1000,
+        "cost_bodykits":                250,
+        "cost_screwdriver":             1000,
+        "cost_smslog":                  2000,
+        "cost_rccam":                   8000,
+        "cost_police_scanner":          5000,
+        "cost_bugsweep":                10000,
+        "cost_crowbar":                 1500
+    },
+    "drug_dealer": {
+        "seed_price":            30,
+        "cocaine_price":           60,
+        "chem_price":            50,
+        "seeds_per_plant":       10,
+        "plant_growing_seconds": 3600,
+        "heroin_cook_seconds":   15,
+        "plant_pick_seconds":    5,
+        "plant_total_weeds":     30
+    },
+    "drug_smuggler": {
+        "crate_cost":          100,
+        "tip_per_level":       100,
+        "seeds_payment_base":  400,
+        "cocaine_payment_base": 600,
+        "chems_payment_base":  500,
+        "seeds_per_delivery":  4,
+        "cocaine_per_delivery": 5,
+        "chems_per_delivery":  4,
+        "max_seeds_stock":     1000,
+        "max_cocaine_stock":    500,
+        "max_chems_stock":     250
+    },
+    "farmer": {
+        "payment_base":          50,
+        "payment_tip_per_level": 25
+    },
+    "fisherman": {
+        "dolphin_sell_value": 3,
+        "shark_sell_value":   1,
+        "crab_sell_value":    2,
+        "small_net_cost":     200,
+        "medium_net_cost":    350,
+        "large_net_cost":     500,
+        "small_net_size":     100,
+        "medium_net_size":    200,
+        "large_net_size":     300,
+        "max_fish_weight":    1500,
+        "base_sell_price":    50,
+        "random_sell_price":  300,
+        "unit_sell_price":    1
+    },
+    "forklift": {
+        "payment_base":           50,
+        "payment_tip_per_level":  25,
+        "payment_max_random_tip": 10
+    },
+    "garbage_man": {
+        "payment_base":           800,
+        "payment_max_random_tip": 300
+    },
+    "hooker": {
+        "sex_reload_time": 300,
+        "max_sex_price":   10000
+    },
+    "lawyer": {
+        "min_free_price":   200,
+        "max_free_price":   1000,
+        "min_defend_price": 500,
+        "max_defend_price": 1500,
+        "neutralize_cost":  2
+    },
+    "lumberjack": {
+        "cooldown_respawn_car":  1800,
+        "cutting_seconds":       8,
+        "cooldown_respawn_tree": 300,
+        "dropped_log_seconds":   120,
+        "log_price":             80
+    },
+    "mechanic": {
+        "max_player_comps":          50,
+        "max_comps_to_buy":          10,
+        "comps_price":               1200,
+        "comps_reduction_per_level": 200
+    },
+    "miner": {
+        "rare_rock_hours_cooldown":    60,
+        "ordinary_stone_base_price":   40,
+        "ordinary_stone_random_price": 10,
+        "quality_stone_base_price":    50,
+        "quality_stone_random_price":  10,
+        "rare_stone_base_price":       100,
+        "rare_stone_random_price":     10,
+        "ruby_base_price":             125,
+        "ruby_random_price":           25,
+        "diamon_base_price":           150,
+        "diamon_random_price":         50,
+        "sapphire_base_price":         130,
+        "sapphire_random_price":       30
+    },
+    "pizzaman": {
+        "payment_base":          250,
+        "payment_tip_per_level": 50,
+        "payment_tip_percent":   5
+    },
+    "scuba_diver": {
+        "jellyfish_price": 40,
+        "max_inventory":   24
+    },
+    "sweeper": {
+        "base_price":       300,
+        "random_price":     50,
+        "cooldown_seconds": 90
+    },
+    "taxi_driver": {
+        "fare_cooldown_seconds": 15,
+        "max_fare":              500
+    },
+    "trucker": {
+        "payment_per_level":         150,
+        "random_payment":            200,
+        "regular_truck_max_payment": 450
+    }
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=1024, initial-scale=1.0">
+    <title>ARP::NEXT Documentation</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <h3>Timers</h3>
+        <ol>
+            <li> <input class="form-check-input" type="checkbox" disabled checked><b>OnServerBeacon</b>(timestamp)</li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked><b>OnServerHeartBeat</b>(timestamp)</li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked><b>OnNewHour</b>(timestamp, hour)</li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked><b>OnNewMinute</b>(timestamp)</li>
+        </ol>
+        <h3>Callbacks</h3>
+        <ol>
+            <li> <input class="form-check-input" type="checkbox" disabled> TODO </li>
+        </ol>
+        <h3>Methods</h3>
+        <ul>
+            <li>stock <b>GetZoneName</b>(Float:x, Float:y, Float:z)</li>
+            <li>stock <b>GetVehicleZoneName</b>(vehicleid)</li>
+            <li>stock Float:<b>GetDistanceBetweenPoints</b>(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2)</li>
+            <li>stock Float:<b>DistanceCameraTargetToLocation</b>(Float:cx, Float:cy, Float:cz, Float:ox, Float:oy, Float:oz, Float:vx, Float:vy, Float:vz)</li>
+            <li>stock <b>IsPointInRangeOfPoint</b>(Float:x1, Float:y1, Float:z1, Float:radius, Float:x2, Float:y2, Float:z2)</li>
+            <li>stock <b>IsPlayerAiming</b>(playerid)</li>
+            <li>stock Float:<b>GetDistanceBetweenPlayers</b>(player1, player2)</li>
+            <li>stock <b>IsPlayerNearPlayer</b>(playerid, targetid, Float:radius)</li>
+            <li>stock <b>GetClosestPlayer</b>(playerid)</li>
+            <li>stock <b>SendToLs</b>(playerid)</li>
+            <li>stock <b>GetPlayerIP</b>(playerid)</li>
+            <li>stock <b>GetPlayerIPRange</b>(playerid, ch = '*')</li>
+            <li>stock <b>GetPlayerHealthEx</b>(playerid)</li>
+            <li>stock <b>GetPlayerArmourEx</b>(playerid)</li>
+            <li>stock <b>GetPlayerNameEx</b>(playerid)</li>
+            <li>stock <b>GetPlayerID</b>(name[])</li>
+            <li>stock <b>GetNameWithSpace</b>(oldName[])</li>
+            <li>stock <b>GetRPName</b>(playerid)</li>
+            <li>stock <b>PlaySoundForPlayersInRange</b>(soundid, Float:range, Float:x, Float:y, Float:z)</li>
+            <li>stock <b>PlayerPlaySoundEx</b>(playerid, soundid, Float:range=20.0)</li>
+            <li>stock <b>SetAttachedObject</b>(playerid, modelid, bone, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, Float:sx = 1.0, Float:sy = 1.0, Float:sz = 1.0, materialcolor1 = 0, materialcolor2 = 0)</li>
+            <li>stock Float:<b>GetPlayerSpeed</b>(playerid)</li>
+            <li>stock <b>GetDeathReason</b>(reason)</li>
+            <li>stock <b>GetBodyPartName</b>(bodypart)</li>
+            <li>stock <b>GetBoneName</b>(boneid)</li>
+            <li>stock Float:<b>GetVehicleSpeed</b>(vehicleid, SPEED_UNIT:unit=SPEED_UNIT_MPH)</li>
+            <li>stock <b>IsPlayerInRangeOfVehicle</b>(playerid, vehicleid, Float:Range)</li>
+            <li>stock <b>IsACruiser</b>(vehicleid)</li>
+            <li>stock <b>IsABike</b>(carid)</li>
+            <li>stock <b>IsAMotorBike</b>(carid)</li>
+            <li>stock <b>IsVehicleParamOn</b>(vehicleid, param)</li>
+            <li>stock <b>SetVehicleParams</b>(vehicleid, param, status)</li>
+            <li>stock <b>VehicleHasWindows</b>(vehicleid)</li>
+            <li>stock <b>IsEngineVehicle</b>(vehicleid)</li>
+            <li>stock <b>GetVehicleSeatCount</b>(vehicleid)</li>
+            <li>stock <b>IsSeatOccupied</b>(vehicleid, seatid)</li>
+            <li>stock <b>IsVehicleOccupied</b>(vehicleid)</li>
+            <li>stock <b>GetVehicleNameByModel</b>(modelid)</li>
+            <li>stock <b>GetVehicleName</b>(vehicleid)</li>
+            <li>stock <b>GetVehicleModelByName</b>(const string[])</li>
+            <li>stock <b>GetVehicleDriver</b>(vehicleid)</li>
+            <li>stock <b>PlayerText</b>:ShowPlayerBox(playerid, color)</li>
+            <li>stock Float:<b>GetPlayerDistanceFromVehicle</b>(playerid, vehicleid)</li>
+            <li>stock <b>GetClosestVehicle</b>(playerid, exception = INVALID_VEHICLE_ID, Float: range = Float: 0x7F800000)</li>
+            <li>stock <b>GetVehicleCameraPos</b>( vehicleid, &Float:x, &Float:y, &Float:z, Float:xoff=0.0, Float:yoff=0.0, Float:zoff=0.0 )</li>
+            <li>stock <b>GetVehicleColor</b>(vehicleid, &color1, &color2)</li>
+            <li>stock <b>IsComponentidCompatible</b>( modelid, componentid )</li>
+            <li>stock <b>ShowActionBubble</b>(playerid, text[], {Float, _}:...)</li>
+            <li>stock <b>SendClientSplitMessage</b>(playerid, color, const text[])</li>
+            <li>stock <b>SendClientSplitMessageEx</b>(playerid, color, const text[], {Float, _}:...)</li>
+            <li>stock <b>PlayerTextDrawFormatString</b>(playerid, PlayerText:playertextid, text[], {Float, _}:...)</li>
+            <li>stock <b>SendDistanceMessage</b>(playerid, Float:distance, color, const text[], {Float, _}:...)</li>
+            <li>stock <b>SendClientMessageEx</b>(playerid, color, const text[], {Float,_}:...)</li>
+            <li>stock <b>SendNearbyMessage</b>(playerid, Float:radius, color, const str[], {Float,_}:...)</li>
+            <li>stock <b>SetPlayerBubbleText</b>(playerid, Float:drawdistance, color, text[], {Float,_}:...)</li>
+            <li>stock <b>SendClientErrorUnauthorizedCmd</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedGate</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedDoor</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedCell</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedChat</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedTogF</b>(playerid)</li>
+            <li>stock <b>SendClientErrorNoPermission</b>(playerid)</li>
+            <li>stock <b>SendUsageHeader</b>(playerid, cmd[], params[])</li>
+            <li>stock <b>ClearChat</b>(playerid)</li>
+            <li>stock <b>Streamer_GetExtraInt</b>(objectid, type)</li>
+            <li>stock <b>Streamer_SetExtraInt</b>(objectid, type, value)</li>
+            <li>stock Float:<b>Streamer_GetExtraFloat</b>(objectid, type)</li>
+            <li>stock <b>Streamer_SetExtraFloat</b>(objectid, type, Float:value)</li>
+            <li>stock <b>IsPlayerInRangeOfDynamicObject</b>(playerid, objectid, Float:radius)</li>
+            <li>stock <b>CreateDynamicLabeledPickup</b>(color, text[], Float:x, Float:y, Float:z, interior, vw, pickupid, Float:radius )</li>
+            <li>stock <b>GetWeaponNameEx</b>(weaponid)</li>
+            <li>stock <b>GetWeaponSlot</b>(weaponid)</li>
+            <li>stock <b>GetWeaponClipSize</b>(weaponid)</li>
+            <li>stock <b>GetWeaponModelID</b>(weaponid)</li>
+            <li>stock <b>GetDateTime</b>(ltr=1)</li>
+            <li>stock <b>TimestampToString</b>(timestamp, _form=0)</li>
+            <li>stock <b>IsValidColorCode</b>(color[])</li>
+            <li>stock <b>GetColorCode</b>(color[])</li>
+            <li>stock <b>fcreate</b>(filename[])</li>
+            <li>stock <b>IsKeyPress</b>(key,newkeys,oldkeys)</li>
+            <li>stock <b>FormatNumber</b>(number)</li>
+            <li>stock <b>FormatCash</b>(value)</li>
+            <li>stock <b>IsNumeric</b>(const string[])</li>
+            <li>stock <b>strmatch</b>(const string1[], const string2[])</li>
+            <li>stock <b>strreplace2</b>(string[], const search[], const replacement[], bool:ignorecase = false, pos = 0, limit = -1, maxlength = sizeof(string))</li>
+            <li>stock <b>mysql_escaped</b>(const string[])</li>
+            <li>stock <b>CheckServerAd</b>(text[])</li>
+            <li>stock <b>IsAnIP</b>(ip[])</li>
+        </ul>
+    </div>
+
+</body>
+</html>

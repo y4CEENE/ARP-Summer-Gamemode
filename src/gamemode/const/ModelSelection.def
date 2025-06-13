@@ -1,0 +1,13 @@
+/// @file      ModelSelection.def
+/// @author    BOURAOUI Al-Moez L.A
+/// @date      Created at 2021-03-29 12:23:11 +0100
+/// @copyright Copyright (c) 2022
+
+#define MODEL_SELECTION_CLOTHES         1
+#define MODEL_SELECTION_FURNITURE       2
+#define MODEL_SELECTION_LANDOBJECTS     3
+#define MODEL_SELECTION_CLOTHING        4
+#define MODEL_SELECTION_COPCLOTHING     5
+#define MODEL_SELECTION_VIPCLOTHES      6
+#define MODEL_SELECTION_VEHICLES        7
+#define MODEL_SELECTION_ADMIN_VEHICLES  8

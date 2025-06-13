@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=1024, initial-scale=1.0">
+    <title>ARP::NEXT Documentation</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body>
+    <div class="container">
+        <h3>Timers</h3>
+        <ol>
+            <li> <input class="form-check-input" type="checkbox" disabled> ServerBeacon</li>
+            <li> <input class="form-check-input" type="checkbox" disabled> ServerMircoBeat</li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked> ServerHeartBeat</li>
+            <li> <input class="form-check-input" type="checkbox" disabled> PlayerBeacon</li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked> OnPlayerHeartBeat</li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked> TwoPlayersHeartBeat</li>
+        </ol>
+        <h3>Callbacks</h3>
+        <ol>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnLoadMapping </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnRemoveBuildings </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnPlayerLogin </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnPlayerStartGame </li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked> OnLoadPlayer </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnOfflineLoadPlayer </li>
+            <li> <input class="form-check-input" type="checkbox" disabled checked> OnPlayerLoaded </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnSavePlayer </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnPlayerSync </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnCreatePlayer </li>
+            <li> <input class="form-check-input" type="checkbox" disabled> OnResetModule </li>
+        </ol>
+        <h3>Methods</h3>
+        <ul>
+            <li>stock <b>fcreate</b>(filename[])</li>
+            <li>stock <b>SendToLs</b>(playerid)</li>
+            <li>stock <b>IsKeyPress</b>(key,newkeys,oldkeys)</li>
+            <li>stock <b>ReturnBodypartName</b>(bodypart)</li>
+            <li>stock <b>SendUsageHeader</b>(playerid, cmd[], params[])</li>
+            <li>stock <b>ClearDamages</b>(playerid)</li>
+            <li>stock <b>ReturnDamages</b>(damaged, playerid)</li>
+            <li>stock <b>ReturnDamagesAdmin</b>(damaged, playerid)</li>
+            <li>stock <b>AddDamages</b>(playerid, issuerid, weaponid, bodypart, Float:amount)</li>
+            <li>stock <b>GetDealerShipCarsIndex</b>(company,index)</li>
+            <li>stock <b>CreateObjectEx</b>(modelid, Float:x, Float:y, Float:z, Float:rx, Float:ry, Float:rz, Float:drawdistance = 0.0)</li>
+            <li>stock <b>Float:GetDistanceBetweenPoints</b>(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2)</li>
+            <li>stock <b>GetPlayerSQLId</b>(playerid)</li>
+            <li>stock <b>CheckServerAd</b>(szInput[])</li>
+            <li>stock <b>l_GetPlayerSkin</b>(playerid)</li>
+            <li>stock <b>GetPlayerSkinScript</b>(playerid)</li>
+            <li>stock <b>IsARestricted</b>(modelid)</li>
+            <li>stock <b>GetVehicleColor</b>(vehicleID, &color1, &color2)</li>
+            <li>stock <b>CreateLSPDMap</b>()</li>
+            <li>stock <b>CreatePlayerTextDraws</b>( playerid )</li>
+            <li>stock <b>IsComponentidCompatible</b>( modelid, componentid )</li>
+            <li>stock <b>GetVehicleCameraPos</b>( vehicleid, &Float:x, &Float:y, &Float:z, Float:xoff=0.0, Float:yoff=0.0, Float:zoff=0.0 )</li>
+            <li>stock <b>IsABike</b>(carid)</li>
+            <li>stock <b>IsAtImpoundingPoint</b>(playerid)</li>
+            <li>stock <b>GetPlayerHelmet</b>(playerid)</li>
+            <li>stock <b>IsanewBike</b>(carid)</li>
+            <li>stock <b>Create3DandP</b>( text[], Float:vXU, Float:vYU, Float:vZU, vInt, vVW, pickupid, Float:radius )</li>
+            <li>stock <b>IsPlayerInRangeOfVehicle</b>(playerid, vehicleid, Float:Range)</li>
+            <li>stock <b>Float:GetPlayerSpeed</b>(playerid)</li>
+            <li>stock <b>IsACruiser</b>(vehicleid)</li>
+            <li>stock <b>PlayerName</b>(playerid)</li>
+            <li>stock <b>GetWeaponSlot</b>(weaponid)</li>
+            <li>stock <b>IsAMotorBike</b>(carid)</li>
+            <li>stock <b>GetTurfOwnerNameTextDraw</b>(id)</li>
+            <li>stock <b>IsValidColorCode</b>(clr[])</li>
+            <li>stock <b>GangTag_IntColor</b>(color)</li>
+            <li>stock <b>Booth_GetPlayer</b>(id)</li>
+            <li>stock <b>Booth_Leave</b>(playerid)</li>
+            <li>stock <b>Booth_Refresh</b>(playerid)</li>
+            <li>stock <b>PlayerPlaySoundEx</b>(playerid, sound)</li>
+            <li>stock <b>GetPlayerNameExt</b>(playerid)</li>
+            <li>stock <b>GetClosestPlayer</b>(p1)</li>
+            <li>stock <b>GetPlayerID</b>(name[])</li>
+            <li>stock <b>GenderToString</b>(gender)</li>
+            <li>stock <b>GetWeaponLicStatus</b>(weaponLicStatus)</li>
+            <li>stock <b>GetNameWithSpace</b>(oldName[])</li>
+            <li>stock <b>GetDriveLicStatus</b>(driveLicStatus)</li>
+            <li>stock <b>strreplace2</b>(string[], const search[], const replacement[], bool:ignorecase = false, pos = 0, limit = -1, maxlength = sizeof(string))</li>
+            <li>stock <b>strmatch</b>(const string1[], const string2[])</li>
+            <li>stock <b>IsEngineVehicle</b>(vehicleid)</li>
+            <li>stock <b>PlayerText:ShowPlayerBox</b>(playerid, color)</li>
+            <li>stock <b>GetClosestCar</b>(iPlayer, iException = INVALID_VEHICLE_ID, Float: fRange = Float: 0x7F800000)</li>
+            <li>stock <b>Impound_Delete</b>(impoundid)</li>
+            <li>stock <b>GetImpoundByID</b>(sqlid)</li>
+            <li>stock <b>Impound_Nearest</b>(playerid)</li>
+            <li>stock <b>Impound_Create</b>(Float:x, Float:y, Float:z)</li>
+            <li>stock <b>Impound_Refresh</b>(impoundid)</li>
+            <li>stock <b>Impound_Save</b>(impoundid)</li>
+            <li>stock <b>FloatGetDistanceToTruckDepot</b>:(p1,p2)</li>
+            <li>stock <b>GetClosestTruckDepot</b>(p1, level)</li>
+            <li>stock <b>g_mysql_ReturnEscaped</b>(unEscapedString[], connectionHandle)</li>
+            <li>stock <b>FIXES_valstr</b>(dest[], value, bool:pack = false)</li>
+            <li>stock <b>number_format</b>(number)</li>
+            <li>stock <b>ABroadCast</b>(hColor, szMessage[], iLevel)</li>
+            <li>stock <b>ShowPlayerFooter</b>(playerid, string[], time = 5000)</li>
+            <li>stock <b>ShowFreezeTextdraw</b>(playerid)</li>
+            <li>stock <b>str_replace</b>(sSearch[], sReplace[], const sSubject[], &iCount = 0)</li>
+            <li>stock <b>SaveImpoundPoint</b>(id)</li>
+            <li>stock <b>SaveImpoundPoints</b>()</li>
+            <li>stock <b>RehashImpoundPoint</b>(id)</li>
+            <li>stock <b>RehashImpoundPoints</b>()</li>
+            <li>stock <b>LoadImpoundPoint</b>(id)</li>
+            <li>stock <b>LoadImpoundPoints</b>()</li>
+            <li>stock <b>PlayLoginMusic</b>(playerid)</li>
+            <li>stock <b>Graffiti_Refresh</b>(id)</li>
+            <li>stock <b>IsSprayingInProgress</b>(id)</li>
+            <li>stock <b>Graffiti_Nearest</b>(playerid)</li>
+            <li>stock <b>GetPlayerFreeVehicleId</b>(playerid)</li>
+            <li>stock <b>SendQuestionToStaff</b>(color, text[])</li>
+            <li>stock <b>SQL_ReturnEscaped</b>(const string[])</li>
+            <li>stock <b>Graffiti_Delete</b>(id)</li>
+            <li>stock <b>Graffiti_Save</b>(id)</li>
+            <li>stock <b>Graffiti_Create</b>(Float:x, Float:y, Float:z, Float:angle)</li>
+            <li>stock <b>GetVehicleSpeedKMH</b>(vehicleid)</li>
+            <li>stock <b>IsPlayerAtFuelStation</b>(playerid)</li>
+            <li>stock <b>SendDistanceMessage</b>(playerid, Float:distance, color, const text[],Float, _}:...)</li>
+            <li>stock <b>SendClientMessageEx</b>(playerid, color, const text[],Float,_}:...)</li>
+            <li>stock <b>SendClientMessageToAllEx</b>(color, const text[],Float,_}:...)</li>
+            <li>stock <b>SendClientErrorUnauthorizedCmd</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedGate</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedDoor</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedCell</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedChat</b>(playerid)</li>
+            <li>stock <b>SendClientErrorUnautorizedTogF</b>(playerid)</li>
+            <li>stock <b>SendClientErrorNoPermission</b>(playerid)</li>
+            <li>stock <b>IsPlayerNearPlayer</b>(playerid, TargetID, Float:radius)</li>
+            <li>stock <b>SendNearbyMessage</b>(playerid, Float:radius, color, const str[],Float,_}:...)</li>
+            <li>stock <b>IsValidUsername</b>(username[])</li>
+            <li>stock <b>IsValidAdminName</b>(username[])</li>
+            <li>stock <b>LoadGeneralTextdraws</b>()</li>
+            <li>stock <b>CheckAdmin</b>(playerid, level)</li>
+            <li>stock <b>GetPlayerTurfZone</b>(playerid)</li>
+            <li>stock <b>PlaySoundForPlayersInRange</b>(soundid, Float:range, Float:x, Float:y, Float:z)</li>
+            <li>stock <b>Elevator_Initialize</b>()</li>
+            <li>stock <b>Elevator_Destroy</b>()</li>
+            <li>stock <b>Elevator_OpenDoors</b>()</li>
+            <li>stock <b>Elevator_CloseDoors</b>()</li>
+            <li>stock <b>Floor_OpenDoors</b>(floorid)</li>
+            <li>stock <b>Floor_CloseDoors</b>(floorid)</li>
+            <li>stock <b>Elevator_MoveToFloor</b>(floorid)</li>
+            <li>stock <b>RemoveFirstQueueFloor</b>()</li>
+            <li>stock <b>AddFloorToQueue</b>(floorid)</li>
+            <li>stock <b>ResetElevatorQueue</b>()</li>
+            <li>stock <b>IsFloorInQueue</b>(floorid)</li>
+            <li>stock <b>ReadNextFloorInQueue</b>()</li>
+            <li>stock <b>DidPlayerRequestElevator</b>(playerid)</li>
+            <li>stock <b>ShowElevatorDialog</b>(playerid)</li>
+            <li>stock <b>CallElevator</b>(playerid, floorid)</li>
+            <li>stock <b>Float:GetDistance</b>(Float: x1, Float: y1, Float: z1, Float: x2, Float: y2, Float: z2)</li>
+            <li>stock <b>Float:GetPizzaDistance</b>(houseid)</li>
+            <li>stock <b>Float:GetElevatorZCoordForFloor</b>(floorid)</li>
+            <li>stock <b>Float:GetDoorsZCoordForFloor</b>(floorid)</li>
+            <li>stock <b>GetWeaponModel</b>(weaponid)</li>
+            <li>stock <b>nComma</b>(numbers)</li>
+            <li>stock <b>IsProductionServer</b>()</li>            
+        </ul>
+    </div>
+
+</body>
+</html>

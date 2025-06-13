@@ -1,0 +1,105 @@
+/// @file      GarageLarge_Interior.map
+/// @author    BOURAOUI Al-Moez L.A
+/// @date      Created at 2021-03-29 12:23:11 +0100
+/// @copyright Copyright (c) 2022
+
+#include <YSI\y_hooks>
+
+hook OnGameModeInit()
+{
+    new objectid;
+// Large garage
+    CreateDynamicObjectEx(11389, 1665.187500, -2352.026367, 1537.641723, 0.000000, 0.000000, 0.000000);
+    objectid = CreateDynamicObjectEx(19377, 1668.767822, -2340.866943, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1658.277832, -2340.866943, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1668.767822, -2350.427001, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1668.767822, -2360.037597, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1668.767822, -2369.637939, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1658.277832, -2350.467041, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1658.277832, -2360.087646, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1658.277832, -2369.697265, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1661.437255, -2363.377929, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    objectid = CreateDynamicObjectEx(19377, 1671.937988, -2363.377929, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    objectid = CreateDynamicObjectEx(19377, 1671.937988, -2353.787353, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    objectid = CreateDynamicObjectEx(19377, 1671.937988, -2344.167480, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    objectid = CreateDynamicObjectEx(19377, 1671.937988, -2334.539306, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    objectid = CreateDynamicObjectEx(19377, 1661.437988, -2353.787353, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    objectid = CreateDynamicObjectEx(19377, 1661.527465, -2344.167480, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    objectid = CreateDynamicObjectEx(19377, 1661.509521, -2334.539306, 1540.185913, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_peeling_ceiling1_BIG", 0);
+    CreateDynamicObjectEx(2885, 1674.234375, -2340.028320, 1541.174072, 0.000000, 0.000000, 270.000000);
+    CreateDynamicObjectEx(2885, 1674.234375, -2348.668212, 1541.174072, 0.000000, 0.000000, 270.000000);
+    objectid = CreateDynamicObjectEx(19377, 1679.248168, -2340.866943, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    objectid = CreateDynamicObjectEx(19377, 1679.248168, -2350.476562, 1534.396972, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 11389, "hubint1_sfse", "ws_sub_pen_conc2", 0);
+    CreateDynamicObjectEx(2885, 1660.494262, -2368.226806, 1541.143798, 0.000000, 0.000000, 180.000000);
+    CreateDynamicObjectEx(11390, 1665.046875, -2351.977050, 1538.903198, 0.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(11391, 1657.228515, -2360.088378, 1535.773193, 0.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(11393, 1669.819946, -2357.343994, 1536.022583, 0.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19817, 1662.070068, -2340.035888, 1533.891967, 0.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19872, 1659.912719, -2348.421630, 1533.882324, 0.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19903, 1658.435546, -2345.552978, 1534.542480, 0.000000, 0.000000, -47.000000);
+    CreateDynamicObjectEx(19377, 1656.129028, -2362.886718, 1539.213256, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19377, 1656.129028, -2352.425048, 1539.213256, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19377, 1656.129028, -2341.955322, 1539.213256, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19377, 1656.129028, -2331.505126, 1539.213256, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19377, 1661.448364, -2335.926269, 1539.213256, 90.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19377, 1671.927612, -2335.926269, 1539.213256, 90.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19377, 1671.157470, -2368.107421, 1539.213256, 90.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19377, 1674.139404, -2363.225585, 1539.213256, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19377, 1674.149414, -2359.344726, 1539.213256, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19437, 1666.590942, -2361.146240, 1535.482910, 0.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19437, 1666.300659, -2361.146240, 1535.482910, 0.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19437, 1666.350463, -2363.697021, 1534.622070, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19437, 1666.350463, -2367.177734, 1534.622070, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19437, 1667.490478, -2367.398193, 1535.482910, 0.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19437, 1669.050048, -2367.398193, 1535.482910, 0.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19437, 1670.640380, -2367.398193, 1535.482910, 0.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19437, 1672.190063, -2367.398193, 1535.482910, 0.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19437, 1674.090454, -2367.398193, 1535.482910, 0.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19377, 1674.367797, -2348.886474, 1539.123413, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19377, 1674.367797, -2338.387207, 1539.123413, 90.000000, 0.000000, 0.000000);
+    CreateDynamicObjectEx(19377, 1660.698242, -2368.378906, 1539.123413, 90.000000, 0.000000, 90.000000);
+    CreateDynamicObjectEx(19377, 1660.257812, -2368.418945, 1539.123413, 90.000000, 0.000000, 90.000000);
+    objectid = CreateDynamicObjectEx(19369, 1666.348266, -2366.564208, 1537.142822, 0.000000, 0.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1666.348266, -2363.353759, 1537.142822, 0.000000, 0.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1666.348266, -2362.022460, 1537.142822, 0.000000, 0.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1667.818969, -2357.771972, 1537.142822, 0.000000, 0.000000, 90.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1670.998901, -2357.771972, 1537.142822, 0.000000, 0.000000, 90.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1673.869873, -2357.771972, 1537.142822, 0.000000, 0.000000, 90.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1673.898559, -2359.502197, 1537.142822, 0.000000, 0.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1673.878540, -2362.103515, 1537.142822, 0.000000, 0.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1673.878540, -2365.273437, 1537.142822, 0.000000, 0.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19369, 1673.878540, -2368.443115, 1537.142822, 0.000000, 0.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(19377, 1671.468505, -2363.267089, 1537.988037, 0.000000, 90.000000, 0.000000);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    objectid = CreateDynamicObjectEx(9131, 1666.443969, -2358.310058, 1535.482910, 0.000000, 0.000000, 270.520568);
+    SetDynamicObjectMaterial(objectid, 0, 19389, "all_walls", "concretenewb256", 16711680);
+    return 1;
+}

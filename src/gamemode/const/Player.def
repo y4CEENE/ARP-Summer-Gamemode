@@ -1,0 +1,3 @@
+#define LEVEL_COST 5000
+#define MAX_PLAYER_AGE 127
+#define MIN_PLAYER_AGE 10

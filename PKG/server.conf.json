@@ -1,0 +1,29 @@
+{
+    "server_info": {
+        "hostname"        : "Arabica RolePlay | Voice",
+        "name"            : "ArabicaRolePlay",
+        "shortname"       : "ARP",
+        "website"         : "arabicarp.com",
+        "discord"         : "discord.gg/arabicarp",
+        "discord_faction" : "discord.gg/factionsarabica",
+        "ucp"             : "www.arabicarp.com/ucp",
+        "shop"            : "www.arabicarp.com/shop"
+    },
+    "mysql" : {
+        "hostname"       : "127.0.0.1",
+        "port"           : 3306,
+        "database"       : "beta_arp_next",
+        "username"       : "beta",
+        "password"       : "7f74srZ21",
+        "pool_size"      : 4,
+        "auto_reconnect" : true
+    },
+    "server_stats" : {
+        "update_time_s" : 5,
+        "write_to_file" : false
+    },
+    "geoip" : {
+        "mainfile" : "geoip_2017.db",
+        "city"     : "geoip_city_2017.db"
+    }
+}

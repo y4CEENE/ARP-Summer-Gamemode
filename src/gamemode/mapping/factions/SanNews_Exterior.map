@@ -1,0 +1,15 @@
+/// @file      SanNews_Exterior.map
+/// @author    BOURAOUI Al-Moez L.A
+/// @date      Created at 2021-10-10 18:32:02 +0100
+/// @copyright Copyright (c) 2022
+
+#include <YSI\y_hooks>
+
+hook OnGameModeInit()
+{
+    CreateDynamicObject(19176, 732.158, -1346.29, 13.924, 0, 0, 90.000); // Dual office door
+    CreateDynamicObject( 3802, 732.653, -1344.27,   15.5, 0, 0,      0); // Window plant #1
+    CreateDynamicObject( 3810, 732.566,  -1348.1,   15.5, 0, 0,      0); // Window plant #2
+    CreateDynamicObject( 1336, 732.957, -1339.89, 13.366, 0, 0, 94.381); // Bottle disposal unit
+    return 1;
+}
