@@ -1,0 +1,25 @@
+lanmode 0
+rcon_password changeme
+password 0
+maxplayers 30
+port 7770
+sv_port 53003
+sv_log_to_console false
+hostname ArabicaRolePlay
+gamemode0 arp_next
+filterscripts VoiceChat connectionbar
+announce 0
+chatlogging 0
+weburl www.arabicarp.com
+onfoot_rate 40
+incar_rate 40
+weapon_rate 40
+stream_distance 300.0
+stream_rate 2000
+maxnpc 0
+logtimeformat [%Y/%m/%d %H:%M:%S]
+language Arabic/English
+plugins crashdetect.so Whirlpool.so streamer.so mysql_static.so pawncmd.so regex.so SKY.so sampvoice.so discord-connector.so sscanf.so nativechecker.so
+discord_bot_token YOUR_BOT_TOKEN
+#crashdetect_log crash.log
+#trace n

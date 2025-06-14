@@ -1,0 +1,4 @@
+*.amx
+.vscode/
+build/
+server_log.txt

@@ -1,0 +1,12 @@
+test
+biz-welcome-msg
+dashboard
+user-dashboard
+2try-dashboard
+counter
+login-page
+login2
+yourid
+bankui
+showid
+admin-reports

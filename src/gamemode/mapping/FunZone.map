@@ -1,0 +1,68 @@
+#include <YSI\y_hooks>
+
+hook OnRemoveBuildings(playerid)
+{
+    
+    RemoveBuildingForPlayer(playerid, 785, -414.9688, -963.9453, 30.9453, 0.25);
+    RemoveBuildingForPlayer(playerid, 785, -368.9688, -978.4922, 52.2734, 0.25);
+    RemoveBuildingForPlayer(playerid, 791, -368.9688, -978.4922, 52.2734, 0.25);
+    RemoveBuildingForPlayer(playerid, 791, -414.9688, -963.9453, 30.9453, 0.25);
+    RemoveBuildingForPlayer(playerid, 708, -312.8281, -1046.6094, 49.2891, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -271.9844, -997.9922, 38.4219, 0.25);
+    RemoveBuildingForPlayer(playerid, 691, -238.4375, -1007.2813, 24.8281, 0.25);
+    RemoveBuildingForPlayer(playerid, 691, -205.5313, -1014.7109, 16.4531, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -312.4063, -967.3594, 50.1172, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -304.2031, -975.2969, 48.1719, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -295.9922, -983.3516, 45.7266, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -289.0234, -991.1016, 43.6094, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -264.4453, -989.8828, 35.8594, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -256.8438, -981.6953, 33.2656, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -249.1719, -973.5313, 30.7188, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -241.5078, -965.3672, 28.2500, 0.25);
+    RemoveBuildingForPlayer(playerid, 708, -216.8672, -991.0313, 17.3359, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -328.7891, -951.3047, 53.0625, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -320.7031, -959.2188, 51.5781, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -234.0000, -957.2969, 25.9063, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -234.5547, -949.0000, 26.0469, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -243.0391, -941.2422, 28.2578, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -337.0859, -943.2969, 54.4688, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -337.8750, -935.4766, 54.1953, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -251.5156, -933.5938, 30.7891, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -329.7266, -927.9766, 52.4375, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -321.5078, -920.4219, 50.5938, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -313.2188, -912.8750, 48.6953, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -304.9375, -905.3438, 46.5156, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -296.8203, -897.8906, 44.5313, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -260.0938, -925.7422, 33.5625, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -268.4453, -918.1172, 36.2344, 0.25);
+    RemoveBuildingForPlayer(playerid, 3276, -276.3281, -910.0391, 38.6250, 0.25);
+    return 1;
+}
+
+hook OnGameModeInit()
+{
+    CreateObject(8397, -365.66785, -1011.37085, 66.66293,   0.00000, 0.00000, 90.00000);
+    CreateObject(9019, -367.35580, -1011.20941, 59.93110,   0.00000, 0.00000, 90.00000);
+    CreateObject(18853, -476.57138, -853.72693, 107.24562,   300.00000, 130.00000, 37.79039);
+    CreateObject(18853, -391.19760, -869.86609, 63.17380,   -40.00000, 300.00000, 17.17570);
+    CreateObject(13638, -385.07275, -1015.53662, 56.92690,   0.00000, 0.00000, 183.46539);
+    CreateObject(18779, -540.29993, -864.39929, 104.93674,   0.00000, 0.00000, 201.95444);
+    CreateObject(18781, -205.89740, -954.00360, 31.33540,   -20.00000, 0.00000, 97.00000);
+    CreateObject(18781, -245.93874, -959.03320, 46.69633,   0.00000, 0.00000, 97.00000);
+    CreateObject(18777, -261.02979, -980.73352, 60.43750,   0.00000, 0.00000, 97.00000);
+    CreateObject(18780, -461.61987, -991.25745, 35.09542,   0.00000, 0.00000, 42.45094);
+    CreateObject(19001, -296.36661, -892.90070, 56.36640,   0.00000, -6.00000, 248.49229);
+    CreateObject(19634, -346.15369, -904.30579, 57.08930,   0.00000, 0.00000, 1.04620);
+    CreateObject(19633, -342.46756, -1015.51276, 56.96763,   0.00000, 0.00000, 0.00000);
+    CreateObject(900, -332.71823, -976.96808, 50.62809,   0.00000, 0.00000, 281.44641);
+    CreateObject(900, -313.64456, -992.92975, 48.60758,   0.00000, 0.00000, 286.04694);
+    CreateObject(3996, -503.28738, -904.96393, 110.01169,   0.00000, 0.00000, 346.48987);
+    CreateObject(3996, -405.09137, -928.18408, 96.67168,   0.00000, 15.00000, 347.00000);
+    CreateObject(3996, -311.56290, -949.57098, 84.34090,   0.00000, 0.00000, 347.00000);
+    CreateObject(3996, -311.56290, -949.57098, 84.34090,   0.00000, 0.00000, 347.00000);
+    CreateObject(18778, -557.04242, -891.97278, 108.36510,   0.00000, 0.00000, 256.24539);
+    CreateObject(18859, -356.30289, -963.26678, 57.17920,   0.00000, 0.00000, 256.71771);
+    CreateObject(13638, -345.25726, -1001.90588, 59.26589,   0.00000, 0.00000, 258.59464);
+    CreateObject(3361, -337.74811, -995.53198, 67.00945,   0.00000, 0.00000, 254.80908);
+    return 1;
+}

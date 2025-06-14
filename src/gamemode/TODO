@@ -1,0 +1,7 @@
+ - FACTION_TERRORIST
+ - Signup: ACCENT + REFERRAL + Hide spawn button on login
+ - Destroy all objects OnGameModeExit
+ - Turf limit cap per gang
+ - add ls_elevator + ls_beachside elevator from filterscripts
+ 
+ 

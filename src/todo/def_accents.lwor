@@ -1,0 +1,9 @@
+
+new PlayerAccents[][]={
+    "None", "English", "American", "British", "Chinese", "Korean", "Japanese", "Asian", "Canadian", "Australian",
+    "Southern", "Russian", "Ukrainian", "German", "French", "Portuguese", "Polish", "Estonian", "Latvian", "Dutch",
+    "Jamaican", "Turkish", "Mexican", "Spanish", "Arabic", "Israeli", "Romanian", "Italian", "Gangsta", "Greek",
+    "Serbian", "Balkin", "Danish", "Scottish", "Irish", "Indian", "Norwegian", "Swedish", "Finnish", "Hungarian",
+    "Bulgarian", "Pakistani", "Cuban", "Slavic", "Indonesian", "Filipino", "Hawaiian", "Somalian", "Armenian", "Persian",
+    "Vietnamese", "Slovenian", "Kiwi", "Brazilian", "Georgian"
+};

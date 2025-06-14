@@ -1,0 +1,1 @@
+new mechanicVehicles[10];

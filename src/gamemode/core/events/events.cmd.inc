@@ -1,0 +1,1 @@
+#include "core/events/race/race.cmd.pwn"

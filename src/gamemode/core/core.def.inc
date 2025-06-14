@@ -1,0 +1,6 @@
+#include "core/ServerConfig.pwn"
+#include "core/events/events.def.inc"
+#include "core/estates/estates.def.inc"
+#include "core\admin\admin.def.pwn"
+#include "core\jobs\jobs.def.pwn"
+#include "core\chat\chat.def.pwn"
