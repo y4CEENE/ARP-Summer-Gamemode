@@ -1,3 +1,12 @@
+#include <discord-connector>
+
+static DCC_Guild:GName;
+
+hook OnGameModeInit() 
+{
+    GName = DCC_FindGuildById("1267567121756455085");
+    NameLogs = DCC_FindChannelById("1380360632783732746");
+}
 
 GetAdminName(playerid)
 {
@@ -6049,6 +6058,10 @@ CMD:acceptname(playerid, params[])
 
         SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s has accepted %s's free namechange to %s.", GetRPName(playerid), GetRPName(targetid), PlayerData[targetid][pNameChange]);
         SendClientMessageEx(targetid, COLOR_YELLOW, "Your namechange request to %s was approved for free.", PlayerData[targetid][pNameChange]);
+
+        
+        format(string, sizeof(string), "%s has accepted %s namechange to %s", GetRPName(playerid), GetRPName(targetid), PlayerData[targetid][pNameChange]);
+        DCC_SendChannelMessage(NameLogs, string);
 
         if (!IsPlayerLoggedIn(targetid))
         {
