@@ -16,6 +16,7 @@
 #include "modules/BreakIn.pwn"
 #include "modules/BreakCuffs.pwn"
 #include "modules/CCTV.pwn"
+#include "modules/HelpCounter.pwn"
 #include "modules/CarTuning.pwn"
 #include "modules/Clothing.pwn"
 #include "modules/Cookies.pwn"
