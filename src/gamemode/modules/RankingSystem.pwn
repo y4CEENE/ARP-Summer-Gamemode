@@ -1,5 +1,5 @@
 /// @file      RankingSystem.pwn
-/// @author    BOURAOUI Al-Moez L.A
+/// @author    Khalil
 /// @date      Created at 2021-05-21 00:07:36 +0100
 /// @copyright Copyright (c) 2022
 
