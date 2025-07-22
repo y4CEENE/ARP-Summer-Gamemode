@@ -330,14 +330,14 @@ CMD:gang(playerid, params[])
 	}
 	else if(!strcmp(option, "quit", true))
 	{
-	    if(isnull(param) || strcmp(param, "confirm", true) != 0)
+	    /*if(isnull(param) || strcmp(param, "confirm", true) != 0)
 	    {
 	        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gang [quit] [confirm]");
-	    }
+	    }*/
+		SendClientMessage(playerid, COLOR_SYNTAX, "{7E7D7D}Hi {5B0303}You Gangster{7E7D7D} This Command Is Disabled");
 
-
-	    SendClientMessageEx(playerid, COLOR_AQUA, "You have quit %s as a {00AA00}%s{33CCFF} (%i).", GangInfo[PlayerData[playerid][pGang]][gName], GangRanks[PlayerData[playerid][pGang]][PlayerData[playerid][pGangRank]], PlayerData[playerid][pGangRank]);
-		Log_Write("log_gang", "%s (uid: %i) has quit %s (id: %i) has rank %s (%i).", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GangInfo[PlayerData[playerid][pGang]][gName], PlayerData[playerid][pGang], GangRanks[PlayerData[playerid][pGang]][PlayerData[playerid][pGangRank]], PlayerData[playerid][pGangRank]);
+	    //SendClientMessageEx(playerid, COLOR_AQUA, "You have quit %s as a {00AA00}%s{33CCFF} (%i).", GangInfo[PlayerData[playerid][pGang]][gName], GangRanks[PlayerData[playerid][pGang]][PlayerData[playerid][pGangRank]], PlayerData[playerid][pGangRank]);
+		/*Log_Write("log_gang", "%s (uid: %i) has quit %s (id: %i) has rank %s (%i).", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GangInfo[PlayerData[playerid][pGang]][gName], PlayerData[playerid][pGang], GangRanks[PlayerData[playerid][pGang]][PlayerData[playerid][pGangRank]], PlayerData[playerid][pGangRank]);
 
         GangInfo[PlayerData[playerid][pGang]][gCount]--;
 	    PlayerData[playerid][pGang] = -1;
@@ -345,7 +345,7 @@ CMD:gang(playerid, params[])
         DestroyDynamic3DTextLabel(fRepfamtext[playerid]);
         fRepfamtext[playerid] = Text3D:INVALID_3DTEXT_ID;
 		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET gang = -1, gangrank = 0 WHERE uid = %i", PlayerData[playerid][pID]);
-		mysql_tquery(connectionID, queryBuffer);
+		mysql_tquery(connectionID, queryBuffer);*/
 	}
 	else if(!strcmp(option, "offlinekick", true))
 	{
@@ -1132,6 +1132,10 @@ CMD:createganghq(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(GetNearbyEntrance(playerid) >= 0)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "There is an entrance in range. Find somewhere else to create this one.");
@@ -1206,6 +1210,11 @@ CMD:gotoganghq(playerid, params[])
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
 
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
+
 	if(sscanf(params, "i", gangid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gotoganghq [gangid]");
@@ -1236,6 +1245,11 @@ CMD:removeganghq(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	if(sscanf(params, "i", gangid))
 	{

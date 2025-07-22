@@ -52,9 +52,9 @@ CMD:usecookies(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
 	}
-	if(PlayerData[playerid][pHurt] - 40 > 0)
+	if(PlayerData[playerid][pHurt] - 5 > 0)
 	{
-        return SendClientMessageEx(playerid, COLOR_GREY, "You are too hurt to use this command. Please wait %i seconds before trying again.", (PlayerData[playerid][pHurt] - 40));
+        return SendClientMessageEx(playerid, COLOR_GREY, "You are too hurt to use this command. Please wait %i seconds before trying again.", (PlayerData[playerid][pHurt] - 5));
 	}
 	if(IsPlayerInAnyVehicle(playerid))
 	{
@@ -67,7 +67,7 @@ CMD:usecookies(playerid, params[])
 	strcat(string, "\nJail Time\tReduce your IC jailtime by 50 percent.\t{00AA00}5 cookies{FFFFFF}");
 	strcat(string, "\nRespect\tGives you 4 respect points.\t{F7A763}6 cookies{FFFFFF}");
 	strcat(string, "\nMaterials\tGives you 20000 materials.\t{F7A763}10 cookies{FFFFFF}");
-	strcat(string, "\nWeapons\tGives you a full weapon set.\t{F7A763}10 cookies{FFFFFF}");
+	//strcat(string, "\nWeapons\tGives you a full weapon set.\t{F7A763}10 cookies{FFFFFF}");
 	strcat(string, "\nGold VIP\t15 days Limited VIP subscription\t{F7A763}100 cookies{FFFFFF}");
 	strcat(string, "\nLegendary VIP\t15 days Limited VIP subscription\t{F7A763}250 cookies{FFFFFF}");
 
@@ -101,7 +101,7 @@ Dialog:UseCookies(playerid, response, listitem, inputtext[])
                 return SendClientMessage(playerid, COLOR_GREY, "You don't have enough cookies");
             }
             
-            PlayerData[playerid][pHealth] = 150;
+            PlayerData[playerid][pHealth] = 120;
             PlayerData[playerid][pArmor] = 150;
             SetPlayerHealth(playerid, PlayerData[playerid][pHealth]);
             SetPlayerArmour(playerid, PlayerData[playerid][pArmor]);
@@ -217,6 +217,7 @@ Dialog:UseCookies(playerid, response, listitem, inputtext[])
 
     return 1;
 }
+
 CMD:givecookie(playerid, params[])
 {
 	new targetid, reason[128];
@@ -225,6 +226,10 @@ CMD:givecookie(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+    if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[128]", targetid, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_GREY3, "[Usage]: /givecookie [playerid] [reason]");
@@ -323,6 +328,10 @@ CMD:givecookieall(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+    if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	foreach(new i : Player)
 	{

@@ -588,19 +588,19 @@ CMD:take(playerid, params[])
 	}
 	else if(!strcmp(option, "heroin", true))
 	{
-	    if(!PlayerData[targetid][pMeth])
+	    if(!PlayerData[targetid][pHeroin])
 	    {
 	        return SendClientMessage(playerid, COLOR_GREY, "That player has no Heroin on them.");
 		}
 
 	    ShowActionBubble(playerid, "* %s takes away %s's Heroin.", GetRPName(playerid), GetRPName(targetid));
 	    SendClientMessageEx(targetid, COLOR_AQUA, "%s has taken your %i grams of Heroin.", GetRPName(playerid), PlayerData[targetid][pWeed]);
-        Log_Write("log_faction", "%s (uid: %i) has taken %s's (uid: %i) %i grams of Heroin.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pMeth]);
+        Log_Write("log_faction", "%s (uid: %i) has taken %s's (uid: %i) %i grams of Heroin.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pHeroin]);
 
-	    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = 0 WHERE uid = %i", PlayerData[targetid][pID]);
+	    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = 0 WHERE uid = %i", PlayerData[targetid][pID]);
 	    mysql_tquery(connectionID, queryBuffer);
 
-	    PlayerData[targetid][pMeth] = 0;
+	    PlayerData[targetid][pHeroin] = 0;
 	}
 	else if(!strcmp(option, "painkillers", true))
 	{
@@ -956,7 +956,7 @@ CMD:vfrisk(playerid, params[])
     SendClientMessageEx(playerid, COLOR_GREY2, "Cash: $%i/$%i", VehicleInfo[vehicleid][vCash], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_CASH));
 	SendClientMessageEx(playerid, COLOR_GREY2, "Materials: %i/%i | Weapons: %i/%i", VehicleInfo[vehicleid][vMaterials], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_MATERIALS), count, GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_WEAPONS));
     SendClientMessageEx(playerid, COLOR_GREY2, "Weed: %i/%i grams | Crack: %i/%i grams", VehicleInfo[vehicleid][vWeed], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_WEED), VehicleInfo[vehicleid][vCocaine], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_COCAINE));
-    SendClientMessageEx(playerid, COLOR_GREY2, "Heroin: %i/%i grams | Painkillers: %i/%i pills", VehicleInfo[vehicleid][vMeth], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_METH), VehicleInfo[vehicleid][vPainkillers], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_PAINKILLERS));
+    SendClientMessageEx(playerid, COLOR_GREY2, "Heroin: %i/%i grams | Painkillers: %i/%i pills", VehicleInfo[vehicleid][vHeroin], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_HEROIN), VehicleInfo[vehicleid][vPainkillers], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_PAINKILLERS));
 
 	if(count > 0)
 	{
@@ -1038,13 +1038,13 @@ CMD:vtake(playerid, params[])
 	else if(!strcmp(option, "heroin", true))
 	{
 	    ShowActionBubble(playerid, "* %s takes the Heroin from the trunk of the %s.", GetRPName(playerid), GetVehicleName(vehicleid));
-		SendClientMessageEx(playerid, COLOR_AQUA, "You have taken the %i grams of Heroin from the trunk.", VehicleInfo[vehicleid][vMeth]);
-		Log_Write("log_faction", "%s (uid: %i) has taken the %i grams of Heroin from %s's (uid: %i) %s trunk (id: %i).", GetRPName(playerid), PlayerData[playerid][pID], VehicleInfo[vehicleid][vMeth], VehicleInfo[vehicleid][vOwner], VehicleInfo[vehicleid][vOwnerID], GetVehicleName(vehicleid), VehicleInfo[vehicleid][vID]);
+		SendClientMessageEx(playerid, COLOR_AQUA, "You have taken the %i grams of Heroin from the trunk.", VehicleInfo[vehicleid][vHeroin]);
+		Log_Write("log_faction", "%s (uid: %i) has taken the %i grams of Heroin from %s's (uid: %i) %s trunk (id: %i).", GetRPName(playerid), PlayerData[playerid][pID], VehicleInfo[vehicleid][vHeroin], VehicleInfo[vehicleid][vOwner], VehicleInfo[vehicleid][vOwnerID], GetVehicleName(vehicleid), VehicleInfo[vehicleid][vID]);
 
-        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET meth = 0 WHERE id = %i", VehicleInfo[vehicleid][vID]);
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET heroin = 0 WHERE id = %i", VehicleInfo[vehicleid][vID]);
         mysql_tquery(connectionID, queryBuffer);
 
-        VehicleInfo[vehicleid][vMeth] = 0;
+        VehicleInfo[vehicleid][vHeroin] = 0;
 	}
 	else if(!strcmp(option, "painkillers", true))
 	{

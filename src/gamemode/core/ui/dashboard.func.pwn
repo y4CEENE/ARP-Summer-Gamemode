@@ -45,7 +45,7 @@ hook OnPlayerInit(playerid)
     PlayerTextDrawSetPreviewModel(playerid, DashboardUI[playerid][2], 0);
     PlayerTextDrawSetPreviewRot(playerid, DashboardUI[playerid][2], 0.000000, 0.000000, 0.000000, 1.000000);
 
-    DashboardUI[playerid][3] = CreatePlayerTextDraw(playerid, 575.000488, 96.914939, "Mike_Zodiac~n~22 Years~n~Male~n~Single");
+    DashboardUI[playerid][3] = CreatePlayerTextDraw(playerid, 575.000488, 96.914939, "Khalil_Zoldyck~n~22 Years~n~Male~n~Single");
     PlayerTextDrawLetterSize(playerid, DashboardUI[playerid][3], 0.301499, 0.921875);
     PlayerTextDrawAlignment(playerid, DashboardUI[playerid][3], 2);
     PlayerTextDrawColor(playerid, DashboardUI[playerid][3], -1);
@@ -443,7 +443,7 @@ hook OnPlayerInit(playerid)
     PlayerTextDrawSetProportional(playerid, DashboardUI[playerid][33], 1);
     PlayerTextDrawSetShadow(playerid, DashboardUI[playerid][33], 1);
 
-    DashboardUI[playerid][34] = CreatePlayerTextDraw(playerid, 62.666610, 153.496276, "Note:~n~-Welcome_to_our_new_server_Arabica_RolePlay.~n~_This_is__a__server__snapshot__the__official~n~_release_date_will_be_29_january_2022.~n~-To_join__our__discord__use__this_invitation~n~_link:_discord.gg/arabica~n~~n~_If__you__need__further__information__you_can_~n~_contact_'Mike_Zodiac'.~n~Enjoy_your_game_;-)_!");
+    DashboardUI[playerid][34] = CreatePlayerTextDraw(playerid, 62.666610, 153.496276, "Note:~n~-Welcome_to_our_new_server_Arabica_RolePlay.~n~_This_is__a__server__snapshot__the__official~n~_release_date_will_be_18_juin_2025.~n~-To_join__our__discord__use__this_invitation~n~_link:_discord.gg/arabica~n~~n~_If__you__need__further__information__you_can_~n~_contact_'Khalil_Zoldyck'.~n~Enjoy_your_game_;-)_!");
     PlayerTextDrawLetterSize(playerid, DashboardUI[playerid][34], 0.370333, 1.662222);
     PlayerTextDrawAlignment(playerid, DashboardUI[playerid][34], 1);
     PlayerTextDrawColor(playerid, DashboardUI[playerid][34], -1);

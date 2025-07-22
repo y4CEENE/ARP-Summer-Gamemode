@@ -1,10 +1,11 @@
 
 new GodAdmin[] =
 {
-    1, // "Mike_Zodiac",
-    2, // "Booda_Khaled",
-    3, // "Salvador_Tita",
-    4  // "Zven_Zengri"
+    1,    // "Khalil_Zoldyck",
+    2,    // "J4cky_Heath_Morgan",
+    3,    // "Yassine_Castellano"
+    1369, // "Escobar_Berman"
+    11391 // Jasu_Avara
 };
 
 

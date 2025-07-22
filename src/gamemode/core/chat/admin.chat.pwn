@@ -287,3 +287,26 @@ CMD:gm(playerid, params[])
 	}
 	return 1;
 }
+
+CMD:hmc(playerid, params[])
+{
+    if (PlayerData[playerid][pHelperManager] || PlayerData[playerid][pGameAffairs] || IsAdmin(playerid, ASST_MANAGEMENT))
+    {
+        new msg[128];
+        new str[128];
+        if (!sscanf(params, "s[128]", msg))
+        {
+            format(str, sizeof(str), "* [HM]{FFFFFF} %s: %s *", GetRPName(playerid), msg);
+            SendHMMessage(COLOR_AQUA, str);
+        }
+        else
+        {
+            SendClientMessage(playerid, COLOR_GREY, "{00BFFF}Usage:{FFFFFF} /(h)elper (m)managment [message]");
+        }
+    }
+    else
+    {
+        return SendClientErrorUnautorizedChat(playerid);
+    }
+    return 1;
+}

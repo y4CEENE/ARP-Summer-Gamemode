@@ -30,7 +30,7 @@ IsAdminOnDuty(playerid, ignore_highrank=true)
 {
     if(ignore_highrank)
     {
-        return (PlayerData[playerid][pAdminDuty] == 1 || PlayerData[playerid][pAdmin] >= 6);
+        return (PlayerData[playerid][pAdminDuty] == 1 || PlayerData[playerid][pAdmin] >= 8);
     }
     return (PlayerData[playerid][pAdminDuty] == 1);
 }

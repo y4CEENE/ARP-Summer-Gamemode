@@ -1,0 +1,43 @@
+/// @file      Max.def
+/// @author    Khalil
+/// @date      Created at 2021-03-29 12:23:11 +0100
+/// @copyright Copyright (c) 2022
+
+#define MAX_REPORTS                 50
+#define MAX_HOUSES                  1000
+#define MAX_GARAGES                 1000
+#define MAX_BUSINESSES              500
+#define MAX_ENTRANCES               500
+#define MAX_PLAYER_CLOTHING         10
+#define MAX_SPAWNED_VEHICLES        3
+#define MAX_VIP1_SPAWNEDVEH         5
+#define MAX_VIP2_SPAWNEDVEH         7
+#define MAX_VIP3_SPAWNEDVEH         9
+#define MAX_ANTICHEAT_WARNINGS      8
+#define MAX_FACTIONS                20
+#define MAX_FACTION_RANKS           20
+#define MAX_FACTION_SKINS           15
+#define MAX_FACTION_DIVISIONS       5
+#define MAX_DEPLOYABLES             50
+#define MAX_FIRES                   100
+#define MAX_LANDS                   50
+#define MAX_LOCKERS                 50
+#define MAX_BANK_ROBBERS            10
+#define MAX_LOCATIONS                30
+#define MAX_ATMS                    50
+#define MAX_GANGS                   15
+#define MAX_GANG_CREWS              5
+#define MAX_GANG_SKINS              10
+#define MAX_TURFS                   50
+#define MAX_TURFS_PER_PAGE          15
+#define MAX_WEP                     43
+#define MAX_BOOTHS                  8
+#define MAX_PAYPHONES               100
+#define MAX_DEALERSHIP_CARS         1000
+#define MAX_FURNITURE               15000
+#define MAX_OWNABLE_CARS            15
+#define MAX_LISTED_OBJECTS          50
+#define MAX_LISTED_STATIONS         50
+#define MAX_SPLIT_LENGTH            80
+#define MAX_DAMAGES                 200
+#define MAX_BUSINESSES_NAME         128

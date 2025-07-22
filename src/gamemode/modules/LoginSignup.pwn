@@ -31,22 +31,22 @@ hook OnPlayerConnect(playerid)
     TutStep[playerid] = 0;
     new username[MAX_PLAYER_NAME];
     new changed = false;
-	GetPlayerName(playerid, username, MAX_PLAYER_NAME);
-    for(new i=0;username[i];i++)
+    GetPlayerName(playerid, username, MAX_PLAYER_NAME);
+    for (new i=0;username[i];i++)
     {
-        if(username[i] == ' ')
+        if (username[i] == ' ')
         {
             username[i] = '_';
             changed = true;
         }
     }
     
-    if(changed)
+    if (changed)
     {
         SetPlayerName(playerid, username);
     }
 
-    if(!IsValidUsername(GetPlayerNameEx(playerid)))
+    if (!IsValidUsername(GetPlayerNameEx(playerid)))
     {
         KickPlayer(playerid, "Invalid role play name (i.e. John_Smith)", INVALID_PLAYER_ID, BAN_VISIBILITY_NONE);
         return 1;
@@ -301,7 +301,7 @@ hook OnLoadPlayer(playerid, row)
     PlayerData[playerid][pMaterials] = cache_get_field_content_int(row, "materials");
     PlayerData[playerid][pWeed] = cache_get_field_content_int(row, "weed");
     PlayerData[playerid][pCocaine] = cache_get_field_content_int(row, "cocaine");
-    PlayerData[playerid][pMeth] = cache_get_field_content_int(row, "meth");
+    PlayerData[playerid][pHeroin] = cache_get_field_content_int(row, "heroin");
     PlayerData[playerid][pPainkillers] = cache_get_field_content_int(row, "painkillers");
     PlayerData[playerid][pSeeds] = cache_get_field_content_int(row, "seeds");
     PlayerData[playerid][pEphedrine] = cache_get_field_content_int(row, "ephedrine");
@@ -755,6 +755,10 @@ DB:THREAD_CHECK_REFERRAL(playerid)
 hook OnPlayerFirstTimeSpawn(playerid)
 {
     StopAudioStreamForPlayer(playerid);
+    
+    PlayerData[playerid][pInjured] = 0;
+	SetPlayerHealth(playerid, 100.0);
+
     SendStaffMessage(COLOR_YELLOW, "OnPlayerSpawn: %s[%d] has just spawned on %s for the first time!", GetRPName(playerid), playerid, GetServerName());
     
     DestroyDynamic3DTextLabel(fRepfamtext[playerid]);
@@ -1420,6 +1424,134 @@ Dialog:DIALOG_SHOW_TUTORIAL(playerid, response, listitem, inputtext[])
 	return 1;
 }
 
+/*forward ShowMainMenuCamera(playerid);
+public ShowMainMenuCamera(playerid)
+{
+    PlayLoginMusic(playerid);
+    ClearChat(playerid);
+
+    ShowRandomCamera(playerid);
+	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT *,(date + interval duration day) as end, ((date + interval duration day) > now()) as active FROM users_bans WHERE (username = '%e' OR ip = '%e' OR ip LIKE '%e') and ((date + interval duration day) > now() || duration = 0)", GetPlayerNameEx(playerid), GetPlayerIP(playerid), GetPlayerIPRange(playerid));
+	mysql_tquery(connectionID, queryBuffer, "db_THREAD_LOOKUP_BANS", "i", playerid);
+}*/
+
+forward BanLookup(playerid);
+public BanLookup(playerid)
+{
+    new rows = cache_get_row_count(connectionID);
+
+    if (rows)
+    {
+        new adminname[MAX_PLAYER_NAME], username[MAX_PLAYER_NAME];
+        new userip[16], date[24], end[24], reason[128], durationstr[32];
+        new duration = cache_get_field_content_int(0, "duration");
+        new msg[512];
+        new adminmsg[128];
+
+        cache_get_field_content(0, "username", username);
+        cache_get_field_content(0, "userip", userip);
+        cache_get_field_content(0, "adminname", adminname);
+        cache_get_field_content(0, "reason", reason);
+        cache_get_field_content(0, "date", date);
+        cache_get_field_content(0, "end", end);
+        durationstr = FormatBanDuration(duration);
+
+        GameTextForPlayer(playerid, "~r~You are banned!", 999999, 3);
+
+        if (duration == PERMANENT_BAN_DURATION)
+        {
+            format(msg, sizeof(msg),
+                "{808080}Player name: {FFFFFF}%s\t"\
+                "{808080}Player IP: {FFFFFF}%s\n"\
+                "{808080}Banned by: {FFFFFF}%s\t"\
+                "{808080}Duration: {FFFFFF}%s\n"\
+                "{808080}Date: {FFFFFF}%s\n"\
+                "{808080}Ban reason: {FFFFFF}%s",
+                username,
+                userip,
+                adminname,
+                durationstr,
+                date,
+                reason);
+        }
+        else
+        {
+            format(msg, sizeof(msg),
+                "{808080}Player name: {FFFFFF}%s\t"\
+                "{808080}Player IP: {FFFFFF}%s\n"\
+                "{808080}Banned by: {FFFFFF}%s\t"\
+                "{808080}Duration: {FFFFFF}%s\n"\
+                "{808080}Date: {FFFFFF}%s\t"\
+                "{808080}End: {FFFFFF}%s\n"\
+                "{808080}Ban reason: {FFFFFF}%s",
+                username,
+                userip,
+                adminname,
+                durationstr,
+                date,
+                end,
+                reason);
+        }
+        format(adminmsg, sizeof(adminmsg), "%s tries to login with banned account. Duration: %s, Reason: %s", username, durationstr, reason);
+        LoginKickBannedPlayer(playerid, msg, adminmsg);
+    }
+    else
+    {
+        if (CheckIPBan(GetPlayerIP(playerid)))
+        {
+            new string[128];
+            format(string, sizeof(string), "IP (%s) is banned", GetPlayerIP(playerid));
+            KickPlayer(playerid, string, INVALID_PLAYER_ID, BAN_VISIBILITY_ADMIN);
+        }
+        else
+        {
+            ShowMainMenuGUI(playerid);
+            mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT uid, login_nb_fails, TIMESTAMPDIFF(MINUTE, login_last_fail, NOW()) as login_diff_min FROM "#TABLE_USERS" WHERE username = '%e'", GetPlayerNameEx(playerid));
+            mysql_tquery(connectionID, queryBuffer, "AccountLookup", "i", playerid);
+
+        }
+    }
+}
+
+forward AccountLookup(playerid);
+public AccountLookup(playerid)
+{
+    new rows = cache_get_row_count(connectionID);
+
+    if (rows)
+    {
+        if (cache_get_field_content_int(0, "login_nb_fails") >= 5 &&
+           cache_get_field_content_int(0, "login_diff_min") < 5)
+        {
+            KickPlayer(playerid, "Fail to login. Your account is locked try to login after 5min.", INVALID_PLAYER_ID, BAN_VISIBILITY_NONE);
+        }
+        else
+        {
+            new uid = cache_get_field_content_int(0, "uid");
+            foreach (new targetid : Player)
+            {
+                if (playerid != targetid && PlayerData[targetid][pLogged] && PlayerData[targetid][pID] == uid)
+                {
+                    KickPlayer(playerid, "Fail to login. You are already online.", INVALID_PLAYER_ID, BAN_VISIBILITY_NONE);
+                    return 1;
+                }
+            }
+            ShowLoginDlg(playerid);
+        }
+    }
+    else
+    {
+        if (strfind(GetPlayerNameEx(playerid), "_") == -1)
+        {
+            Dialog_Show(playerid, DIALOG_FREENAMECHANGE, DIALOG_STYLE_INPUT, "Non-RP Name", "An administrator has came to the conclusion that your name is non-RP.\nTherefore you have been given this free namechange in order to correct it.\n\nEnter a name in the Firstname_Lastname format in the box below:", "Submit", "");
+        }
+        else
+        {
+            ShowRegisterDlg(playerid);
+        }
+    }
+    return 1;
+}
 
 forward ShowMainMenuCamera(playerid);
 public ShowMainMenuCamera(playerid)
@@ -1428,10 +1560,9 @@ public ShowMainMenuCamera(playerid)
     ClearChat(playerid);
 
     ShowRandomCamera(playerid);
-	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT *,(date + interval duration day) as end, ((date + interval duration day) > now()) as active FROM bans WHERE (username = '%e' OR ip = '%e' OR ip LIKE '%e') and ((date + interval duration day) > now() || duration = 0)", GetPlayerNameEx(playerid), GetPlayerIP(playerid), GetPlayerIPRange(playerid));
-	mysql_tquery(connectionID, queryBuffer, "db_THREAD_LOOKUP_BANS", "i", playerid);
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT * FROM users_bans WHERE (username = '%e') and (isbanned = true) order by id DESC limit 1;", GetPlayerNameEx(playerid));
+    mysql_tquery(connectionID, queryBuffer, "BanLookup", "i", playerid);
 }
-
 
 PlayerLogin(playerid)
 {
@@ -1487,7 +1618,6 @@ public TutorialTimer(playerid, stage)
 		}
 	}
 }
-
 
 CMD:skiptut(playerid, params[])
 {
@@ -1689,7 +1819,7 @@ InitLoginGUI()
 	TextDrawFont(MainMenuTxtdraw[9], 1);
 	TextDrawSetProportional(MainMenuTxtdraw[9], 1);
 
-	MainMenuTxtdraw[10] = TextDrawCreate(143.367507, 394.333343, GetServerWebsite());
+	MainMenuTxtdraw[10] = TextDrawCreate(143.367507, 394.333343, "arabicarp.com");
 	TextDrawLetterSize(MainMenuTxtdraw[10], 0.449999, 1.600000);
 	TextDrawAlignment(MainMenuTxtdraw[10], 1);
 	TextDrawColor(MainMenuTxtdraw[10], -1);

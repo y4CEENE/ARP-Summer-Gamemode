@@ -33,10 +33,12 @@ CMD:newbie(playerid, params[])
         return SendClientMessage(playerid, COLOR_GREY, "USAGE: /newb [question/answer]");
     }
 	SendNewbieChatMessage(playerid,FilterChat(params));
-	
+	PlayerData[playerid][pNewbies] ++;
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET newbies = %i WHERE uid = %i", PlayerData[playerid][pNewbies], PlayerData[playerid][pID]);
+	mysql_tquery(connectionID, queryBuffer);
+
 	return 1;
 }
-
 
 SendNewbieChatMessage(playerid, text[])
 {

@@ -25,7 +25,7 @@ enum eStorage
     Storage_LimitCash,
     Storage_LimitDrugs,
     Storage_LimitWeaponSlots,
-    Storage_Pot,
+    Storage_Weed,
     Storage_Crack,
     Storage_Cocaine,
     Storage_Heroin,
@@ -79,7 +79,7 @@ publish OnLoadStorages()
         Storages[i][Storage_LimitCash] = cache_get_field_content_int(i, "limit_cash");
         Storages[i][Storage_LimitDrugs] = cache_get_field_content_int(i, "limit_drugs");
         Storages[i][Storage_LimitWeaponSlots] = cache_get_field_content_int(i, "limit_weapon_slots");
-        Storages[i][Storage_Pot] = cache_get_field_content_int(i, "pot");
+        Storages[i][Storage_Weed] = cache_get_field_content_int(i, "weed");
         Storages[i][Storage_Crack] = cache_get_field_content_int(i, "crack");
         Storages[i][Storage_Cocaine] = cache_get_field_content_int(i, "cocaine");
         Storages[i][Storage_Heroin] = cache_get_field_content_int(i, "heroin");
@@ -176,7 +176,7 @@ ShowStorageMainMenu(playerid, storageid)
     }
     if(Storages[storageid][Storage_LimitDrugs] > 0)
     {
-        format(string, sizeof(string), "%s\n Pot\t%i/%i", string, Storages[storageid][Storage_Pot], Storages[storageid][Storage_LimitDrugs]);
+        format(string, sizeof(string), "%s\n Weed\t%i/%i", string, Storages[storageid][Storage_Weed], Storages[storageid][Storage_LimitDrugs]);
         format(string, sizeof(string), "%s\n Crack\t%i/%i", string, Storages[storageid][Storage_Crack], Storages[storageid][Storage_LimitDrugs]);
         format(string, sizeof(string), "%s\n Cocaine\t%i/%i", string, Storages[storageid][Storage_Cocaine], Storages[storageid][Storage_LimitDrugs]);
         format(string, sizeof(string), "%s\n Heroin\t%i/%i", string, Storages[storageid][Storage_Heroin], Storages[storageid][Storage_LimitDrugs]);
@@ -303,15 +303,15 @@ Dialog:StorageOperation(playerid, response, listitem, inputtext[])
         }
         if(index == selecteditem)
         {
-            // Is Pot
+            // Is Weed
             if(listitem == 1)
             {
-                format(string, sizeof(string), "Enter amount of pot to withdraw (Total: %s).", FormatNumber(Storages[storageid][Storage_Pot]));
-                Dialog_Show(playerid, StoragePotWithdraw, DIALOG_STYLE_INPUT, "Storage withdraw", string, "Select", "Cancel");                
+                format(string, sizeof(string), "Enter amount of weed to withdraw (Total: %s).", FormatNumber(Storages[storageid][Storage_Weed]));
+                Dialog_Show(playerid, StorageWeedWithdraw, DIALOG_STYLE_INPUT, "Storage withdraw", string, "Select", "Cancel");                
             }
             else if(listitem == 0)
             {
-	            Dialog_Show(playerid, StoragePotDeposit, DIALOG_STYLE_INPUT, "Storage deposit", "Enter amount of pot to deposit.", "Select", "Cancel");
+	            Dialog_Show(playerid, StorageWeedDeposit, DIALOG_STYLE_INPUT, "Storage deposit", "Enter amount of weed to deposit.", "Select", "Cancel");
             }
             return 1;
         }
@@ -663,7 +663,7 @@ Dialog:StorageMaterialDeposit(playerid, response, listitem, inputtext[])
 
     return 1;
 }
-Dialog:StoragePotWithdraw(playerid, response, listitem, inputtext[])
+Dialog:StorageWeedWithdraw(playerid, response, listitem, inputtext[])
 {
     if(!response)
     {
@@ -673,28 +673,28 @@ Dialog:StoragePotWithdraw(playerid, response, listitem, inputtext[])
     new storageid = PlayerSelectedStorage[playerid];
     if(PlayerData[playerid][pID] != Storages[storageid][Storage_Managerid])
     {
-        return SendClientMessageEx(playerid, COLOR_GREY, "You are not authorized to withdraw pot.");
+        return SendClientMessageEx(playerid, COLOR_GREY, "You are not authorized to withdraw weed.");
     }
 	if(sscanf(inputtext, "i", amount))
     {
-        return SendClientMessageEx(playerid, COLOR_GREY, "Invalid amount of pot.");
+        return SendClientMessageEx(playerid, COLOR_GREY, "Invalid amount of weed.");
     }
-    if(amount >  Storages[storageid][Storage_Pot])
+    if(amount >  Storages[storageid][Storage_Weed])
     {
-        return SendClientMessageEx(playerid, COLOR_GREY, "This amount of pot is not available in this storage.");
+        return SendClientMessageEx(playerid, COLOR_GREY, "This amount of weed is not available in this storage.");
     }
 
     PlayerData[playerid][pWeed] +=  amount;
-    Storages[storageid][Storage_Pot] -= amount;
+    Storages[storageid][Storage_Weed] -= amount;
 
-    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE storages SET pot = %i WHERE id = %i", Storages[storageid][Storage_Pot], Storages[storageid][Storage_ID]);
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE storages SET weed = %i WHERE id = %i", Storages[storageid][Storage_Weed], Storages[storageid][Storage_ID]);
     mysql_tquery(connectionID, queryBuffer);
     
-    SendClientMessageEx(playerid, COLOR_AQUA, "You have withdraw %s pot.", FormatNumber(amount));
+    SendClientMessageEx(playerid, COLOR_AQUA, "You have withdraw %s weed.", FormatNumber(amount));
 
     return 1;
 }
-Dialog:StoragePotDeposit(playerid, response, listitem, inputtext[])
+Dialog:StorageWeedDeposit(playerid, response, listitem, inputtext[])
 {
     if(!response)
     {
@@ -705,28 +705,28 @@ Dialog:StoragePotDeposit(playerid, response, listitem, inputtext[])
     new storageid = PlayerSelectedStorage[playerid];
     if(PlayerData[playerid][pID] != Storages[storageid][Storage_Managerid])
     {
-        return SendClientMessageEx(playerid, COLOR_GREY, "You are not authorized to deposit pots.");
+        return SendClientMessageEx(playerid, COLOR_GREY, "You are not authorized to deposit weeds.");
     }
 	if(sscanf(inputtext, "i", amount))
     {
-        return SendClientMessageEx(playerid, COLOR_GREY, "Invalid amount of pots.");
+        return SendClientMessageEx(playerid, COLOR_GREY, "Invalid amount of weeds.");
     }
     if(PlayerData[playerid][pWeed] < amount)
     {
-        return SendClientMessageEx(playerid, COLOR_GREY, "You don't have this amount of pots.");
+        return SendClientMessageEx(playerid, COLOR_GREY, "You don't have this amount of weeds.");
     }
-    if(Storages[storageid][Storage_LimitDrugs] < Storages[storageid][Storage_Pot] + amount)
+    if(Storages[storageid][Storage_LimitDrugs] < Storages[storageid][Storage_Weed] + amount)
     {
-        return SendClientMessageEx(playerid, COLOR_GREY, "There is no space for this amount of pots.");
+        return SendClientMessageEx(playerid, COLOR_GREY, "There is no space for this amount of weeds.");
     }
 
     PlayerData[playerid][pWeed] -=  amount;
-    Storages[storageid][Storage_Pot] += amount;
+    Storages[storageid][Storage_Weed] += amount;
 
-    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE storages SET pot = %i WHERE id = %i", Storages[storageid][Storage_Pot], Storages[storageid][Storage_ID]);
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE storages SET weed = %i WHERE id = %i", Storages[storageid][Storage_Weed], Storages[storageid][Storage_ID]);
     mysql_tquery(connectionID, queryBuffer);
     
-    SendClientMessageEx(playerid, COLOR_AQUA, "You have deposit %s pot.", FormatNumber(amount));
+    SendClientMessageEx(playerid, COLOR_AQUA, "You have deposit %s weed.", FormatNumber(amount));
 
     return 1;
 }
@@ -832,7 +832,7 @@ Dialog:StorageHeroinWithdraw(playerid, response, listitem, inputtext[])
         return SendClientMessageEx(playerid, COLOR_GREY, "This amount of heroin is not available in this storage.");
     }
 
-    PlayerData[playerid][pMeth] +=  amount;
+    PlayerData[playerid][pHeroin] +=  amount;
     Storages[storageid][Storage_Heroin] -= amount;
 
     mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE storages SET heroin = %i WHERE id = %i", Storages[storageid][Storage_Heroin], Storages[storageid][Storage_ID]);
@@ -857,7 +857,7 @@ Dialog:StorageHeroinDeposit(playerid, response, listitem, inputtext[])
     {
         return SendClientMessageEx(playerid, COLOR_GREY, "Invalid amount of heroin.");
     }
-    if(PlayerData[playerid][pMeth] < amount)
+    if(PlayerData[playerid][pHeroin] < amount)
     {
         return SendClientMessageEx(playerid, COLOR_GREY, "You don't have this amount of heroin.");
     }
@@ -866,7 +866,7 @@ Dialog:StorageHeroinDeposit(playerid, response, listitem, inputtext[])
         return SendClientMessageEx(playerid, COLOR_AQUA, "There is no space for this amount of heroin.");
     }
 
-    PlayerData[playerid][pMeth] -=  amount;
+    PlayerData[playerid][pHeroin] -=  amount;
     Storages[storageid][Storage_Heroin] += amount;
 
     mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE storages SET heroin = %i WHERE id = %i", Storages[storageid][Storage_Heroin], Storages[storageid][Storage_ID]);
@@ -996,7 +996,7 @@ publish OnStorageAdded(storageid)
     Storages[storageid][Storage_LimitCash] = 10000000;
     Storages[storageid][Storage_LimitDrugs] = 2000;
     Storages[storageid][Storage_LimitWeaponSlots] = MAX_STORAGE_WEAPONS;
-    Storages[storageid][Storage_Pot] = 0;
+    Storages[storageid][Storage_Weed] = 0;
     Storages[storageid][Storage_Crack] = 0;
     Storages[storageid][Storage_Cocaine] = 0;
     Storages[storageid][Storage_Heroin] = 0;

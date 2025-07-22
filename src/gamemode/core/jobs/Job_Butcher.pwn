@@ -1,8 +1,8 @@
 #include <YSI\y_hooks>
 
 
-static MinButcherRate=6000;
-static MaxButcherRate=8000;
+static MinButcherRate=4000;
+static MaxButcherRate=6000;
 static IsPlayerButcher[MAX_PLAYERS];
 static ButcherTask[MAX_PLAYERS];
 static LastSkin[MAX_PLAYERS];

@@ -232,6 +232,7 @@ CMD:profile(playerid, params[])
 	SendClientMessageEx(playerid, COLOR_NAVYBLUE, "_____ %s _____", GetRPName(targetid));
 	SendClientMessageEx(playerid, COLOR_GREY2, "Gender: %s", (PlayerData[targetid][pGender] == 2) ? ("Female") : ("Male"));
 	SendClientMessageEx(playerid, COLOR_GREY2, "Age: %i years old", PlayerData[targetid][pAge]);
+	SendClientMessageEx(playerid, COLOR_GREY2, "Phone: %i Target Number", PlayerData[targetid][pPhone]);
 
 	if(PlayerData[targetid][pFaction] != -1)
 	{

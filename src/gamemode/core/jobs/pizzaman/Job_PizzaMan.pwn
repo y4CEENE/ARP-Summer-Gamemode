@@ -17,6 +17,9 @@ GetPizzaCoolDown(playerid)
 }
 hook OnLoadGameMode(timestamp)
 {
+    CreateDynamicLabeledPickup(0x008080FF, "{FF0000}Pizza Job\n{FFFFFF}Use {7FFF00}/getpizza{FFFFFF} to get the delivery!",
+                               2114.8374, -1823.9231, 13.5785, 0, 0, 1582, 30.0);
+
     pizzaVehicles[0] = AddStaticVehicleEx(448, 2097.8396, -1792.2556, 12.9978, 90.0000, 3, 6, 300); // bike 1
 	pizzaVehicles[1] = AddStaticVehicleEx(448, 2097.8396, -1794.0065, 12.9978, 90.0000, 3, 6, 300); // bike 2
 	pizzaVehicles[2] = AddStaticVehicleEx(448, 2097.8396, -1795.7574, 12.9978, 90.0000, 3, 6, 300); // bike 3
@@ -38,7 +41,7 @@ hook OnPlayerEnterCheckpoint(playerid)
 	if(PlayerData[playerid][pCP] == CHECKPOINT_PIZZA)
     {
         new string[32];
-        new amount = (100 + GetJobLevel(playerid, JOB_PIZZAMAN) * 100 + random(100)), tip = percent(amount, 5);
+        new amount = (2500 + GetJobLevel(playerid, JOB_PIZZAMAN) * 300 + random(200)), tip = percent(amount, 10);
 
         if(gettime() - PlayerLastPizza[playerid] < 15 && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked])
         {
@@ -126,14 +129,14 @@ CMD:getpizza(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You need to be driving a pizza bike.");
 	}
-	/*if(PlayerPizzas[playerid] > 0)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You have pizzas already. Deliver them first.");
-	}*/
-	if(!IsPlayerInRangeOfPoint(playerid, 6.0, jobLocations[JOB_PIZZAMAN][jobX], jobLocations[JOB_PIZZAMAN][jobY], jobLocations[JOB_PIZZAMAN][jobZ]))
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You must be closer to the job icon at the pizza stacks.");
-	}
+	if (PlayerPizzas[playerid] > 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You have pizzas already. Deliver them first.");
+    }
+    if (!IsPlayerInRangeOfPoint(playerid, 6.0, 2114.8374, -1823.9231, 13.5785))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You must be close to the pizza stacks bike delivery window.");
+    }
 	if((houseid = GetRandomHouse(playerid)) == -1)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "There are no houses in the server to deliver pizza to. Ask an admin to set them up.");

@@ -1,6 +1,6 @@
 #include <YSI\y_hooks>
 
-#define MAX_GATES 50
+#define MAX_GATES 120
 // TODO:
 //   - Replace useless message Dyuze, 
 //   - Add edit position call back

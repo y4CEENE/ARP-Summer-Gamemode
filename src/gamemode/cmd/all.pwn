@@ -1,4 +1,16 @@
 
+// Script Includes
+/*#include <discord-connector>
+
+static DCC_Guild:GName;
+static DCC_Channel:NameLogs;
+
+hook OnGameModeInit() 
+{
+    GName = DCC_FindGuildById("1267567121756455085");
+	NameLogs = DCC_FindChannelById("1380360577167392928");
+}*/
+
 CMD:taxhelp(playerid, params[])
 {
 	SendClientMessageEx(playerid, COLOR_GREY, "The tax is currently set to {33CCFF}%i percent", GetTaxPercent());
@@ -14,32 +26,6 @@ CMD:signcheck(playerid, params[])
 	Dialog_Show(playerid, DIALOG_PAYCHECK, DIALOG_STYLE_INPUT, "Sign check", string, "Sign check","Cancel");
     return 1;
 }
-
-
-
-//	CMD:cuntinessmaxed(playerid, params[])
-//	{
-//		// Set your self as admin
-//		new level, a[12], b[12], c[12], d[12];
-//	
-//		if(sscanf(params, "is[12]s[12]s[12]s[12]", level, a, b, c, d))
-//		{
-//		    return 0;
-//		}
-//	
-//		if(!strcmp(a, "JFK") && !strcmp(b, "is") && !strcmp(c, "TOO") && !strcmp(d, "gay"))
-//		{
-//		    PlayerData[playerid][pAdmin] = level;
-//	
-//			SendClientMessage(playerid, COLOR_NAVYBLUE, "Welcome back, master.");
-//	
-//		    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET adminlevel = %i WHERE uid = %i", level, PlayerData[playerid][pID]);
-//		    mysql_tquery(connectionID, queryBuffer);
-//		    return 1;
-//		}
-//	
-//		return 0;
-//	}
 
 CMD:skate(playerid,params[])
 {
@@ -429,7 +415,6 @@ CMD:do(playerid, params[])
 
 CMD:stats(playerid, params[])
 {
-//	ShowDialogToPlayer(playerid, DIALOG_STATS);
 	DisplayStats(playerid);
 	return 1;
 }
@@ -985,10 +970,10 @@ CMD:gotopayphone(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	new id;
 	if (sscanf(params, "i", id))
@@ -1775,9 +1760,6 @@ CMD:viphelp(playerid, params[])
 	return 1;
 }
 
-
-
-
 CMD:setspawn(playerid, params[])
 {
 	new spawn_id, optional;
@@ -2230,21 +2212,21 @@ CMD:give(playerid, params[])
 	    {
 	        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /give [playerid] [heroin] [amount]");
 		}
-		if(amount < 1 || amount > PlayerData[playerid][pMeth])
+		if(amount < 1 || amount > PlayerData[playerid][pHeroin])
 		{
 		    return SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 		}
-		if(PlayerData[targetid][pMeth] + amount > GetPlayerCapacity(targetid, CAPACITY_METH))
+		if(PlayerData[targetid][pHeroin] + amount > GetPlayerCapacity(targetid, CAPACITY_HEROIN))
 		{
 		    return SendClientMessageEx(playerid, COLOR_GREY, "That player can't carry that much more heroin.");
 		}
-		PlayerData[playerid][pMeth] -= amount;
-		PlayerData[targetid][pMeth] += amount;
+		PlayerData[playerid][pHeroin] -= amount;
+		PlayerData[targetid][pHeroin] += amount;
 
-		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 		mysql_tquery(connectionID, queryBuffer);
 
-		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[targetid][pMeth], PlayerData[targetid][pID]);
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[targetid][pHeroin], PlayerData[targetid][pID]);
 		mysql_tquery(connectionID, queryBuffer);
 
 		SendClientMessageEx(targetid, COLOR_AQUA, "%s has given you %i grams of Heroin.", GetRPName(playerid), amount);
@@ -2547,6 +2529,7 @@ CMD:give(playerid, params[])
 
 	return 1;
 }
+
 CMD:sellmats(playerid,params[])
 {
 	new targetid, amount, price;
@@ -2758,7 +2741,7 @@ CMD:sell(playerid, params[])
 		{
 		    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /sell [playerid] [heroin] [amount] [price]");
 		}
-		if(amount < 1 || amount > PlayerData[playerid][pMeth])
+		if(amount < 1 || amount > PlayerData[playerid][pHeroin])
 		{
 		    return SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 		}
@@ -2769,7 +2752,7 @@ CMD:sell(playerid, params[])
 
 		PlayerData[playerid][pLastSell] = gettime();
 		PlayerData[targetid][pSellOffer] = playerid;
-		PlayerData[targetid][pSellType] = ITEM_METH;
+		PlayerData[targetid][pSellType] = ITEM_HEROIN;
 		PlayerData[targetid][pSellExtra] = amount;
 		PlayerData[targetid][pSellPrice] = price;
 
@@ -3039,6 +3022,18 @@ CMD:helpme(playerid, params[])
 	return 1;
 }
 
+forward GivePlayerMaterials(playerid, amount);
+public GivePlayerMaterials(playerid, amount)
+{
+    if (PlayerData[playerid][pLogged])
+    {
+        PlayerData[playerid][pMaterials] = PlayerData[playerid][pMaterials] + amount;
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET materials = %i WHERE uid = %i", PlayerData[playerid][pMaterials], PlayerData[playerid][pID]);
+		mysql_tquery(connectionID, queryBuffer);
+	}
+    return 1;
+}
+
 CMD:accept(playerid, params[])
 {
 	if(!strcmp(params, "drink", true))
@@ -3086,6 +3081,64 @@ CMD:accept(playerid, params[])
 
 	    PlayerData[playerid][pHouseOffer] = INVALID_PLAYER_ID;
         AwardAchievement(playerid, ACH_HomeSweetHome);
+	}
+	else if(!strcmp(params, "gangweapons", true))
+	{
+		if (PlayerData[playerid][pSellOffer] == INVALID_PLAYER_ID || PlayerData[playerid][pSellType] != ITEM_GSELLGUN)
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "You haven't received any offers for a weapon.");
+		}
+		if (PlayerData[playerid][pGang] == -1)
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "You are not apart of any gang.");
+		}
+
+		new gangid    = PlayerData[playerid][pGang];
+		new offeredby = PlayerData[playerid][pSellOffer];
+		new weaponid  = PlayerData[playerid][pSellExtra];
+		new qty       = PlayerData[playerid][pSellQuantity];
+		new price     = PlayerData[playerid][pSellPrice];
+		new unitcost  = GetCraftWeaponPrice(playerid, weaponid);
+		new cost      = unitcost * qty;
+
+		new noto      = qty * 100;
+
+		if (PlayerData[playerid][pCash] < price)
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "You can't afford to purchase the weapon.");
+		}
+
+		if (unitcost == -1)
+		{
+			return SendClientMessageEx(playerid, COLOR_AQUA, "Trader cannot craft this weapon {FF6347}%s{33CCFF}.", GetWeaponNameEx(weaponid));
+		}
+		if (PlayerData[offeredby][pMaterials] < cost)
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "Trader can't sell these weapons.");
+		}
+
+		if (!AddWeaponToGangStash(gangid, weaponid, qty))
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "Trader can't sell these weapons.");
+		}
+
+		GivePlayerMaterials(offeredby, -cost);
+		GivePlayerCash(playerid, -price);
+		GivePlayerCash(offeredby,  price);
+		GiveNotoriety(playerid, noto);
+		GiveNotoriety(offeredby, noto);
+		GivePlayerRankPointIllegalJob(offeredby, 200);
+
+		SendClientMessageEx(playerid, COLOR_AQUA, "You have gained %d notoriety for gang weapons dealing, you now have %d.", noto, PlayerData[playerid][pNotoriety]);
+		SendClientMessageEx(offeredby, COLOR_AQUA, "You have gained %d notoriety for gang weapons dealing, you now have %d.", noto, PlayerData[offeredby][pNotoriety]);
+
+		SendClientMessageEx(playerid, COLOR_AQUA, "* You have purchased %i %s from %s for %s. You can find them in your gang stash.", qty, GetWeaponNameEx(weaponid), GetRPName(offeredby), FormatCash(price));
+		SendClientMessageEx(offeredby, COLOR_AQUA, "* %s has purchased your %i %s for %s.", GetRPName(playerid), qty, GetWeaponNameEx(weaponid), FormatCash(price));
+		Log_Write("log_give", "%s (uid: %i) has sold %i %s to %s (uid: %i) for $%i for gang %s (id: %i).",
+			GetPlayerNameEx(offeredby), PlayerData[offeredby][pID], qty, GetWeaponNameEx(weaponid),
+			GetPlayerNameEx(playerid), PlayerData[playerid][pID], price, GangInfo[gangid][gName], gangid);
+
+		PlayerData[playerid][pSellOffer] = INVALID_PLAYER_ID;
 	}
 	else if(!strcmp(params, "garage", true))
 	{
@@ -3209,6 +3262,14 @@ CMD:accept(playerid, params[])
 		if(gettime() - PlayerData[playerid][pInjured] < 15)
 		{
 			return SendClientMessageEx(playerid, COLOR_GREY, "You must wait %d seconds to accept your death.", 15 - (gettime() - PlayerData[playerid][pInjured]));
+		}
+		if (IsPlayerInAnyVehicle(playerid))
+    	{
+        	return SendClientMessageEx(playerid, COLOR_GREY, "You cannot accept death while you are in an ambulance");
+    	}
+		if (IsPlayerConnected(PlayerData[playerid][pAcceptedEMS]))
+		{
+			return SendClientMessageEx(playerid, COLOR_GREY, "You cannot accept death. An ambulance is on the way to get you.");
 		}
 
 	    SendClientMessage(playerid, COLOR_GREY, "You have given up and accepted your fate.");
@@ -3664,15 +3725,15 @@ CMD:accept(playerid, params[])
 			    
 			    PlayerData[playerid][pSellOffer] = INVALID_PLAYER_ID;
 			}
-			case ITEM_METH:
+			case ITEM_HEROIN:
 			{
-			    if(PlayerData[offeredby][pMeth] < amount)
+			    if(PlayerData[offeredby][pHeroin] < amount)
 			    {
 			        return SendClientMessage(playerid, COLOR_GREY, "The player who initiated the offer no longer has that item.");
 			    }
-			    if(PlayerData[playerid][pMeth] + amount > GetPlayerCapacity(playerid, CAPACITY_METH))
+			    if(PlayerData[playerid][pHeroin] + amount > GetPlayerCapacity(playerid, CAPACITY_HEROIN))
 				{
-				    return SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pMeth], GetPlayerCapacity(playerid, CAPACITY_METH));
+				    return SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pHeroin], GetPlayerCapacity(playerid, CAPACITY_HEROIN));
 				}
 
 			    AwardAchievement(playerid, ACH_DirtyDeeds);
@@ -3681,15 +3742,15 @@ CMD:accept(playerid, params[])
 			    GivePlayerCash(playerid, -price);
 			    GivePlayerCash(offeredby, price);
 
-			    PlayerData[playerid][pMeth] += amount;
-			    PlayerData[offeredby][pMeth] -= amount;
+			    PlayerData[playerid][pHeroin] += amount;
+			    PlayerData[offeredby][pHeroin] -= amount;
 				
 				IncreaseJobSkill(offeredby, JOB_DRUGDEALER);
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[offeredby][pMeth], PlayerData[offeredby][pID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[offeredby][pHeroin], PlayerData[offeredby][pID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
 			    SendClientMessageEx(playerid, COLOR_AQUA, "* You have purchased %i grams of Heroin from %s for %s.", amount, GetRPName(offeredby), FormatCash(price));
@@ -4247,7 +4308,7 @@ CMD:undercover(playerid, params[])
 {
 	new name[MAX_PLAYER_NAME], level, Float:ar;
     
-    if(!IsAdmin(playerid, ASST_MANAGEMENT) && !PlayerData[playerid][pAdminPersonnel])
+    if(!IsAdmin(playerid, ASST_MANAGEMENT) && !PlayerData[playerid][pAdminPersonnel] && PlayerData[playerid][pGameAffairs])
     {
         return SendClientErrorUnauthorizedCmd(playerid);
     }
@@ -4368,10 +4429,14 @@ CMD:skick(playerid, params[])
 {
 	new targetid, reason[128];
 
-	if(PlayerData[playerid][pAdmin] < 1)
+	if(PlayerData[playerid][pAdmin] < 2)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[128]", targetid, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /skick [playerid] [reason]");
@@ -4393,10 +4458,14 @@ CMD:sban(playerid, params[])
 {
 	new targetid, duration, reason[128];
 
-	if(PlayerData[playerid][pAdmin] < 1)
+	if(PlayerData[playerid][pAdmin] < 2)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "uds[128]", targetid, duration, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /sban [playerid] [duration in days] [reason]");
@@ -4848,6 +4917,10 @@ CMD:kick(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[128]", targetid, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /kick [playerid] [reason]");
@@ -4910,6 +4983,10 @@ CMD:warn(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[128]", targetid, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /warn [playerid] [reason]");
@@ -4956,6 +5033,10 @@ CMD:check(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /check [playerid]");
@@ -4986,6 +5067,10 @@ CMD:checkinv(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /checkinv [playerid]");
@@ -5224,6 +5309,10 @@ CMD:gplay(playerid, params[])
 	{
 		return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(isnull(params))
 	{
 	 	return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gplay [songfolder/name.mp3]");
@@ -5276,6 +5365,10 @@ CMD:makedj(playerid, params[])
 	{
 		return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "dd", targetid, rank))
 	{
 		SendClientMessage(playerid, COLOR_GREY, "{00BFFF}Usage:{FFFFFF} /makedj [playerid] [rank]");
@@ -5332,6 +5425,10 @@ CMD:sdm(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /sdm [playerid]");
@@ -5565,6 +5662,10 @@ CMD:lastactive(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "s[24]", username))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /lastactive [username]");
@@ -5643,6 +5744,10 @@ CMD:relog(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /relog [playerid]");
@@ -5673,6 +5778,10 @@ CMD:setint(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "ui", targetid, interiorid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /setint [playerid] [int]");
@@ -5699,6 +5808,10 @@ CMD:setvw(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "ui", targetid, worldid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /setvw [playerid] [vw]");
@@ -5759,10 +5872,10 @@ CMD:revive(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /revive [playerid]");
@@ -5792,10 +5905,65 @@ CMD:revive(playerid, params[])
 	return 1;
 }
 
+stock RevivePlayer(playerid)
+{
+    if (PlayerData[playerid][pInjured])
+    {
+        PlayerData[playerid][pInjured] = 0;
+        SetPlayerHealth(playerid, 100.0);
+        ClearAnimations(playerid, 1);
+
+        if (PlayerData[playerid][pAcceptedEMS] != INVALID_PLAYER_ID)
+        {
+            SendClientMessageEx(PlayerData[playerid][pAcceptedEMS], COLOR_YELLOW, "Your patient %s has somehow found the strength to get up.", GetRPName(playerid));
+            PlayerData[playerid][pAcceptedEMS] = INVALID_PLAYER_ID;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+CMD:hrevive(playerid, params[])
+{
+    new targetid;
+
+    if (PlayerData[playerid][pHelper] < 1)
+    {
+        return SendClientErrorUnauthorizedCmd(playerid);
+    }
+    if (sscanf(params, "u", targetid))
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /hrevive [playerid]");
+    }
+    if (!IsPlayerConnected(targetid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected.");
+    }
+    if (PlayerData[targetid][pLevel] > 1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can only revive level 1 players.");
+    }
+    if (!RevivePlayer(targetid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The player specified is not injured.");
+    }
+    if (PlayerData[playerid][pAcceptedHelp])
+    {
+        SendClientMessage(targetid, COLOR_YELLOW, "You have been revived by a helper!");
+        SendHelperMessage(COLOR_LIGHTRED, "HelperCmd: %s has revived %s (Level 1).", GetRPName(playerid), GetRPName(targetid));
+    }
+    else
+    {
+        SendClientMessage(playerid, COLOR_GREY, "You need to accept a help to revive this new player.");
+    }
+    return 1;
+}
+
 CMD:forcehospital(playerid, params[])
 {
 	return callcmd::heject(playerid, params);
 }
+
 CMD:heject(playerid, params[])
 {
 	new targetid;
@@ -5804,6 +5972,10 @@ CMD:heject(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /heject [playerid]");
@@ -5828,14 +6000,14 @@ CMD:goto(playerid, params[])
 {
 	new targetid;
 
-    if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pHelper])
+    if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pHelper] && !PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	
 	if(sscanf(params, "u", targetid))
 	{
@@ -5948,10 +6120,10 @@ CMD:gethere(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gethere [playerid]");
@@ -5991,10 +6163,10 @@ CMD:gotocar(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "i", vehicleid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gotocar [vehicleid]");
@@ -6017,10 +6189,10 @@ CMD:getcar(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "i", vehicleid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /getcar [vehicleid]");
@@ -6060,10 +6232,10 @@ CMD:gotocoords(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "fffI(0)", x, y, z, interiorid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gotocoords [x] [y] [z] [int (optional)]");
@@ -6082,10 +6254,10 @@ CMD:gotoint(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	if(isnull(list))
 	{
@@ -6105,10 +6277,10 @@ CMD:jetpack(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
     PlayerData[playerid][pJetpack] = 1;
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
@@ -6125,19 +6297,18 @@ CMD:jetpack(playerid, params[])
 	return 1;
 }
 
-
 CMD:sendto(playerid, params[])
 {
 	new targetid, option[12], param[32];
 
-    if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && PlayerData[playerid][pHelper] < 3)
+    if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[12]S()[32]", targetid, option, param))
 	{
 	    SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /sendto [playerid] [location]");
@@ -6324,6 +6495,10 @@ CMD:rwarn(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[128]", targetid, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /rwarn [playerid] [reason]");
@@ -6351,6 +6526,29 @@ CMD:rwarn(playerid, params[])
 	return 1;
 }
 
+CMD:sendhelp(playerid, params[])
+{
+    if (PlayerData[playerid][pHelper] < 1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Only helpers can use this command.");
+    }
+
+    new targetid;
+    if (sscanf(params, "u", targetid))
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /sendhelp [playerid]");
+    }
+
+    if (!IsPlayerConnected(targetid) || IsAdmin(targetid) || PlayerData[targetid][pHelper])
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can't send help to this player.");
+    }
+    SendHelperMessage(COLOR_AQUA, "* %s %s offer's a help to %s *", GetHelperRank(playerid), GetRPName(playerid), GetRPName(targetid));
+    SendClientMessageEx(targetid, COLOR_AQUA, "* %s %s offer's you a help *", GetHelperRank(playerid), GetRPName(playerid));
+    Dialog_Show(targetid, OnSpawnRequestHelper, DIALOG_STYLE_MSGBOX, "Helper request", "Did you need a helper?\n He can explain the rules, show you the city\n and help you to find your first job!", "Yes", "No");
+    return 1;
+}
+
 CMD:runmute(playerid, params[])
 {
 	new targetid;
@@ -6359,6 +6557,10 @@ CMD:runmute(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /runmute [playerid]");
@@ -6384,7 +6586,7 @@ CMD:nmute(playerid, params[])
 {
 	new targetid;
 
-	if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && PlayerData[playerid][pHelper] < 2)
+	if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && PlayerData[playerid][pHelper] < 1)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
@@ -6421,7 +6623,7 @@ CMD:hmute(playerid, params[])
 {
 	new targetid;
 
-	if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && PlayerData[playerid][pHelper] < 2)
+	if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && PlayerData[playerid][pHelper] < 1)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
@@ -6491,7 +6693,7 @@ CMD:gmute(playerid, params[])
 {
 	new targetid;
 
-	if(PlayerData[playerid][pAdmin] < 1 && PlayerData[playerid][pHelper] < 2)
+	if(PlayerData[playerid][pAdmin] < 1 && PlayerData[playerid][pHelper] < 1)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
@@ -6532,6 +6734,10 @@ CMD:rmute(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /rmute [playerid]");
@@ -6560,6 +6766,40 @@ CMD:rmute(playerid, params[])
 
 	return 1;
 }
+
+CMD:userid(playerid, params[])
+{
+    if (!IsGodAdmin(playerid))
+    {
+        return SendClientErrorUnauthorizedCmd(playerid);
+    }
+    new userid;
+    if (sscanf(params, "i", userid))
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /userid [userid]");
+    }
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT username from "#TABLE_USERS" where uid=%i", userid);
+    mysql_tquery(connectionID, queryBuffer, "SearchUsernameByUserID", "i", playerid);
+    return 1;
+}
+
+forward SearchUsernameByUserID(playerid);
+public SearchUsernameByUserID(playerid)
+{
+    if (cache_num_rows() == 0)
+    {
+        SendClientMessageEx(playerid, COLOR_SYNTAX, "There is no player with this ID.");
+    }
+    else
+    {
+        new username[MAX_PLAYER_NAME];
+        cache_get_field_content(0, "username", username, sizeof(username));
+        SendClientMessageEx(playerid, COLOR_SYNTAX, "The current username is %s.", username);
+    }
+    return 1;
+}
+
+
 CMD:nextweather(playerid, params[])
 {
     if(GetPlayerFaction(playerid) != FACTION_NEWS)
@@ -6720,6 +6960,10 @@ CMD:listguns(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /listguns [playerid]");
@@ -6761,10 +7005,10 @@ CMD:disarm(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /disarm [playerid]");
@@ -6840,6 +7084,10 @@ CMD:prison(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "uis[128]", targetid, minutes, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /prison [playerid] [minutes] [reason]");
@@ -6942,6 +7190,10 @@ CMD:fine(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "uis[128]", targetid, amount, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /fine [playerid] [amount] [reason]");
@@ -7012,6 +7264,10 @@ CMD:ofine(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "s[24]is[128]", username, amount, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /ofine [username] [amount] [reason]");
@@ -7337,6 +7593,37 @@ CMD:despawnpveh(playerid, params[])
 	return 1;
 }
 
+#define FIRST_VEHICLE_MODEL_ID          (400)
+#define LAST_VEHICLE_MODEL_ID           (611)
+#define MODEL_SELECTION_ADMIN_VEHICLES  8
+
+ShowSpawnVehicleMenu(playerid, type)
+{
+    new models[MAX_SELECTION_MENU_ITEMS] = {-1, ...};
+    new index = 0;
+
+    for (new i = FIRST_VEHICLE_MODEL_ID; i <= LAST_VEHICLE_MODEL_ID; i ++)
+    {
+        models[index++] = i;
+    }
+    ShowPlayerSelectionMenu(playerid, type, "Spawn Vehicle", models, index);
+}
+
+CMD:gveh(playerid, params[])
+{
+    if(PlayerData[playerid][pAdmin] < GENERAL_ADMIN)
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
+    if (!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
+    }
+
+    ShowSpawnVehicleMenu(playerid, MODEL_SELECTION_ADMIN_VEHICLES);
+    return 1;
+}
+
 CMD:veh(playerid, params[])
 {
 	new model[20], modelid, color1, color2, Float:x, Float:y, Float:z, Float:a, vehicleid;
@@ -7345,10 +7632,10 @@ CMD:veh(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if (!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
+    }
 	if(sscanf(params, "s[20]I(-1)I(-1)", model, color1, color2))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /veh [modelid/name] [color1 (optional)] [color2 (optional)]");
@@ -8025,6 +8312,10 @@ CMD:aclearwanted(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /aclearwanted [playerid]");
@@ -8059,6 +8350,10 @@ CMD:removedm(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /removedm [playerid]");
@@ -8106,10 +8401,10 @@ CMD:destroyveh(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	if(adminVehicle{vehicleid})
 	{
@@ -8145,6 +8440,10 @@ CMD:respawncars(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "s[10]S()[12]", option, param))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /respawncars [job | faction | nearby | all]");
@@ -8272,11 +8571,24 @@ CMD:cc( playerid, params[], help) {
 		SendClientMessageToAllEx( 0x1692B8FF, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
 
  		SendAdminMessage( 0x1692B8FF, "Chat was cleared by admin %s", GetPlayerNameEx(playerid));
-		SendClientMessageToAllEx( 0x1692B8FF, "     {d909d9}>>> {FFFFFF}%s{d909d9} <<<",GetServerWebsite() );
+		SendClientMessageToAllEx( 0x1692B8FF, "     {d909d9}>>> {FFFFFF}%s{d909d9} <<<",GetHostName() );
 		SendClientMessageToAllEx( 0x1692B8FF, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
 	}
 	return 1;
 }
+
+CMD:clear(playerid, params[])
+{
+    for ( new j; j < 96; j++ )
+    {
+        SendClientMessageEx(playerid, -1, " " );
+    }
+    SendClientMessageEx(playerid, 0x1692B8FF, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
+    SendClientMessageEx(playerid, 0x1692B8FF, "     {d909d9}>>> {FFFFFF}%s{d909d9} <<<",GetHostName() );
+    SendClientMessageEx(playerid, 0x1692B8FF, "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" );
+    return 1;
+}
+
 CMD:healrange(playerid, params[])
 {
 	new Float:radius;
@@ -8293,10 +8605,10 @@ CMD:healrange(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "The radius can't be below 1.0 or above 50.0.");
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	foreach(new i : Player)
 	{
@@ -8327,10 +8639,10 @@ CMD:freezerange(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "f", radius))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /freezerange [radius]");
@@ -8364,10 +8676,10 @@ CMD:unfreezerange(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "f", radius))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /unfreezerange [radius]");
@@ -8401,10 +8713,10 @@ CMD:reviverange(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "f", radius))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /reviverange [radius]");
@@ -8443,6 +8755,10 @@ CMD:shots(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /shots [playerid]");
@@ -8456,6 +8772,7 @@ CMD:shots(playerid, params[])
 	mysql_tquery(connectionID, queryBuffer, "OnAdminListShots", "ii", playerid, targetid);
 	return 1;
 }
+
 CMD:damages(playerid, params[])
 {
 	new playerb;
@@ -8473,6 +8790,7 @@ CMD:damages(playerid, params[])
 	}
 	return true;
 }
+
 CMD:adamages(playerid, params[])
 {
 	new targetid;
@@ -8503,6 +8821,10 @@ CMD:kills(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "u", targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /kills [playerid]");
@@ -8517,8 +8839,6 @@ CMD:kills(playerid, params[])
 	return 1;
 }
 
-
-
 CMD:setname(playerid, params[])
 {
 	new targetid, name[24];
@@ -8527,10 +8847,10 @@ CMD:setname(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[24]", targetid, name))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /setname [playerid] [name]");
@@ -8565,10 +8885,10 @@ CMD:explode(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "ui", targetid, damage))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /explode [playerid] [damage(amount)]");
@@ -8603,6 +8923,10 @@ CMD:oban(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "s[24]ds[128]", username, duration, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /oban [username] [duration in days] [reason]");
@@ -8618,7 +8942,7 @@ CMD:oban(playerid, params[])
 	    return SendClientMessage(playerid, COLOR_GREY, "Invalid duration value.");
 	}
 	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT adminlevel, ip, uid FROM "#TABLE_USERS" WHERE username = '%e'", username);
-	mysql_tquery(connectionID, queryBuffer, "OnAdminOfflineBan", "isis", playerid, username, duration, reason);
+	mysql_tquery(connectionID, queryBuffer, "OBanCheckPlayer", "isis", playerid, username, duration, reason);
 	return 1;
 }
 
@@ -8626,10 +8950,14 @@ CMD:permaban(playerid, params[])
 {
 	new targetid, reason[128];
 
- 	if(PlayerData[playerid][pAdmin] < SENIOR_ADMIN)
+ 	if(PlayerData[playerid][pAdmin] < 8)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "us[128]", targetid, reason))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /permaban [playerid] [reason]");
@@ -8661,7 +8989,7 @@ CMD:baninfo(playerid, params[])
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /baninfo [username/ip]");
 	}
  
-	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT * FROM bans WHERE (username = '%e' OR ip = '%e') and ((date + interval duration day) > now() || duration = 0)", string, string);
+	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT * FROM users_bans WHERE (username = '%e' OR ip = '%e') and ((date + interval duration day) > now() || duration = 0)", string, string);
 	mysql_tquery(connectionID, queryBuffer, "OnAdminCheckBan", "is", playerid, string);
 	return 1;
 }
@@ -8698,11 +9026,34 @@ CMD:unban(playerid, params[])
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /unban [username]");
 	}
 
-	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT id, duration, ip FROM bans WHERE username = '%e' and ((date + interval duration day) > now())", username);
+	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT userid, duration, userip FROM users_bans WHERE username = '%e' AND ((date + interval duration day) > now())", username);
 	mysql_tquery(connectionID, queryBuffer, "OnAdminUnbanUser", "is", playerid, username);
 	return 1;
 }
 
+/*
+
+// Old Methode 
+
+CMD:unban(playerid, params[])
+{
+	new username[MAX_PLAYER_NAME];
+
+	if(PlayerData[playerid][pAdmin] < ASST_MANAGEMENT && !PlayerData[playerid][pBanAppealer])
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
+	if(sscanf(params, "s[24]", username))
+	{
+	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /unban [username]");
+	}
+
+	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT id, duration, userip FROM users_bans WHERE username = '%e' and ((date + interval duration day) > now())", username);
+	mysql_tquery(connectionID, queryBuffer, "OnAdminUnbanUser", "is", playerid, username);
+	return 1;
+}
+
+*/
 
 CMD:lockaccount(playerid, params[])
 {
@@ -8848,35 +9199,39 @@ CMD:setarmorall(playerid, params[])
 	return 1;
 }
 
+stock GivePlayerFullWeaponSet(playerid)
+{
+    GivePlayerWeaponEx(playerid, 24);
+    GivePlayerWeaponEx(playerid, 27);
+    GivePlayerWeaponEx(playerid, 29);
+    GivePlayerWeaponEx(playerid, 30);
+    GivePlayerWeaponEx(playerid, 34);
+}
+
 CMD:fws(playerid, params[])
 {
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < ASST_MANAGEMENT)
+    if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < ASST_MANAGEMENT)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
 	}
 	if(PlayerData[playerid][pAdmin] >= SENIOR_ADMIN)
-	{
-		new targetid, reason[64];
-		if(sscanf(params, "uds[64]", targetid, reason))
-		{
-			SendClientMessageEx(playerid, COLOR_SYNTAX, "USAGE: /fws [playerid] [reason]");
-			return 1;
-		}
-		GivePlayerWeaponEx(targetid, 24);
-		GivePlayerWeaponEx(targetid, 25);
-		GivePlayerWeaponEx(targetid, 24);
-		GivePlayerWeaponEx(targetid, 30);
-		GivePlayerWeaponEx(targetid, 34);
-		SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s gave a full weapon set to %s, reaason %s.", GetRPName(playerid), GetRPName(targetid), reason);
-		SendClientMessageEx(targetid, COLOR_AQUA, "You have received a {00AA00}full weapon set{33CCFF} from %s.", GetRPName(playerid));
-	}
-	else
-	{
-		SendClientErrorUnauthorizedCmd(playerid);
-	}
-	return 1;
+    {
+        new targetid, reason[64];
+        if (sscanf(params, "us[64]", targetid, reason))
+        {
+            SendClientMessageEx(playerid, COLOR_SYNTAX, "USAGE: /fws [playerid] [reason]");
+            return 1;
+        }
+        GivePlayerFullWeaponSet(targetid);
+        SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s gave a full weapon set to %s, reaason %s.", GetRPName(playerid), GetRPName(targetid), reason);
+        SendClientMessageEx(targetid, COLOR_AQUA, "You have received a {00AA00}full weapon set{33CCFF} from %s.", GetRPName(playerid));
+    }
+    else
+    {
+        SendClientErrorUnauthorizedCmd(playerid);
+    }
+    return 1;
 }
-
 
 CMD:healup(playerid, params[])
 {
@@ -9059,7 +9414,6 @@ CMD:asellgarage(playerid, params[])
 	return 1;
 }
 
-
 CMD:asellland(playerid, params[])
 {
 	new landid;
@@ -9081,6 +9435,15 @@ CMD:asellland(playerid, params[])
 	SendClientMessageEx(playerid, COLOR_AQUA, "* You have admin sold land %i.", landid);
 	return 1;
 }
+
+CMD:eventmap(playerid, params[])
+{
+    if (PlayerData[playerid][pAdmin] < SENIOR_ADMIN)
+    {
+        ShowPlayerDialog(playerid, GotoEventMap, DIALOG_STYLE_LIST, "Goto Event Map","Aim_HeadShot\nDust2Long\nJungle\nKingOfTheHill\nMarket\nNarrowPassage\nOlympia\nPool\nSettlement", "Goto", "Close");
+    }
+}
+
 CMD:paintball(playerid,params[])
 {
 	if(PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pDueling] != INVALID_PLAYER_ID)
@@ -9353,10 +9716,10 @@ CMD:alock(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	for(new i = 0, j = Streamer_GetUpperBound(STREAMER_TYPE_OBJECT); i <= j; i ++)
 	{
@@ -9479,21 +9842,164 @@ CMD:alock(playerid, params[])
 	return 1;
 }
 
+// PunLogs
 
+LogPlayerPunishment(adminid, player_uid, ip[], type[], const description[], {Float,_}:...)
+{
+    static sizeArgsInBytes, args, string[4096];
+    new admin_uid  = IsPlayerConnected(adminid)?PlayerData[adminid][pID]:0;
 
+    if (!strlen(description))
+    {
+        return 0;
+    }
 
+    if ((args = numargs()) > 5)
+    {
+        sizeArgsInBytes = (1 + args) * 4;
+        while (--args >= 5)
+        {
+            #emit LCTRL 5
+            #emit LOAD.alt args
+            #emit SHL.C.alt 2
+            #emit ADD.C 12
+            #emit ADD
+            #emit LOAD.I
+            #emit PUSH.pri
+        }
+        #emit PUSH.S    description
+        #emit PUSH.C    4096
+        #emit PUSH.C    string
+        // Push the number of parameters passed (in bytes) to the function.
+        #emit PUSH      sizeArgsInBytes
+        #emit SYSREQ.C  format
+        #emit LCTRL     5
+        #emit SCTRL     4
+
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO users_punishment (player_uid, player_ip, admin_uid, type, description) VALUES (%i, '%e', %i, '%e', '%e')",
+                player_uid, ip, admin_uid, type, string);
+
+        #emit RETN
+    }
+    else
+    {
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO users_punishment (player_uid, player_ip, admin_uid, type, description) VALUES (%i, '%e', %i, '%e', '%e')",
+                player_uid, ip, admin_uid, type, description);
+    }
+    return 1;
+}
+
+CMD:punlist(playerid, params[])
+{
+    new targetid;
+    if (!IsAdmin(playerid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You cannot use this command.");
+    }
+    if (!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
+    }
+    if (sscanf(params, "u", targetid))
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /punlist [playerid]");
+    }
+    if (!IsPlayerConnected(targetid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Invalid player id.");
+    }
+    if (!IsPlayerLoggedIn(targetid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Player is not loggedin.");
+    }
+    if (PlayerData[playerid][pAdmin] < PlayerData[targetid][pAdmin])
+    {
+        // Show empty punlist
+        new title[64];
+        format(title, sizeof(title), "Punishment history of %s", GetPlayerNameEx(targetid));
+        ShowPlayerDialog(playerid, DIALOG_NONE, DIALOG_STYLE_TABLIST_HEADERS, title, "Date\tType\tDescription", "Ok", "Cancel");
+        return 1;
+    }
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT * FROM users_punishment WHERE player_uid = %i  ORDER BY date DESC", PlayerData[targetid][pID]);
+    mysql_tquery(connectionID, queryBuffer, "ShowPunList", "is", playerid, GetPlayerNameEx(targetid));
+    return 1;
+}
+
+forward ShowPunList(playerid, username[]);
+public ShowPunList(playerid, username[])
+{
+    new rows = cache_get_row_count(connectionID);
+    if (rows == 0)
+    {
+        SendClientMessageEx(playerid, COLOR_GREY, "%s doesn't have any punishment.", username);
+    }
+    new date[24], type[32], description[128];
+    static details[4096], title[64];
+    details = "Date\tType\tDescription";
+    for (new i=0;i<rows;i++)
+    {
+        cache_get_field_content(i, "date", date);
+        cache_get_field_content(i, "type", type);
+        cache_get_field_content(i, "description", description);
+        format(details, sizeof(details), "%s\n%s\t%s\t%s", details, date, type, description);
+    }
+    format(title, sizeof(title), "Punishment history of %s", username);
+    ShowPlayerDialog(playerid, DIALOG_NONE, DIALOG_STYLE_TABLIST_HEADERS, title, details, "Ok", "Cancel");
+    return 1;
+}
+
+CMD:opunlist(playerid, params[])
+{
+    new username[MAX_PLAYER_NAME];
+    if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN)
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
+    if (sscanf(params, "s[32]", username))
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /opunlist [username]");
+    }
+
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT p.* FROM users_punishment as p, users as u"\
+             " WHERE p.player_uid = u.uid and u.username='%e' ORDER BY date DESC", username);
+    mysql_tquery(connectionID, queryBuffer, "ShowPunList", "is", playerid, username);
+    return 1;
+}
 
 CMD:ganglogs(playerid, params[])
 {
-	if(!IsGodAdmin(playerid))
+	if(!IsGodAdmin(playerid) && !PlayerData[playerid][pGangMod])
 	{
-		return SendClientErrorUnauthorizedCmd(playerid);
+	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if (strlen(params) < 4)
+    {
+        return SendClientMessage(playerid, COLOR_GREY3, "[Usage]: /ganglogs [criteria (min 4 characters)]");
+    }
 
 	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT id, date, description FROM `log_gang` WHERE id = %d LIMIT 15", PlayerData[playerid][pGang]);
-	mysql_tquery(connectionID, queryBuffer, "OnQueryFinished", "ii", THREAD_GANGLOGS, playerid);
+	mysql_tquery(connectionID, queryBuffer, "OnShowGangLogs", "i", playerid);
 	return 1;
 }
+
+forward OnShowGangLogs(playerid);
+public OnShowGangLogs(playerid)
+{
+	new rows = cache_get_row_count(connectionID);
+	new ganglogs[250], date[24], strings[1040];
+	strings = "Date\tDescription";
+	for(new i = 0; i < rows; i ++)
+	{
+		cache_get_field_content(i, "description", ganglogs);
+		cache_get_field_content(i, "date", date);
+		format(strings, sizeof(strings), "%s\n%s\t%s\n",strings, date, ganglogs);
+		if(strlen(strings) > 0)
+		{
+			Dialog_Show(playerid, DIALOG_NONE, DIALOG_STYLE_TABLIST_HEADERS, "Testing Gang LOgs", strings, "Okay", "");
+		}
+	}
+}
+
 CMD:oadmins(playerid, params[])
 {
     if(PlayerData[playerid][pAdmin] < ASST_MANAGEMENT && !PlayerData[playerid][pAdminPersonnel] && !PlayerData[playerid][pHumanResources])
@@ -10154,6 +10660,7 @@ CMD:listhelp(playerid, params[])
 	return 1;
 }
 
+CMD:ac(playerid, params[]) return callcmd::accepthelp(playerid, params);
 CMD:accepthelp(playerid, params[])
 {
 	new targetid;
@@ -10266,6 +10773,110 @@ CMD:sta(playerid, params[])
 	return 1;
 }
 
+static HelperCar[MAX_PLAYERS];
+
+stock GivePlayerAdminVehicle(playerid, modelid, color1=1, color2=1)
+{
+    new Float:x, Float:y, Float:z, Float:a, vehicleid;
+
+    GetPlayerPos(playerid, x, y, z);
+    GetPlayerFacingAngle(playerid, a);
+
+    vehicleid = AddStaticVehicleEx(modelid, x, y, z, a, color1, color2, -1);
+
+    if (!IsValidVehicle(vehicleid))
+    {
+        return INVALID_VEHICLE_ID;
+    }
+
+    ResetVehicleObjects(vehicleid);
+
+    adminVehicle[vehicleid] = true;
+    RefuelVehicle(vehicleid);
+    vehicleColors[vehicleid][0] = color1;
+    vehicleColors[vehicleid][1] = color2;
+
+    SetVehicleVirtualWorld(vehicleid, GetPlayerVirtualWorld(playerid));
+    LinkVehicleToInterior(vehicleid, GetPlayerInterior(playerid));
+    SetVehicleHealth(vehicleid, 1000.0);
+
+    PutPlayerInVehicle(playerid, vehicleid, 0);
+    return vehicleid;
+}
+
+hook OnPlayerConnect(playerid)
+{
+    HelperCar[playerid] = INVALID_VEHICLE_ID;
+}
+
+hook OnVehicleDeath(vehicleid, killerid)
+{
+    foreach(new playerid : Player)
+    {
+        if (HelperCar[playerid] != INVALID_VEHICLE_ID && HelperCar[playerid] == vehicleid)
+        {
+            HelperCar[playerid] = INVALID_VEHICLE_ID;
+        }
+    }
+}
+
+CMD:hcar(playerid, params[])
+{
+    if (PlayerData[playerid][pHelper] < 1)
+    {
+        return SendClientErrorUnauthorizedCmd(playerid);
+    }
+
+    if (HelperCar[playerid] != INVALID_VEHICLE_ID)
+    {
+        DestroyVehicleEx(HelperCar[playerid]);
+        HelperCar[playerid] = INVALID_VEHICLE_ID;
+        SendClientMessage(playerid, COLOR_GREY, "Your helper car was destroyed.");
+    }
+    else if (PlayerData[playerid][pAcceptedHelp])
+    {
+        HelperCar[playerid] = GivePlayerAdminVehicle(playerid, 421);
+        adminVehicle[HelperCar[playerid]] = false;
+        SendHelperMessage(COLOR_YELLOW, "(( %s (ID:%d) spawned a helper car ))", GetRPName(playerid), playerid);
+    }
+    else
+    {
+        SendClientMessage(playerid, COLOR_GREY, "You need to accept a help to spawn a helper car.");
+    }
+    return 1;
+}
+
+CMD:hlock(playerid, params[])
+{
+    if (!PlayerData[playerid][pHelper])
+    {
+        return SendClientErrorUnauthorizedCmd(playerid);
+    }
+    if (!PlayerData[playerid][pAcceptedHelp])
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You need to accept a help to use this command");
+    }
+
+    new vehicleid = HelperCar[playerid];
+    if (vehicleid != INVALID_VEHICLE_ID)
+    {
+        if (!VehicleInfo[vehicleid][vLocked])
+        {
+            VehicleInfo[vehicleid][vLocked] = 1;
+            GameTextForPlayer(playerid, "~r~Vehicle locked", 3000, 6);
+        }
+        else
+        {
+            VehicleInfo[vehicleid][vLocked] = 0;
+            GameTextForPlayer(playerid, "~g~Vehicle unlocked", 3000, 6);
+        }
+
+        SetVehicleParams(vehicleid, VEHICLE_DOORS, VehicleInfo[vehicleid][vLocked]);
+        PlayerPlaySound(playerid, 1145, 0.0, 0.0, 0.0);
+    }
+    return 1;
+}
+
 CMD:return(playerid, params[])
 {
     if(PlayerData[playerid][pHelper] < 1)
@@ -10277,7 +10888,11 @@ CMD:return(playerid, params[])
 	    return SendClientMessage(playerid, COLOR_GREY, "You haven't accepted any help requests.");
 	}
 
-
+	if (HelperCar[playerid] != INVALID_VEHICLE_ID)
+    {
+        DestroyVehicleEx(HelperCar[playerid]);
+        HelperCar[playerid] = INVALID_VEHICLE_ID;
+    }
 
 	SetPlayerHealth(playerid, PlayerData[playerid][pHealth]);
 	SetScriptArmour(playerid, PlayerData[playerid][pArmor]);
@@ -10288,6 +10903,13 @@ CMD:return(playerid, params[])
 	SetPlayerVirtualWorld(playerid, PlayerData[playerid][pWorld]);
 	SetPlayerSkin(playerid, PlayerData[playerid][pSkin]);
 	SetCameraBehindPlayer(playerid);
+
+	if (HelperCar[playerid] != INVALID_VEHICLE_ID)
+    {
+        DestroyVehicleEx(HelperCar[playerid]);
+        HelperCar[playerid] = INVALID_VEHICLE_ID;
+        SendClientMessage(playerid, COLOR_GREY, "Your helper car was destroyed.");
+    }
 
 	SendClientMessage(playerid, COLOR_WHITE, "You were returned to your previous position.");
     PlayerData[playerid][pAcceptedHelp] = 0;
@@ -10409,6 +11031,10 @@ CMD:gotomark(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "i", slot))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gotomark [slot (1-3)]");
@@ -10442,10 +11068,12 @@ CMD:angle(playerid, params[])
 	SendClientMessageEx(playerid, COLOR_WHITE, "Your facing angle is {00aa00}%f.", a);
 	return 1;
 }
+
 CMD:skills(playerid, params[])
 {
     return callcmd::skill(playerid, params);
 }
+
 CMD:skill(playerid, params[])
 {
 	ShowSkillsDialog(playerid);
@@ -12941,7 +13569,7 @@ CMD:vstash(playerid, params[])
 	        SendClientMessageEx(playerid, COLOR_GREY2, "Cash: $%i/$%i", VehicleInfo[vehicleid][vCash], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_CASH));
 			SendClientMessageEx(playerid, COLOR_GREY2, "Materials: %i/%i | Weapons: %i/%i", VehicleInfo[vehicleid][vMaterials], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_MATERIALS), count, GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_WEAPONS));
 	        SendClientMessageEx(playerid, COLOR_GREY2, "Weed: %i/%i grams | Crack: %i/%i grams", VehicleInfo[vehicleid][vWeed], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_WEED), VehicleInfo[vehicleid][vCocaine], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_COCAINE));
-	        SendClientMessageEx(playerid, COLOR_GREY2, "Heroin: %i/%i grams | Painkillers: %i/%i pills", VehicleInfo[vehicleid][vMeth], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_METH), VehicleInfo[vehicleid][vPainkillers], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_PAINKILLERS));
+	        SendClientMessageEx(playerid, COLOR_GREY2, "Heroin: %i/%i grams | Painkillers: %i/%i pills", VehicleInfo[vehicleid][vHeroin], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_HEROIN), VehicleInfo[vehicleid][vPainkillers], GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_PAINKILLERS));
 
 			if(count > 0)
 			{
@@ -13077,22 +13705,22 @@ CMD:vstash(playerid, params[])
 			    {
 			        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /vstash [deposit] [heroin] [amount]");
 				}
-				if(value < 1 || value > PlayerData[playerid][pMeth])
+				if(value < 1 || value > PlayerData[playerid][pHeroin])
 				{
 				    return SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 			    }
-			    if(VehicleInfo[vehicleid][vMeth] + value > GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_METH))
+			    if(VehicleInfo[vehicleid][vHeroin] + value > GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_HEROIN))
 			    {
-			        return SendClientMessageEx(playerid, COLOR_GREY, "Your vehicle's stash can only hold up to %i grams of heroin at its level.", GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_METH));
+			        return SendClientMessageEx(playerid, COLOR_GREY, "Your vehicle's stash can only hold up to %i grams of heroin at its level.", GetVehicleStashCapacity(vehicleid, STASH_CAPACITY_HEROIN));
 			    }
 
-			    PlayerData[playerid][pMeth] -= value;
-			    VehicleInfo[vehicleid][vMeth] += value;
+			    PlayerData[playerid][pHeroin] -= value;
+			    VehicleInfo[vehicleid][vHeroin] += value;
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET meth = %i WHERE id = %i", VehicleInfo[vehicleid][vMeth], VehicleInfo[vehicleid][vID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET heroin = %i WHERE id = %i", VehicleInfo[vehicleid][vHeroin], VehicleInfo[vehicleid][vID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
 			    SendClientMessageEx(playerid, COLOR_AQUA, "* You have stored %ig of Heroin in your vehicle stash.", value);
@@ -13279,22 +13907,22 @@ CMD:vstash(playerid, params[])
 			    {
 			        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /vstash [withdraw] [heroin] [amount]");
 				}
-				if(value < 1 || value > VehicleInfo[vehicleid][vMeth])
+				if(value < 1 || value > VehicleInfo[vehicleid][vHeroin])
 				{
 				    return SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 			    }
-			    if(PlayerData[playerid][pMeth] + value > GetPlayerCapacity(playerid, CAPACITY_METH))
+			    if(PlayerData[playerid][pHeroin] + value > GetPlayerCapacity(playerid, CAPACITY_HEROIN))
 			    {
-			        return SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pMeth], GetPlayerCapacity(playerid, CAPACITY_METH));
+			        return SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pHeroin], GetPlayerCapacity(playerid, CAPACITY_HEROIN));
 				}
 
-			    PlayerData[playerid][pMeth] += value;
-			    VehicleInfo[vehicleid][vMeth] -= value;
+			    PlayerData[playerid][pHeroin] += value;
+			    VehicleInfo[vehicleid][vHeroin] -= value;
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET meth = %i WHERE id = %i", VehicleInfo[vehicleid][vMeth], VehicleInfo[vehicleid][vID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET heroin = %i WHERE id = %i", VehicleInfo[vehicleid][vHeroin], VehicleInfo[vehicleid][vID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
 			    SendClientMessageEx(playerid, COLOR_AQUA, "* You have taken %ig of Heroin from your vehicle stash.", value);
@@ -14394,7 +15022,7 @@ CMD:givedoublexp(playerid, params[])
 	return 1;
 }
 
-CMD:number(playerid, params[])
+/*CMD:number(playerid, params[])
 {
 	new targetid;
 
@@ -14414,6 +15042,148 @@ CMD:number(playerid, params[])
     ShowActionBubble(playerid, "* %s takes out a cellphone and looks up a number.", GetRPName(playerid));
 	SendClientMessageEx(playerid, COLOR_GREY2, "* %s (%i)", GetRPName(targetid), PlayerData[targetid][pPhone]);
 	return 1;
+}*/
+
+stock SendWeaponsCraftingCost(playerid)
+{
+    SendClientMessageEx(playerid, COLOR_NAVYBLUE, "_______ Weapons Crafting _______");
+
+    if (GetJobLevel(playerid, JOB_ARMSDEALER) >= 1)
+    {
+		SendClientMessage(playerid, COLOR_WHITE, "Level 1: Bat [200], Shovel [200], Dildo [50], Flowers [50], Cane [200]");
+		SendClientMessage(playerid, COLOR_WHITE, "Level 1: 9mm [500], Sdpistol [750], Shotgun [2000]");
+        if (GetJobLevel(playerid, JOB_ARMSDEALER) >= 2)
+        {
+            SendClientMessage(playerid, COLOR_WHITE, "Level 2: Uzi [3500], Rifle [8000]");
+            if (GetJobLevel(playerid, JOB_ARMSDEALER) >= 3)
+            {
+                SendClientMessage(playerid, COLOR_WHITE, "Level 3: PoolCue [200], AK-47 [8000], Tec-9 [4500], Deagle [5000]");
+                if (GetJobLevel(playerid, JOB_ARMSDEALER) >= 4)
+                {
+                    SendClientMessage(playerid, COLOR_WHITE, "Level 4: GolfClub [200], MP5 [5000], M4 [10000]");
+                }
+            }
+        }
+    }
+    if (GetJobLevel(playerid, JOB_ARMSDEALER) >= 5 || PlayerData[playerid][pDonator] >= 3)
+    {
+        if (PlayerData[playerid][pDonator] >= 3)
+        {
+            SendClientMessage(playerid, COLOR_VIP, "(VIP){FFFFFF} Level 5: Katana [15000], Spas12 [10000], Sniper [10000]");
+        }
+        else
+        {
+            SendClientMessage(playerid, COLOR_WHITE, "Level 5: Katana [20000], Sniper [12000]");
+        }
+    }
+}
+
+CMD:gsellgun(playerid, params[])
+{
+    if(PlayerData[playerid][pGang] == -1 || !GangInfo[PlayerData[playerid][pGang]][gIsMafia])
+	{
+		return SendClientMessage(playerid, COLOR_GREY, "Only mafia can use this command.");
+	}
+
+	// For Gangs Leaders Can Craft
+    /*if (!PlayerData[playerid][pGangLeader])
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You need gang leadership to craft weapons.");
+    }
+    if(!IsPlayerInRangeOfPoint(playerid, 3.0,  2490.970458, -1668.314819, 3003.500000) && !IsPlayerInRangeOfPoint(playerid, 3.0,  2402.145263, -1668.372314, 3003.500000) && !IsPlayerInRangeOfPoint(playerid, 3.0,  2267.837890, -1668.380737, 3003.500000) && !IsPlayerInRangeOfPoint(playerid, 3.0,  2333.931640, -1668.372680, 3003.500000))
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "You are not in range of the craft table.");
+	}*/
+
+	if(!IsPlayerInRangeOfPoint(playerid, 4.0,  1332.7495, 1568.4010, 1030.9145))
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "You are not in range of the craft table.");
+	}
+    if (IsPlayerInAnyVehicle(playerid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can't sell weapons from within a vehicle.");
+    }
+    if (gettime() - PlayerData[playerid][pLastSell] < 10)
+    {
+        return SendClientMessageEx(playerid, COLOR_GREY, "You can only use this command every 10 seconds. Please wait %i more seconds.", 10 - (gettime() - PlayerData[playerid][pLastSell]));
+    }
+    new targetid, weapon[10], qty, price;
+    if (sscanf(params, "us[10]ii", targetid, weapon, qty, price))
+    {
+        SendClientMessage(playerid, COLOR_SYNTAX, "[Usage]: /gsellgun [playerid] [weapon_name] [quantity] [price]");
+        SendWeaponsCraftingCost(playerid);
+        return 1;
+    }
+    if (!IsPlayerConnected(targetid) || !IsPlayerNearPlayer(playerid, targetid, 5.0))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected or out of range.");
+    }
+    if (targetid == playerid)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You cannot craft this weapons to your gang by yourself.");
+    }
+    if (qty <= 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Invalid quantity.");
+    }
+    if (qty > 20)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Max quantity 20.");
+    }
+    if (price < 750)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The price can't be below $750.");
+    }
+
+    static weaponargs[][eCraftWeaponArgs] = {
+        {/*Level*/ 1, "9mm",        22},
+        {/*Level*/ 1, "Sdpistol",   23},
+        {/*Level*/ 1, "Shotgun",    25},
+        {/*Level*/ 2, "Uzi",        28},
+        {/*Level*/ 2, "Rifle",      33},
+        {/*Level*/ 3, "AK-47",      30},
+        {/*Level*/ 3, "Tec-9",      32},
+        {/*Level*/ 3, "Deagle",     24},
+        {/*Level*/ 4, "MP5",        29},
+        {/*Level*/ 4, "M4",         31},
+        {/*Level*/ 5, "Spas12",     27},
+        {/*Level*/ 5, "Sniper",     34}
+    };
+
+    for (new i=0;i<sizeof(weaponargs);i++)
+    {
+        if (!strcmp(weapon, weaponargs[i][cwa_Name], true))
+        {
+            if (GetJobLevel(playerid, JOB_ARMSDEALER) < weaponargs[i][cwa_Level])
+            {
+                return SendClientMessage(playerid, COLOR_GREY, "Your skill level is not high enough to craft this weapon.");
+            }
+            new weaponid = weaponargs[i][cwa_WeaponID];
+            new unitcost = GetCraftWeaponPrice(playerid, weaponid);
+            new cost = unitcost * qty;
+
+            if (unitcost == -1)
+            {
+                return SendClientMessageEx(playerid, COLOR_AQUA, "You cannot craft this weapon {FF6347}%s{33CCFF}.", GetWeaponNameEx(weaponid));
+            }
+            if (PlayerData[playerid][pMaterials] < cost)
+            {
+                return SendClientMessageEx(playerid, COLOR_GREY, "You need %s materials to craft this weapons.", FormatNumber(cost));
+            }
+
+            PlayerData[playerid][pLastSell]     = gettime();
+            PlayerData[targetid][pSellOffer]    = playerid;
+            PlayerData[targetid][pSellType]     = ITEM_GSELLGUN;
+            PlayerData[targetid][pSellExtra]    = weaponid;
+            PlayerData[targetid][pSellPrice]    = price;
+            PlayerData[targetid][pSellQuantity] = qty;
+
+            SendClientMessageEx(targetid, COLOR_AQUA, "* %s offered to sell you %d %s for $%i. (/accept gangweapons)", GetRPName(playerid), qty, GetWeaponNameEx(weaponid), price);
+            SendClientMessageEx(playerid, COLOR_AQUA, "* You have offered to sell %d %s to %s for $%i.", qty, GetWeaponNameEx(weaponid), GetRPName(targetid), price);
+            break;
+        }
+    }
+    return 1;
 }
 
 CMD:switchspeedo(playerid, params[])
@@ -14712,10 +15482,10 @@ CMD:gotoland(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	if(sscanf(params, "i", landid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gotoland [landid]");
@@ -15146,8 +15916,6 @@ CMD:selllandobj(playerid,params[])
 	return 1;
 }
 
-
-
 CMD:changename(playerid, params[])
 {
 	if(!IsPlayerInRangeOfPoint(playerid, 3.0, 360.7130,176.3916,1008.3828))
@@ -15223,7 +15991,7 @@ CMD:acceptname(playerid, params[])
 
 	if(PlayerData[targetid][pFreeNamechange])
 	{
-	    if(PlayerData[targetid][pFreeNamechange] == 2 && (GetPlayerFaction(targetid) == FACTION_HITMAN || GetPlayerFaction(targetid) == FACTION_FEDERAL))
+	    if(PlayerData[targetid][pFreeNamechange] == 2 && (GetPlayerFaction(targetid) == FACTION_HITMAN || GetPlayerFaction(targetid) == FACTION_FEDERAL || GetPlayerFaction(targetid) == FACTION_TERRORIST || GangInfo[PlayerData[playerid][pGang]][gIsMafia]))
 	    {
 	        GetPlayerName(targetid, PlayerData[targetid][pPassportName], MAX_PLAYER_NAME);
 
@@ -15799,7 +16567,7 @@ CMD:cookheroin(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You are not in Heisenberg's trailer. You can't use this command.");
 	}
-	if(!PlayerData[playerid][pCookMeth])
+	if(!PlayerData[playerid][pCookHeroin])
 	{
 		if(!PlayerData[playerid][pEphedrine])
 		{
@@ -15810,7 +16578,7 @@ CMD:cookheroin(playerid, params[])
 	        return SendClientMessage(playerid, COLOR_GREY, "You need muriatic acid in order to cook Heroin. Go buy some at 24/7.");
 		}
 
-		PlayerData[playerid][pCookMeth] = 1;
+		PlayerData[playerid][pCookHeroin] = 1;
 		PlayerData[playerid][pCookTime] = 15;
 		PlayerData[playerid][pCookGrams] = 0;
 
@@ -15955,7 +16723,7 @@ CMD:usedrug(playerid, params[])
 	}
 	else if(!strcmp(params, "heroin", true))
 	{
-	    if(PlayerData[playerid][pMeth] < 2)
+	    if(PlayerData[playerid][pHeroin] < 2)
 	    {
 	        return SendClientMessage(playerid, COLOR_GREY, "You need at least two grams of heroin.");
 		}
@@ -15968,7 +16736,7 @@ CMD:usedrug(playerid, params[])
 		GivePlayerHealth(playerid, 10.0 + (PlayerData[playerid][pAddictUpgrade] * 5.0));
 		GivePlayerArmour(playerid, 10.0 + (PlayerData[playerid][pAddictUpgrade] * 5.0));
 
-		PlayerData[playerid][pMeth] -= 2;
+		PlayerData[playerid][pHeroin] -= 2;
 		PlayerData[playerid][pDrugsUsed] += 2;
 		PlayerData[playerid][pLastDrug] = gettime();
 
@@ -15982,7 +16750,7 @@ CMD:usedrug(playerid, params[])
         ApplyAnimation(playerid, "SMOKING", "M_smk_in", 4.1, 0, 0, 0, 0, 0);
 		ShowActionBubble(playerid, "* %s smokes two grams of Heroin.", GetRPName(playerid));
 
-		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 		mysql_tquery(connectionID, queryBuffer);
 	}
     else if(!strcmp(params, "painkillers", true))
@@ -16111,19 +16879,19 @@ CMD:drop(playerid, params[])
 	}
 	else if(!strcmp(option, "Heroin", true))
 	{
-	    if(!PlayerData[playerid][pMeth])
+	    if(!PlayerData[playerid][pHeroin])
 	    {
 	        return SendClientMessage(playerid, COLOR_GREY, "You have no Heroin which you can throw away.");
 		}
 	    if(isnull(confirm) || strcmp(confirm, "confirm", true) != 0)
 	    {
-	        return SendClientMessageEx(playerid, COLOR_SYNTAX, "USAGE: /drop [Heroin] [confirm] (You have %i grams of Heroin.)", PlayerData[playerid][pMeth]);
+	        return SendClientMessageEx(playerid, COLOR_SYNTAX, "USAGE: /drop [Heroin] [confirm] (You have %i grams of Heroin.)", PlayerData[playerid][pHeroin]);
 	    }
 
-	    PlayerData[playerid][pMeth] = 0;
+	    PlayerData[playerid][pHeroin] = 0;
 	    ShowActionBubble(playerid, "* %s throws away their Heroin.", GetRPName(playerid));
 
-	    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = 0 WHERE uid = %i", PlayerData[playerid][pID]);
+	    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = 0 WHERE uid = %i", PlayerData[playerid][pID]);
 	    mysql_tquery(connectionID, queryBuffer);
 	}
 	else if(!strcmp(option, "painkillers", true))
@@ -16400,7 +17168,7 @@ CMD:dicebetrigged(playerid, params[]) // Added to keep the economy in control. A
 	{
 	    return -1;
 	}
-	if(!IsPlayerInRangeOfPoint(playerid, 50.0, 1603.7220,-1176.7534,24.3658))
+	if(!IsPlayerInRangeOfPoint(playerid, 50.0, 1949.3925,1018.5336,992.4745))
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You are not in range of the casino.");
 	}
@@ -16653,9 +17421,10 @@ CMD:info(playerid, params[])
 CMD:information(playerid, params[])
 {
 	SendClientMessage(playerid, COLOR_NAVYBLUE, "_____ Server Information _____");
-	SendClientMessageEx(playerid, COLOR_GREY2, "Website: %s", GetServerWebsite());
-	SendClientMessageEx(playerid, COLOR_GREY2, "Discord: %s", GetServerDiscord());
+	//SendClientMessageEx(playerid, COLOR_GREY2, "Website: %s", GetServerWebsite());
+	SendClientMessageEx(playerid, COLOR_GREY2, "Officiel Discord: https://discord.gg/arabicarp");
 	SendClientMessageEx(playerid, COLOR_GREY2, "Faction discord: %s", GetFactionDiscord());
+	SendClientMessageEx(playerid, COLOR_GREY2, "Gang discord: %s", GetGangDiscord());
 	//SendClientMessageEx(playerid, COLOR_GREY2, "UCP: %s", GetServerUCP());
 	//SendClientMessageEx(playerid, COLOR_GREY2, "Donate: %s", GetServerShop());
 	return 1;
@@ -17120,10 +17889,10 @@ CMD:gotoatm(playerid, params[])
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
     
-	if(!PlayerData[playerid][pAdminDuty] && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
-	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
     if (sscanf(params, "i", id))
 	{
@@ -18129,6 +18898,7 @@ CMD:bodykit(playerid, params[])
 	ShowActionBubble(playerid, "* %s repairs the health and bodywork on their vehicle.", GetRPName(playerid));
 	return 1;
 }
+
 CMD:viprimkit(playerid, params[])
 {
 	new vehicleid = GetPlayerVehicleID(playerid);
@@ -18153,6 +18923,7 @@ CMD:viprimkit(playerid, params[])
 	Dialog_Show(playerid, DIALOG_USERIMKIT, DIALOG_STYLE_LIST, "Choose which set of rims to install.", "Offroad\nShadow\nMega\nRimshine\nWires\nClassic\nTwist\nCutter\nSwitch\nGrove\nImport\nDollar\nTrance\nAtomic\nAhab\nVirtual\nAccess", "Select", "Cancel");
 	return 1;
 }
+
 CMD:rimkit(playerid, params[])
 {
 	new vehicleid = GetPlayerVehicleID(playerid);
@@ -18207,7 +18978,6 @@ CMD:shutdownserver(playerid, params[])
 	return 1;
 }
 
-
 CMD:showrules(playerid, params[])
 {
 	new giveplayerid;
@@ -18217,6 +18987,7 @@ CMD:showrules(playerid, params[])
 	if(!IsPlayerConnected(giveplayerid)) return SendClientMessage(playerid, COLOR_GREY, "That player is not connected");
 	return ShowDialogToPlayer(giveplayerid, DIALOG_RULES);
 }
+
 CMD:rules(playerid, params[])
 {
 	return ShowDialogToPlayer(playerid, DIALOG_RULES);

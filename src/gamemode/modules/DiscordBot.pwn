@@ -1,78 +1,77 @@
+#include <YSI\y_hooks>
+
+static DCC_Channel:SignatureChannel;
+static DCC_Guild:ServerGuildID;
 
 
-static DCC_Channel:IG_Admin_Announcement;
-static ConnectedToDiscord=0;
+hook OnGameModeInit() {
+    SignatureChannel = DCC_FindChannelById("1380360379934179399");
+    ServerGuildID = DCC_FindGuildById("1267567121756455085");
+}
 
-hook OnGameModeInit()
+DCMD:signature(user, channel, params[])
 {
-    IG_Admin_Announcement = DCC_FindChannelById(GetDiscordChannelID());//"895772517485117480"
-    if(IG_Admin_Announcement)
+    new name[128];
+    if (channel != SignatureChannel)
     {
-        new string[128];
-        format(string,sizeof string,"Server succesfully started");
-        DCC_SendChannelMessage(IG_Admin_Announcement, string);
-        ConnectedToDiscord=1;
+        return 1;
     }
+    
+    if(sscanf(params, "s", name))
+    {
+        return DCC_SendChannelMessage(channel, "> USAGE: !signature [username]");
+    }
+
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer),
+        "SELECT uid, skin, hours, cash, level FROM "#TABLE_USERS" WHERE username = '%e'", 
+        name
+    );
+    
+    mysql_tquery(connectionID, queryBuffer, "DiscordCheckingStats", "s", name);
     return 1;
 }
 
-
-publish DCC_OnMessageCreate(DCC_Message:message)
+forward DiscordCheckingStats(username[]);
+public DiscordCheckingStats(username[])
 {
-    if(ConnectedToDiscord)
+    new rows = cache_get_row_count(connectionID);
+    if (rows == 0)
     {
-        new realMsg[100];
-        DCC_GetMessageContent(message, realMsg, 100);
-        new bool:IsBot;
-        new DCC_Channel:channel;
-        DCC_GetMessageChannel(message, channel);
-        new DCC_User:author;
-        DCC_GetMessageAuthor(message, author);
-        DCC_IsUserBot(author, IsBot);
-        if(channel == IG_Admin_Announcement && !IsBot) //!IsBot will block BOT's message in game
-        {
-            new user_name[32 + 1], str[152];
-            DCC_GetUserName(author, user_name, 32);
-            format(str,sizeof(str), "{8a6cd1}[DISCORD] {aa1bb5}%s: {ffffff}%s",user_name, realMsg);
-            SendClientMessageToAll(-1, str);
-        }
+        DCC_SendChannelMessage(SignatureChannel, "The player specified doesn't exist.");
     }
-    return 1;
-}
-
-
-public OnDiscordCommandPerformed(DCC_User:user, DCC_Channel:channel, cmdtext[], success) 
-{
-    if(ConnectedToDiscord)
+    else
     {
-        if(!success) {
+        new string[1028], skinurl[1028];
+        new skin  = cache_get_field_content_int(0, "skin");
+        new hours = cache_get_field_content_int(0, "hours");
+        new cash  = cache_get_field_content_int(0, "cash");
+        new level = cache_get_field_content_int(0, "level");
+
+        format(string, sizeof(string), "**Player Name:** %s\n**Player Skin:** %i\n**Playing Hours:** %i\n**Player Cash:** %s\n**Player Level:** %i",
+               username, skin, hours, FormatCash(cash), level);
         
-            DCC_SendChannelMessage(channel, "This command does not exist!");
+        if (skin <= 0) {
+            format(skinurl, sizeof(skinurl), "https://assets.open.mp/assets/images/skins/default.png");
+        } else {
+            format(skinurl, sizeof(skinurl), "https://assets.open.mp/assets/images/skins/%i.png", skin);
         }
+
+        SendDiscordProfile(SignatureChannel, 0x33CCFF, "ArabicaRoleplay Signature", string, skinurl);
     }
     return 1;
 }
 
-
-BCMD:gmx(user, channel, params[]) 
+SendDiscordProfile(DCC_Channel:channel, color, const title[], const message[], const skin[])
 {
-    if(ConnectedToDiscord && channel == IG_Admin_Announcement)
-    {
-        new user_name[32 + 1];
-        DCC_GetUserName(user, user_name, 32);
+    new DCC_Embed:embed= DCC_CreateEmbed(title);
+    DCC_SetEmbedColor(embed, color);
+    DCC_SetEmbedDescription(embed, message);
+    DCC_SetEmbedImage(embed, skin);
 
-        if(!PerformServerRestart(INVALID_PLAYER_ID, user_name))
-        {
-            DCC_SendChannelMessage(channel, "Server restart already called. You can't cancel it.");
-        }
+    if (DCC_SendChannelEmbedMessage(channel, embed) != 1) {
+        printf("Error sending Discord embed message.");
+        return 0;
     }
+
     return 1;
-}
-
-DiscordSendMessage(msg[])
-{
-    if(ConnectedToDiscord)
-    {
-        DCC_SendChannelMessage(IG_Admin_Announcement, msg);
-    }
 }

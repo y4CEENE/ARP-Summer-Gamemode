@@ -201,7 +201,8 @@ CMD:fmotd(playerid, params[])
 
 	return SendClientMessageEx(playerid, COLOR_YELLOW, "* Faction MOTD: %s", FactionInfo[PlayerData[playerid][pFaction]][fMOTD]);
 }
-CMD:quitfaction(playerid, params[])
+
+/*CMD:quitfaction(playerid, params[])
 {
 	if(PlayerData[playerid][pFaction] == -1)
         return SendClientMessage(playerid, COLOR_GREY, "You are not apart of any faction at the moment.");
@@ -216,7 +217,7 @@ CMD:quitfaction(playerid, params[])
 	SetPlayerFaction(playerid, -1);
 	RemovePlayerFromVehicle(playerid);
 	return 1;
-}
+}*/
 
 CMD:froster(playerid, params[])
 {
@@ -1080,7 +1081,7 @@ CMD:switchfaction(playerid, params[])
 {
 	new targetid, factionid, rankid, leader;
 
-	if(!IsGodAdmin(playerid) && !PlayerData[playerid][pFactionMod])
+	if(!IsGodAdmin(playerid) && !PlayerData[playerid][pFactionMod] && PlayerData[playerid][pGameAffairs])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
@@ -1185,6 +1186,10 @@ CMD:drag(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't drag yourself.");
 	}
+	if(IsPlayerInAnyVehicle(targetid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can't use this command when player is in a vehicle use [/eject].");
+    }
 	if(!PlayerData[targetid][pInjured] && !PlayerData[targetid][pCuffed] && !PlayerData[targetid][pTied])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "That player is not injured, handcuffed or tied.");
@@ -1363,6 +1368,7 @@ CMD:hfind(playerid, params[])
 	SendClientMessageEx(playerid, COLOR_WHITE, "* %s's location marked on your radar. 15 seconds remain until the marker disappears.", GetRPName(targetid));
 	return 1;
 }
+
 CMD:passport(playerid, params[])
 {
 	new name[24], level, skinid;
@@ -1382,10 +1388,15 @@ CMD:passport(playerid, params[])
 		return 1;
 	}
 
-	if(GetPlayerFaction(playerid) != FACTION_HITMAN && GetPlayerFaction(playerid) != FACTION_FEDERAL && GetPlayerFaction(playerid) != FACTION_TERRORIST && GetPlayerFaction(playerid) != FACTION_GOVERNMENT)
-	{
+    if (GetPlayerFaction(playerid) != FACTION_HITMAN &&
+        GetPlayerFaction(playerid) != FACTION_FEDERAL &&
+        GetPlayerFaction(playerid) != FACTION_TERRORIST &&
+        GetPlayerFaction(playerid) != FACTION_GOVERNMENT &&
+        !(PlayerData[playerid][pGang] != -1 && GangInfo[PlayerData[playerid][pGang]][gIsMafia]))
+    {
+     
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you're not a hitman or federal agent.");
-	}
+    }
 	if(sscanf(params, "s[24]ii", name, level, skinid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /passport [name] [level] [skinid]");

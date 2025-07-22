@@ -646,6 +646,11 @@ CMD:sellmybiz(playerid, params[])
 	return 1;
 }
 
+CMD:biz(playerid, params[])
+{
+    return callcmd::bizmenu(playerid, params);
+}
+
 CMD:bizmenu(playerid, params[])
 {
     new businessid = GetNearbyBusinessEx(playerid);

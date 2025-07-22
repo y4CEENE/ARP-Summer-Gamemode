@@ -77,8 +77,8 @@ new const jobLocations[][jobEnum] =
 	{"brinks",      "Brinks",         JOB_BRINKS,			-1495.6901,  841.2843,     7.1875, 162.2570,  30, "/loadcash"},
 	//entrance that can't be found on /locate must have empty shortname and placed under this line
 	{"",			"Drug Smuggler",  JOB_DRUGSMUGGLER,	 	 2355.1421, -1169.8289,   28.0375,  26.7895, 28, ""}
-//	{"",	"Lumber Jack",      2359.1599,-650.2137,128.0523, 16, 276.390838}
-//	{"",	"Forklift",        2424.3030,-2098.8564,13.7151}
+	//	{"",	"Lumber Jack",      2359.1599,-650.2137,128.0523, 16, 276.390838}
+	//	{"",	"Forklift",        2424.3030,-2098.8564,13.7151}
 };
 
 

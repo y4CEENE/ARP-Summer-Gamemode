@@ -1,3 +1,18 @@
+/*  
+===================================================
+    📜 SCRIPT INFORMATION
+===================================================
+    ➤ Script Name  : Arabica RolePlay | Chapter 2
+    ➤ Script Type  : SA-MP (San Andreas Multiplayer)  
+    ➤ Version      : V5.0-RC2
+    ➤ Author       : [ Khalil Zoldyck ]  
+    ➤ Description  : 
+        - Implements Many systems
+        - Includes Voice Chat & Anti Ddos ...
+        - Doors open/close with animations  
+    ➤ Last Updated : [ 13/07/2025 ]  
+===================================================
+*/
 
 // TODO:
 //   + Casino Random 3 objects
@@ -14,6 +29,9 @@
 #include <a_http>
 #include <a_mysql>
 #include <foreach>
+#include <sampvoice>
+//#include <discord-connector>
+//#include <discord-cmd>
 #define ITER_NONE						(cellmin) // Temporary fix for https://github.com/Misiur/YSI-Includes/issues/109
 
 #include <MenuStore>
@@ -46,6 +64,8 @@
 #include "const\def_modelSelection.lwor"
 #include "const\def_misc.lwor"
 // ---------------------------------------
+#include "dev\developer.pwn"
+// ---------------------------------------
 #undef SSCANF_Join
 #undef SSCANF_Leave
 //----------------------------------------
@@ -60,10 +80,50 @@
 #include <YSI\y_hooks>
 DEFINE_HOOK_REPLACEMENT(OnPlayer, OP_);
 
-#define Mysql_Hostname "217.182.175.212"
-#define Mysql_Username "u3053613_z6hPMyf2KO"
-#define Mysql_Password "wO3y3.I!z!JWJDHiX.heShs5"
-#define Mysql_Database "s3053613_db1749070712756"
+#define Mysql_Hostname "db.velocityhost.tn"
+#define Mysql_Username "u109_CUf7vcnnbQ"
+#define Mysql_Password "imiwjbeVQi2LbPDJtw@WX+=e"
+#define Mysql_Database "s109_arabica"
+
+//#define SM 		SendMessage // SendClientMessage with string formats
+#define SAM 	SendAdminMessage // with string formats
+
+/*SendMessage(playerid, color, const text[], {Float,_}:...)
+{
+	static
+  	    args,
+	    str[192];
+
+	if((args = numargs()) <= 3)
+	{
+	    SCM(playerid, color, text);
+	}
+	else
+	{
+		while(--args >= 3)
+		{
+			#emit LCTRL 	5
+			#emit LOAD.alt 	args
+			#emit SHL.C.alt 2
+			#emit ADD.C 	12
+			#emit ADD
+			#emit LOAD.I
+			#emit PUSH.pri
+		}
+		#emit PUSH.S 	text
+		#emit PUSH.C 	192
+		#emit PUSH.C 	str
+		#emit PUSH.S	8
+		#emit SYSREQ.C 	format
+		#emit LCTRL 	5
+		#emit SCTRL 	4
+
+		SCM(playerid, color, str);
+
+		#emit RETN
+	}
+	return 1;
+}*/
 
 enum
 {
@@ -121,6 +181,7 @@ enum
 	DIALOG_CREATEQUIZ,
 	DIALOG_DELETEOBJECT,
 	DIALOG_PAINTBALL,
+	GotoEventMap,
 	DIALOG_BUYVEHICLE
 }
 
@@ -141,7 +202,7 @@ enum
 	STASH_CAPACITY_MATERIALS,
 	STASH_CAPACITY_WEED,
 	STASH_CAPACITY_COCAINE,
-	STASH_CAPACITY_METH,
+	STASH_CAPACITY_HEROIN,
  	STASH_CAPACITY_PAINKILLERS,
 	STASH_CAPACITY_WEAPONS
 };
@@ -253,11 +314,12 @@ enum
 	ITEM_MATERIALS,
 	ITEM_WEED,
 	ITEM_COCAINE,
-	ITEM_METH,
+	ITEM_HEROIN,
 	ITEM_PAINKILLERS,
 	ITEM_SEEDS,
 	ITEM_EPHEDRINE,
-	ITEM_CASH
+	ITEM_CASH,
+	ITEM_GSELLGUN
 };
 
 enum
@@ -265,7 +327,7 @@ enum
 	CAPACITY_MATERIALS,
 	CAPACITY_WEED,
 	CAPACITY_COCAINE,
-	CAPACITY_METH,
+	CAPACITY_HEROIN,
 	CAPACITY_PAINKILLERS,
 	CAPACITY_SEEDS,
 	CAPACITY_EPHEDRINE,
@@ -468,7 +530,7 @@ enum pEnum
 	pMaterials,
 	pWeed,
 	pCocaine,
-	pMeth,
+	pHeroin,
 	pPainkillers,
 	pSeeds,
 	pEphedrine,
@@ -695,6 +757,7 @@ enum pEnum
 	pLandOffered,
 	pLandPrice,
 	pSellOffer,
+	pSellQuantity,
 	pAllianceOffer,
 	pWarOffer,
 	pSellType,
@@ -800,7 +863,7 @@ enum pEnum
  	pWeedObject,
  	pPickPlant,
  	pPickTime,
- 	pCookMeth,
+ 	pCookHeroin,
  	pCookTime,
  	pCookGrams,
  	pDrugsUsed,
@@ -976,7 +1039,7 @@ enum vEnum
 	vMaterials,
 	vWeed,
 	vCocaine,
-	vMeth,
+	vHeroin,
 	vPainkillers,
 	vWeapons[5],
 	vGang,
@@ -1087,7 +1150,7 @@ enum gaEnum
 	gMaterials,
 	gWeed,
 	gCocaine,
-	gMeth,
+	gHeroin,
 	gPainkillers,
 	gSkins[MAX_GANG_SKINS],
 	gWeapons[14],
@@ -1107,7 +1170,7 @@ enum gaEnum
 	gDrugWorld,
 	gDrugWeed,
 	gDrugCocaine,
-	gDrugMeth,
+	gDrugHeroin,
 	gArmsMaterials,
 	gArmsPrices[12],
 	gDrugPrices[3],
@@ -1691,7 +1754,7 @@ new const Float:AdminPrisonFloat[18][3] = {
 new const Float:arrestPoints[][] =
 {
     { 1229.3544, -1311.8627, 796.7859}, // PD interior
-	{ 1528.5728, -1677.8324,   5.8906}, // PD garage
+	{ 1745.8483, -978.1483, 1152.5780}, // PD Wanted
 	{ 1564.6931, -1662.1338,  28.3956}, // PD roof
 	{  310.3752, -1515.3691,  24.9219}, // FBI garage
 	{ 1382.0898, -1393.6364, -33.7034}, // army garage
@@ -2196,13 +2259,10 @@ GetVehicleOwnerID(vehicleid)
 #include <YSI\y_hooks>
 #include "core\core.func.inc"
 
-
-
 main()
 {
     printf("Server Started");
 }
-
 
 GetAdminDivision(playerid)
 {
@@ -2257,8 +2317,6 @@ GetAdminDivision(playerid)
 	}
 	return division;
 }
-
-
 
 GetStaffRank(playerid)
 {
@@ -2332,6 +2390,7 @@ GetAdminRank(playerid)
 	}
 	return string;
 }
+
 GetAdmCmdRank(playerid)
 {
 	new string[64];
@@ -2351,6 +2410,7 @@ GetAdmCmdRank(playerid)
 	}
 	return string;
 }
+
 GetAdminRank1(playerid)
 {
 	new string[24];
@@ -2379,7 +2439,6 @@ GetAdminRank1(playerid)
 	}
 	return string;
 }
-
 
 GetHelperRank(playerid)
 {
@@ -2464,7 +2523,7 @@ GetPlayerCapacity(playerid, item)
 		        case 5: return 150;
 			}
 		}
-		case CAPACITY_METH:
+		case CAPACITY_HEROIN:
 		{
 		    switch(PlayerData[playerid][pInventoryUpgrade])
      		{
@@ -2662,7 +2721,6 @@ DeployObject(type, Float:x, Float:y, Float:z, Float:angle)
 	return -1;
 }
 
-
 HandleContract(playerid, killerid)
 {
     if(GetPlayerFaction(killerid) == FACTION_HITMAN && PlayerData[killerid][pContractTaken] == playerid)
@@ -2731,7 +2789,6 @@ HandleContract(playerid, killerid)
 		Log_Write("log_contracts", "%s (uid: %i) failed their hit on %s (uid: %i) and lost $%i.", GetRPName(playerid), PlayerData[playerid][pID], GetRPName(killerid), PlayerData[killerid][pID], price);
 	}
 }
-
 
 GetPlayerZoneName(playerid)
 {
@@ -2881,7 +2938,6 @@ GetVehicleValue(vehicleid)
 	return price;
 }
 
-
 GetVehicleLinkedID(id)
 {
     foreach(new i: Vehicle)
@@ -2894,8 +2950,6 @@ GetVehicleLinkedID(id)
 
     return INVALID_VEHICLE_ID;
 }
-
-
 
 PreviewClothing(playerid, index)
 {
@@ -2974,6 +3028,7 @@ PurchaseLandObject(playerid, landid, index)
         EditDynamicObject(playerid, PlayerData[playerid][pEditObject]);
 	}
 }
+
 ShowLandObjects(playerid, type)
 {
     new
@@ -3338,8 +3393,6 @@ ShowColorList(playerid)
 	return 1;
 }
 
-
-
 Dialog:DIALOG_BUYVEHICLE2(playerid, response, listitem, inputtext[])
 {
     if(response)
@@ -3349,6 +3402,7 @@ Dialog:DIALOG_BUYVEHICLE2(playerid, response, listitem, inputtext[])
 	}
 	return 1;
 }
+
 forward PlayerCanAfford(playerid, amount);
 public PlayerCanAfford(playerid, amount)
 {
@@ -3362,7 +3416,7 @@ stock IsPlayerIdle(playerid)
 		return false;
 	}
 
-	if(PlayerData[playerid][pHurt] - 30 > 0 || PlayerData[playerid][pInjured] || PlayerData[playerid][pHospital])
+	if(PlayerData[playerid][pHurt] - 5 > 0 || PlayerData[playerid][pInjured] || PlayerData[playerid][pHospital])
 	{
 		return false;
 	}
@@ -3600,30 +3654,70 @@ DoorCheck(playerid)
 
 EnterCheck(playerid)
 {
-	new id, string[40];
+    new id, string[40];
 
-	if((gettime() - PlayerData[playerid][pLastEnter]) < 3 && PlayerData[playerid][pAdminDuty] == 0)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "Please wait a moment before entering or exiting again.");
-	}
-	new vehicleid = GetPlayerVehicleID(playerid);
-	new closestcar = GetClosestVehicle(playerid, vehicleid);
-	if(IsPlayerInRangeOfVehicle(playerid, closestcar, 6.0) && GetVehicleModel(closestcar) == 519)
-	{
-	    if(VehicleStatus{closestcar} == 1) return SendClientMessage(playerid, COLOR_WHITE, "You're not allowed to enter this Shamal as it's been damaged!");
-   		ShowActionBubble(playerid, "* %s enters the Shamal airplane as a passenger.", GetRPName(playerid));
-
-     	SetPlayerPos(playerid, 2.509036, 23.118730, 1199.593750);
-     	SetPlayerFacingAngle(playerid, 82.14);
-        SetCameraBehindPlayer(playerid);
-		PlayerData[playerid][pWorld] = closestcar;
-		SetPlayerVirtualWorld(playerid, closestcar);
-		PlayerData[playerid][pInterior] = 1;
-        SetPlayerInterior(playerid, 1);
-		InsideShamal[playerid] = closestcar;
-		SendClientMessage(playerid, COLOR_WHITE, "Type /exit near the door to exit the vehicle, or /window to look outside.");
-
-	}
+    if ((gettime() - PlayerData[playerid][pLastEnter]) < 3 && PlayerData[playerid][pAdminDuty] == 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Please wait a moment before entering or exiting again.");
+    }
+    new closestcar = GetClosestVehicle(playerid, INVALID_VEHICLE_ID, 6.0);
+    new Float:vehicleHp;
+    GetVehicleHealth(closestcar, vehicleHp);//TODO: GetVehicleHealthEx
+    if (vehicleHp >= 250.0 && GetPlayerInterior(playerid) == 0)
+    {//TODO: save player pos outside vehicle
+     //TODO: what happen when vehicle destroyed
+        new bool:hasInterior = true;
+        switch (GetVehicleModel(closestcar))
+        {
+            case 519: // Shamal
+            {
+                TeleportToCoords(playerid, 2.509036, 23.118730, 1199.593750, 82.14, 1, closestcar, true, false);
+            }
+            case 431: // Bus
+            {
+                TeleportToCoords(playerid, 2022.0204, 2236.0549, 2103.9536, 2.01, 1, closestcar, true, false);
+            }
+            case 508: // Journey
+            {
+                TeleportToCoords(playerid, 2512.6985, -1729.2311, 778.6371, 85.67, 1, closestcar, true, false);
+            }
+            case 563: // Raindance
+            {
+                TeleportToCoords(playerid, -537.9229, 1303.6589, 2075.6223, 137.62, 1, closestcar, true, false);
+            }
+            case 433: // Barracks
+            {
+                TeleportToCoords(playerid, 1101.5210, 1074.7563, 3510.9238, 87.62, 1, closestcar, true, false);
+            }
+            case 548: // Cargobob
+            {
+                TeleportToCoords(playerid, 1472.1326, 1778.1577, -45.2152, 176.85, 1, closestcar, true, false);
+            }
+            case 417: // Leviathan
+            {
+                TeleportToCoords(playerid, 2650.8535, 858.0659, 633.7065, 201.70, 1, closestcar, true, false);
+            }
+            case 427: // Enfrocer
+            {
+                TeleportToCoords(playerid, -26.4598, 42.3772, 1000.1084, 179.77, 1, closestcar, true, false);
+            }
+            default:
+            {
+                hasInterior = false;
+            }
+        }
+        if (hasInterior)
+        {
+            SetCameraBehindPlayer(playerid);
+            PlayerData[playerid][pWorld] = closestcar;
+            SetPlayerVirtualWorld(playerid, closestcar);
+            PlayerData[playerid][pInterior] = 1;
+            SetPlayerInterior(playerid, 1);
+            InsideShamal[playerid] = closestcar;
+            SendClientMessage(playerid, COLOR_WHITE, "Type /exit near the door to exit the vehicle, or /window to look outside.");
+            ShowActionBubble(playerid, "* %s enters the %s as a passenger.", GetRPName(playerid), GetVehicleName(closestcar));
+        }
+    }
     if((id = GetNearbyHouse(playerid)) >= 0)
 	{
 	    if(HouseInfo[id][hLocked])
@@ -5351,9 +5445,9 @@ FriskPlayer(playerid, targetid)
 	{
 	    SendClientMessageEx(playerid, COLOR_RED, "Crack (%ig)", PlayerData[targetid][pCocaine]);
 	}
-	if(PlayerData[targetid][pMeth])
+	if(PlayerData[targetid][pHeroin])
 	{
-	    SendClientMessageEx(playerid, COLOR_RED, "Heroin (%ig)", PlayerData[targetid][pMeth]);
+	    SendClientMessageEx(playerid, COLOR_RED, "Heroin (%ig)", PlayerData[targetid][pHeroin]);
 	}
 	if(PlayerData[targetid][pPainkillers])
 	{
@@ -5384,216 +5478,267 @@ FriskPlayer(playerid, targetid)
 
     ShowActionBubble(playerid, "* %s searches for illegal items on %s.", GetRPName(playerid), GetRPName(targetid));
 }
-DisplayStats(playerid, targetid = INVALID_PLAYER_ID)
+
+GetHospitalName(type)
 {
-	if(targetid == INVALID_PLAYER_ID) targetid = playerid;
-	//new string[3000];
-    new name[24], gender[8], faction[48], facrank[32], gang[32], gangrank[32], gangcrew[32], division[32], insurance[24], Float:health, Float:armor;
-    new job[32], secondjob[32], jailtype[32];
-
-	if(playerid == MAX_PLAYERS)
-	{
-		strcpy(name, PlayerData[playerid][pUsername]);
-	}
-	else
-	{
-		strcat(name, GetRPName(playerid));
-	}
-
-	if(PlayerData[playerid][pGender] == 1) gender = "Male";
-	else if(PlayerData[playerid][pGender] == 2) gender = "Female";
-
-	switch(PlayerData[playerid][pInsurance])
-	{
-	    case HOSPITAL_COUNTY: insurance = "County General";
-	    case HOSPITAL_ALLSAINTS: insurance = "All Saints";
-	    case HOSPITAL_VIPLOUNGE: insurance = "VIP Lounge";
-	    case HOSPITAL_SAN_FIERRO: insurance = "Saint Fierro";
-	    default: insurance = "None";
-	}
-
-	if(PlayerData[playerid][pFaction] >= 0)
-	{
-	    if(!strcmp(FactionInfo[PlayerData[playerid][pFaction]][fShortName], "None", true))
-	    {
-		    strcpy(faction, FactionInfo[PlayerData[playerid][pFaction]][fName]);
-		}
-		else
-		{
-		    strcpy(faction, FactionInfo[PlayerData[playerid][pFaction]][fShortName]);
-		}
-
-	    format(facrank, sizeof(facrank), "%s (%i)", FactionRanks[PlayerData[playerid][pFaction]][PlayerData[playerid][pFactionRank]], PlayerData[playerid][pFactionRank]);
-
-	    if(PlayerData[playerid][pDivision] >= 0)
-	    {
-	        strcpy(division, FactionDivisions[PlayerData[playerid][pFaction]][PlayerData[playerid][pDivision]]);
-		}
-		else
-		{
-		    division = "None";
-		}
-	}
-	else
-	{
-	    faction = "None";
-	    facrank = "N/A";
-	    division = "None";
-	}
-
-	if(PlayerData[playerid][pGang] >= 0)
-	{
-	    strcpy(gang, GangInfo[PlayerData[playerid][pGang]][gName]);
-	    format(gangrank, sizeof(gangrank), "%s (%i)", GangRanks[PlayerData[playerid][pGang]][PlayerData[playerid][pGangRank]], PlayerData[playerid][pGangRank]);
-	    if(PlayerData[playerid][pCrew] >= 0)
-	    {
-	        strcpy(gangcrew, GangCrews[PlayerData[playerid][pGang]][PlayerData[playerid][pCrew]]);
-	    }
-	}
-	else
-	{
-	    gang = "None";
-	    gangrank = "N/A";
-	    gangcrew = "None";
-	}
-
-	/*switch(PlayerData[playerid][pDonator])
-	{
-		case 0:
-			maxarmor = 100.0;
-		case 1, 2:
-			maxarmor = 125.0;
-		case 3:
-		    maxarmor = 150.0;
-	}*/
-
-	if(playerid == MAX_PLAYERS)
-	{
-	    health = PlayerData[playerid][pHealth];
-	    armor = PlayerData[playerid][pArmor];
-	}
-	else
-	{
-		GetPlayerHealth(playerid, health);
-		GetPlayerArmour(playerid, armor);
-	}
-
-	if(PlayerData[playerid][pJob] != JOB_NONE)
-	{
-	    format(job, sizeof(job), "%s (%i)", GetJobName(PlayerData[playerid][pJob]), GetJobLevel(playerid, PlayerData[playerid][pJob]));
-	}
-	else
-	{
-	    job = "None";
-	}
-
-	if(PlayerData[playerid][pSecondJob] != JOB_NONE)
-	{
-	    format(secondjob, sizeof(secondjob), "%s (%i)", GetJobName(PlayerData[playerid][pSecondJob]), GetJobLevel(playerid, PlayerData[playerid][pSecondJob]));
-	}
-	else
-	{
-	    secondjob = "None";
-	}
-	new totalwealth = PlayerData[playerid][pCash] + PlayerData[playerid][pBank];
-
-    foreach(new i : House)
+    new hospital[32];
+    switch (type)
     {
-        if(HouseInfo[i][hExists] && PlayerData[playerid][pID] == HouseInfo[i][hOwnerID])
-        {
-            totalwealth += HouseInfo[i][hCash];
-		}
-	}
+        case HOSPITAL_ALLSAINTS:  strcat(hospital, "All Saints General");
+        case HOSPITAL_COUNTY:     strcat(hospital, "County General");
+        case HOSPITAL_FMDHQ:      strcat(hospital, "FMD HQ");
+        case HOSPITAL_VIPLOUNGE:  strcat(hospital, "VIP Lounge");
+        case HOSPITAL_SAN_FIERRO: strcat(hospital, "Saint Fierro");
+        default:                  strcat(hospital, "None");
+    }
+    return hospital;
+}
 
- 	foreach(new i : Business)
-    {
-        if(BusinessInfo[i][bExists] && PlayerData[playerid][pID] == BusinessInfo[i][bOwnerID])
-        {
-            totalwealth += BusinessInfo[i][bCash];
-		}
-	}
+GetWantedLevel(playerid)
+{
+    return PlayerData[playerid][pWantedLevel];
+}
 
+stock GetPlayerWarnings(playerid)
+{
+    return PlayerData[playerid][pWarnings];
+}
+
+GetPlayerJailTypeStr(playerid)
+{
+    new jailtype[32];
 	switch(PlayerData[playerid][pJailType])
 	{
-	    case 0: jailtype = "None";
-	    case 1: jailtype = "OOC jail";
-	    case 2: jailtype = "OOC prison";
-	    case 3: jailtype = "IC prison";
+		case 0:  jailtype = "None";
+	    case 1:  jailtype = "OOC jailed";
+		case 2:  jailtype = "OOC prisoned";
+		case 3:  jailtype = "IC prisoned";
+		default: jailtype = "Unknown";
 	}
-	new titlelen = strlen(name) + 21;
-	new leftunderscorelen = (89 - titlelen) / 2;
-	new underscorestr[89] = "";
-	new rightoddunderscore[2] = "";
-	if(leftunderscorelen * 2 != 89 - titlelen)
-		rightoddunderscore = "_";
-	for(new i=0;i<leftunderscorelen;i++)
-	{
-		format(underscorestr,sizeof(underscorestr),"%s_",underscorestr);
-	}
-	
-	SendClientMessageEx(targetid, COLOR_DARKGREEN, "_%s {FFFFFF}%s - %s{00AA00} %s%s_",underscorestr,name, GetDateTime(0),underscorestr,rightoddunderscore);
-	SendClientMessageEx(targetid, COLOR_WHITE, "(Level: %i - Experience: %s/%s)(Age: %i)(Gender: %s)(%s hours played)(Phone: %i)",
-		PlayerData[playerid][pLevel], FormatNumber(PlayerData[playerid][pEXP]), FormatNumber((PlayerData[playerid][pLevel] * 4)),
-		PlayerData[playerid][pAge], gender, FormatNumber(PlayerData[playerid][pHours]), PlayerData[playerid][pPhone]);
-	
-	SendClientMessageEx(targetid, 0x008080FF, "(Total Wealth: %s)(Cash: %s)(Bank: %s)(Insured: %s)(Spouse: %s)",
-		FormatCash(totalwealth), FormatCash(PlayerData[playerid][pBank]), FormatCash(PlayerData[playerid][pBank]), insurance, PlayerData[playerid][pMarriedName]);
-		
-	if(PlayerData[playerid][pGang] >= 0){
-		SendClientMessageEx(targetid, COLOR_WHITE, "(%s - %s, Crew: %s)(Job1: %s, Job2: %s)(Donator: %s{FFFFFF})",
-			gangrank, gang, gangcrew, job, secondjob,PlayerData[playerid][pDoubleXP],GetVIPRankEx(PlayerData[playerid][pDonator]));
-	}else {
-		SendClientMessageEx(targetid, COLOR_WHITE, "(%s - %s, Div: %s)(Job1: %s, Job2: %s)(Donator: %s{FFFFFF})",
-			facrank, faction, division, job, secondjob,PlayerData[playerid][pDoubleXP],GetVIPRankEx(PlayerData[playerid][pDonator]));	
-	}
-	SendClientMessageEx(targetid, 0x008080FF, "(Notoriety: %s)(Crimes: %s)(Arrests: %s)(Warrants: %s)(Health: %.0f)(Armor: %.0f)(Spawn armor: %.0f)(Radio: %i Khz)",
-		FormatNumber(PlayerData[playerid][pNotoriety]), FormatNumber(PlayerData[playerid][pCrimes]), FormatNumber(PlayerData[playerid][pArrested]), PlayerData[playerid][pWantedLevel], 
-		health, armor, PlayerData[playerid][pSpawnArmor], PlayerData[playerid][pChannel]);
-	
-	SendClientMessageEx(targetid, COLOR_WHITE, "(DM Warns: %i)(Weapon Restricted: %i hours)(Warnings: %i)(Next level cost: $%s)",
-		PlayerData[playerid][pDMWarnings], PlayerData[playerid][pWeaponRestricted], PlayerData[playerid][pWarnings], FormatNumber((PlayerData[playerid][pLevel] + 1) * 5000));
+    return jailtype;
+}
 
-	
-	SendClientMessageEx(targetid, 0x008080FF, "(Drug Addict: Level %i/3)(Trader Skill: %i/3)(Asset Skill: %i/4)(Labor Skill: %i/5)(Inventory Skill: Level %i/5)",
-		PlayerData[playerid][pAddictUpgrade], PlayerData[playerid][pTraderUpgrade], PlayerData[playerid][pAssetUpgrade], PlayerData[playerid][pLaborUpgrade], PlayerData[playerid][pInventoryUpgrade]);
-				//(Referral Tokkens: 0)(DM Warns: %i[expire: 0 hours])
-    if(playerid != MAX_PLAYERS)
+stock GetPlayerReportWarns(playerid)
+{
+    return PlayerData[playerid][pReportWarns];
+}
+
+DisplayStats(playerid, targetid = INVALID_PLAYER_ID)
+{
+    if (targetid == INVALID_PLAYER_ID) targetid = playerid;
+    new name[24];
+    new faction[48];
+    new facrank[32];
+    new gang[32];
+    new gangrank[32];
+    new gangcrew[32];
+    new division[32];
+    new insurance[32];
+    new Float:health;
+    new Float:armor;
+    new job[32];
+    new secondjob[32];
+
+    if (playerid == MAX_PLAYERS)
     {
-        SendClientMessageEx(targetid, COLOR_WHITE, "(Upgrade points: %i)(Paycheck: %s, Playing Time: %i/60 min)(Double Xp: %i)(Cookies: %s)",
-                    PlayerData[playerid][pUpgradePoints], FormatCash(PlayerData[playerid][pPaycheck]), PlayerData[playerid][pMinutes],PlayerData[playerid][pDoubleXP],
-                    FormatNumber(GetPlayerCookies(playerid)));
+        strcpy(name, PlayerData[playerid][pUsername]);
     }
     else
     {
-        SendClientMessageEx(targetid, COLOR_WHITE, "(Upgrade points: %i)(Paycheck: %s, Playing Time: %i/60 min)(Double Xp: %i)",
-                    PlayerData[playerid][pUpgradePoints], FormatCash(PlayerData[playerid][pPaycheck]), PlayerData[playerid][pMinutes],PlayerData[playerid][pDoubleXP]);
+        strcat(name, GetRPName(playerid));
     }
-    SendClientMessageEx(targetid, COLOR_DARKGREEN, "_________________________________________________________________________________________");
 
-/*
-    format(string, sizeof(string), "Weapon Restriction: %i hours | Married To: %s | DJ Rank: %d",
-	PlayerData[playerid][pWeaponRestricted], PlayerData[playerid][pMarriedName], PlayerData[playerid][pDJ]);
-    SendClientMessage(targetid, COLOR_WHITE, string);
+    insurance = GetHospitalName(PlayerData[playerid][pInsurance]);
 
-    format(string, sizeof(string), "Jail Type: %s | Jail Time: %s sec",
-	PlayerData[playerid][pWarnings], PlayerData[playerid][pDMWarnings], PlayerData[playerid][pReportWarns], jailtype, FormatNumber(PlayerData[playerid][pJailTime]));
-    SendClientMessage(targetid, COLOR_WHITE, string);
-*/
-	if(PlayerData[targetid][pAdmin] > 0 && playerid != MAX_PLAYERS)
-	{
+    if (PlayerData[playerid][pFaction] >= 0)
+    {
+        if (!strcmp(FactionInfo[PlayerData[playerid][pFaction]][fShortName], "None", true))
+        {
+            strcpy(faction, FactionInfo[PlayerData[playerid][pFaction]][fName]);
+        }
+        else
+        {
+            strcpy(faction, FactionInfo[PlayerData[playerid][pFaction]][fShortName]);
+        }
+
+        format(facrank, sizeof(facrank), "%s (%i)", FactionRanks[PlayerData[playerid][pFaction]][PlayerData[playerid][pFactionRank]], PlayerData[playerid][pFactionRank]);
+
+        if (PlayerData[playerid][pDivision] >= 0)
+        {
+            strcpy(division, FactionDivisions[PlayerData[playerid][pFaction]][PlayerData[playerid][pDivision]]);
+        }
+        else
+        {
+            division = "None";
+        }
+    }
+    else
+    {
+        faction = "None";
+        facrank = "N/A";
+        division = "None";
+    }
+
+    if (PlayerData[playerid][pGang] >= 0)
+    {
+        strcpy(gang, GangInfo[PlayerData[playerid][pGang]][gName]);
+        format(gangrank, sizeof(gangrank), "%s (%i)", GangRanks[PlayerData[playerid][pGang]][PlayerData[playerid][pGangRank]], PlayerData[playerid][pGangRank]);
+        if (PlayerData[playerid][pCrew] >= 0)
+        {
+            strcpy(gangcrew, GangCrews[PlayerData[playerid][pGang]][PlayerData[playerid][pCrew]]);
+        }
+        else
+        {
+            gangcrew = "None";
+        }
+    }
+    else
+    {
+        gang = "None";
+        gangrank = "N/A";
+        gangcrew = "None";
+    }
+
+    if (playerid == MAX_PLAYERS)
+    {
+        health = PlayerData[playerid][pHealth];
+        armor = PlayerData[playerid][pArmor];
+    }
+    else
+    {
+        GetPlayerHealth(playerid, health);
+        GetPlayerArmour(playerid, armor);
+    }
+
+    if (PlayerData[playerid][pJob] != JOB_NONE)
+    {
+        format(job, sizeof(job), "%s (%i)", GetJobName(PlayerData[playerid][pJob]), GetJobLevel(playerid, PlayerData[playerid][pJob]));
+    }
+    else
+    {
+        job = "None";
+    }
+
+    if (PlayerData[playerid][pSecondJob] != JOB_NONE)
+    {
+        format(secondjob, sizeof(secondjob), "%s (%i)", GetJobName(PlayerData[playerid][pSecondJob]), GetJobLevel(playerid, PlayerData[playerid][pSecondJob]));
+    }
+    else
+    {
+        secondjob = "None";
+    }
+    new totalwealth = PlayerData[playerid][pCash] + PlayerData[playerid][pBank];
+
+    foreach(new i : House)
+    {
+        if (HouseInfo[i][hExists] && PlayerData[playerid][pID] == HouseInfo[i][hOwnerID])
+        {
+            totalwealth += HouseInfo[i][hCash];
+        }
+    }
+
+    foreach(new i : Business)
+    {
+        if (BusinessInfo[i][bExists] && PlayerData[playerid][pID] == BusinessInfo[i][bOwnerID])
+        {
+            totalwealth += BusinessInfo[i][bCash];
+        }
+    }
+
+    new title[256];
+    format(title, sizeof(title), "{FF9900}%s - %s [%s]", GetDateTime(), name, GetPlayerSerialNumber(playerid));
+
+    new content[4096];
+    format(content, sizeof(content), "{FFFFFF}Level: {33CCFF}%i{FFFFFF} - XP: {33CCFF}%s/%s{FFFFFF}"\
+                                     " - Next level cost: {33CCFF}%s{FFFFFF} - Hours: {33CCFF}%s{FFFFFF} - Double XP: {33CCFF}%i",
+           PlayerData[playerid][pLevel], FormatNumber(PlayerData[playerid][pEXP]),
+           FormatNumber((PlayerData[playerid][pLevel] * 4)), FormatCash((PlayerData[playerid][pLevel] + 1) * 5000),
+           FormatNumber(PlayerData[playerid][pHours]), PlayerData[playerid][pDoubleXP]);
+    format(content, sizeof(content), "%s\n{FFFFFF}Age:{33CCFF} %i (%s) {FFFFFF}- Cookies:{33CCFF} %s {FFFFFF}- Phone:{33CCFF} %i {FFFFFF}- Radio:{33CCFF} %i Khz {FFFFFF}- Married To: {33CCFF}%s",
+           content, PlayerData[playerid][pAge], GetPlayerGenderStr(playerid), FormatNumber(GetPlayerCookies(playerid)),
+           PlayerData[playerid][pPhone], PlayerData[playerid][pChannel], PlayerData[playerid][pMarriedName]);
+    format(content, sizeof(content), "%s\n{FFFFFF}Total Wealth:{33CCFF} %s (Cash %s, Bank %s) {FFFFFF}\nPaycheck:{33CCFF} %s (Playing Time: %i/60 min)",
+           content, FormatCash(totalwealth), FormatCash(PlayerData[playerid][pCash]), FormatCash(PlayerData[playerid][pBank]),
+           FormatCash(PlayerData[playerid][pPaycheck]), PlayerData[playerid][pMinutes]);
+
+    format(content, sizeof(content), "%s\n\n{FFFFFF}Insured:{33CCFF} %s {FFFFFF}- HP:{33CCFF} %.0f (Spawn: %.0f) {FFFFFF}- Armor:{33CCFF} %.0f (Spawn: %.0f)",
+           content, insurance, health, PlayerData[playerid][pSpawnHealth], armor, PlayerData[playerid][pSpawnArmor]);
+
+    format(content, sizeof(content), "%s\n{FFFFFF}WantedLevel:{33CCFF} %d {FFFFFF}- Notoriety:{33CCFF} %s {FFFFFF}- Crimes:{33CCFF} %s {FFFFFF}- Arrests:{33CCFF} %s",
+           content, GetWantedLevel(playerid), FormatNumber(PlayerData[playerid][pNotoriety]),
+           FormatNumber(PlayerData[playerid][pCrimes]), FormatNumber(PlayerData[playerid][pArrested]));
+
+
+    format(content, sizeof(content), "%s\n\n{FFFFFF}Jobs:{33CCFF} %s, %s", content, job, secondjob);
+    if (PlayerData[playerid][pGang] >= 0 && PlayerData[playerid][pFaction] >= 0)
+    {
+        format(content, sizeof(content), "%s\n{FFFFFF}Membership:{00FF00} %s %s (Crew: %s) {FFFFFF}-{0000FF} %s %s (Division: %s)",
+            content, gang, gangrank, gangcrew, faction, facrank, division);
+    }
+    else if (PlayerData[playerid][pGang] >= 0)
+    {
+        format(content, sizeof(content), "%s\n{FFFFFF}Membership:{00FF00} %s %s (Crew: %s)",
+            content, gang, gangrank, gangcrew);
+    }
+    else if (PlayerData[playerid][pFaction] >= 0)
+    {
+        format(content, sizeof(content), "%s\n{FFFFFF}Membership:{0000FF} %s %s (Division: %s)",
+            content, faction, facrank, division);
+    }
+    else
+    {
+        format(content, sizeof(content), "%s\n{FFFFFF}Membership:{C8C8C8} None", content);
+    }
+    format(content, sizeof(content), "%s\n{FFFFFF}Donator: %s ", content, GetVIPRankEx(PlayerData[playerid][pDonator]));
+    if (PlayerData[playerid][pDonator])
+    {
+        format(content, sizeof(content), "%s\n{FFFFFF}- Exipry Date: {33CCFF}%s",
+               content, TimestampToString(PlayerData[playerid][pVIPTime], 4));
+
+        new time = PlayerData[playerid][pVIPCooldown] - gettime();
+        if (time > 3600)
+        {
+            format(content, sizeof(content), "%s {FFFFFF}- Invite:{C8C8C8} available after %i hour(s).", time / 3600);
+        }
+        else if (time > 0)
+        {
+            format(content, sizeof(content), "%s {FFFFFF}- Invite:{C8C8C8} available after %i minute(s).", time / 60);
+        }
+        else
+        {
+            format(content, sizeof(content), "%s {FFFFFF}- Invite:{00FF00} Ready", content);
+        }
+    }
+
+    format(content, sizeof(content), "%s\n\n{FFFFFF}Upgrade points:{33CCFF} %i {FFFFFF}- Drug Addict:{33CCFF} %i/3 {FFFFFF}- Trader Skill:{33CCFF} %i/3",
+           content, PlayerData[playerid][pUpgradePoints], PlayerData[playerid][pAddictUpgrade], PlayerData[playerid][pTraderUpgrade]);
+    format(content, sizeof(content), "%s\n{FFFFFF}Asset Skill:{33CCFF} %i/4  {FFFFFF}- Labor Skill:{33CCFF} %i/5 {FFFFFF}- Inventory Skill:{33CCFF} %i/5",
+           content, PlayerData[playerid][pAssetUpgrade], PlayerData[playerid][pLaborUpgrade], PlayerData[playerid][pInventoryUpgrade]);
+
+    format(content, sizeof(content), "%s\n\n{FFFFFF}Warnings:{33CCFF} %i {FFFFFF}- DM Warns:{33CCFF} %i {FFFFFF}- Report warns:{33CCFF} %i {FFFFFF}- Weapon Restricted:{33CCFF} %i hours",
+           content, GetPlayerWarnings(playerid), PlayerData[playerid][pDMWarnings],
+           GetPlayerReportWarns(playerid), PlayerData[playerid][pWeaponRestricted]);
+    if (IsAdmin(targetid) && playerid != MAX_PLAYERS)
+    {
         new interior = (playerid == MAX_PLAYERS) ? (PlayerData[playerid][pInterior]) : (GetPlayerInterior(playerid));
         new vw = (playerid == MAX_PLAYERS) ? (PlayerData[playerid][pWorld]) : (GetPlayerVirtualWorld(playerid));
         new fps = (playerid == MAX_PLAYERS) ? (0) : (PlayerData[playerid][pFPS]);
-        SendClientMessageEx(targetid, COLOR_LIGHTRED, "Interior: %i | Virtual: %i | FPS: %i | AFK: %s | Raports: %s | Help Requests: %s | Newbie Replies: %s.", 
-            interior, 
-            vw, 
-            fps, 
-            (playerid == MAX_PLAYERS) ? ("No") : ((IsPlayerAFK(playerid)) ? ("Yes") : ("No")), 
-            FormatNumber(PlayerData[playerid][pReports]), 
-            FormatNumber(PlayerData[playerid][pHelpRequests]), 
-            FormatNumber(PlayerData[playerid][pNewbies]));
-	}
 
+        format(content, sizeof(content), "%s\n{FFFFFF}Interior:{33CCFF} %i {FFFFFF}- Virtual:{33CCFF} %i {FFFFFF}- FPS:{33CCFF} %i {FFFFFF}- AFK:{33CCFF} %s {FFFFFF}- Jail:{33CCFF} %s (%s sec)",
+               content, interior, vw, fps, (playerid != MAX_PLAYERS && IsPlayerAFK(playerid) ? ("Yes") : ("No")),
+               GetPlayerJailTypeStr(playerid), FormatNumber(PlayerData[playerid][pJailTime]));
+
+        format(content, sizeof(content), "%s\n{FFFFFF}Reports:{33CCFF} %s {FFFFFF}- Help Requests:{33CCFF} %s {FFFFFF}- Newbie Replies:{33CCFF} %s",
+               content, FormatNumber(PlayerData[playerid][pReports]), FormatNumber(PlayerData[playerid][pHelpRequests]),
+               FormatNumber(PlayerData[playerid][pNewbies]));
+    }
+    else if (PlayerData[playerid][pJailType] != 0)
+    {
+        format(content, sizeof(content), "%s\n{FFFFFF}Jail:{33CCFF} %s (%s sec)",
+               content, GetPlayerJailTypeStr(playerid), FormatNumber(PlayerData[playerid][pJailTime]));
+    }
+
+    Dialog_Show(targetid, 0 , DIALOG_STYLE_MSGBOX, title, content, "Ok", "");
 }
 
 DisplayInventory(playerid, targetid = INVALID_PLAYER_ID)
@@ -5607,7 +5752,7 @@ DisplayInventory(playerid, targetid = INVALID_PLAYER_ID)
 	SendClientMessageEx(targetid, COLOR_WHITE, string);
 
 	format(string, sizeof(string), "Weed: %i/%ig | Crack: %i/%ig | Heroin: %i/%ig | Painkillers: %i/%i | Seeds: %i/%i", PlayerData[playerid][pWeed], GetPlayerCapacity(playerid, CAPACITY_WEED),
-        PlayerData[playerid][pCocaine], GetPlayerCapacity(playerid, CAPACITY_COCAINE), PlayerData[playerid][pMeth], GetPlayerCapacity(playerid, CAPACITY_METH), PlayerData[playerid][pPainkillers], GetPlayerCapacity(playerid, CAPACITY_PAINKILLERS), PlayerData[playerid][pSeeds], GetPlayerCapacity(playerid, CAPACITY_SEEDS));
+        PlayerData[playerid][pCocaine], GetPlayerCapacity(playerid, CAPACITY_COCAINE), PlayerData[playerid][pHeroin], GetPlayerCapacity(playerid, CAPACITY_HEROIN), PlayerData[playerid][pPainkillers], GetPlayerCapacity(playerid, CAPACITY_PAINKILLERS), PlayerData[playerid][pSeeds], GetPlayerCapacity(playerid, CAPACITY_SEEDS));
 	SendClientMessageEx(targetid, COLOR_WHITE, string);
 
 	format(string, sizeof(string), "{008080}Materials: %s/%s | Chemicals: %i/%ig | Muriatic acid: %i/10 | Baking soda: %i/3", FormatNumber(PlayerData[playerid][pMaterials]), FormatNumber(GetPlayerCapacity(playerid, CAPACITY_MATERIALS)),
@@ -5903,7 +6048,7 @@ ShowDialogToPlayer(playerid, dialogid)
 		case DIALOG_GANGSTASHDRUGS1:
 		{
 		    format(string, sizeof(string), "Weed (%i/%ig)\nCrack (%i/%ig)\nHeroin (%i/%ig)\nPainkillers (%i/%i)",
-				GangInfo[PlayerData[playerid][pGang]][gWeed], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_WEED), GangInfo[PlayerData[playerid][pGang]][gCocaine], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_COCAINE), GangInfo[PlayerData[playerid][pGang]][gMeth], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_METH), GangInfo[PlayerData[playerid][pGang]][gPainkillers], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_PAINKILLERS));
+				GangInfo[PlayerData[playerid][pGang]][gWeed], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_WEED), GangInfo[PlayerData[playerid][pGang]][gCocaine], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_COCAINE), GangInfo[PlayerData[playerid][pGang]][gHeroin], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_HEROIN), GangInfo[PlayerData[playerid][pGang]][gPainkillers], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_PAINKILLERS));
 		    Dialog_Show(playerid, DIALOG_GANGSTASHDRUGS1, DIALOG_STYLE_LIST, "Gang stash | Drugs", string, "Select", "Back");
 		}
 		case DIALOG_GANGSTASHDRUGS2:
@@ -5912,7 +6057,7 @@ ShowDialogToPlayer(playerid, dialogid)
 		        Dialog_Show(playerid, DIALOG_GANGSTASHDRUGS2, DIALOG_STYLE_LIST, "Gang stash | Weed", "Withdraw\nDeposit", "Select", "Back");
 			} else if(PlayerData[playerid][pSelected] == ITEM_COCAINE) {
 			    Dialog_Show(playerid, DIALOG_GANGSTASHDRUGS2, DIALOG_STYLE_LIST, "Gang stash | Crack", "Withdraw\nDeposit", "Select", "Back");
-			} else if(PlayerData[playerid][pSelected] == ITEM_METH) {
+			} else if(PlayerData[playerid][pSelected] == ITEM_HEROIN) {
 		        Dialog_Show(playerid, DIALOG_GANGSTASHDRUGS2, DIALOG_STYLE_LIST, "Gang stash | Heroin", "Withdraw\nDeposit", "Select", "Back");
 			} else if(PlayerData[playerid][pSelected] == ITEM_PAINKILLERS) {
 			    Dialog_Show(playerid, DIALOG_GANGSTASHDRUGS2, DIALOG_STYLE_LIST, "Gang stash | Painkillers", "Withdraw\nDeposit", "Select", "Back");
@@ -5939,8 +6084,8 @@ ShowDialogToPlayer(playerid, dialogid)
 		        format(string, sizeof(string), "How much weed would you like to withdraw? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gWeed], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_WEED));
 			} else if(PlayerData[playerid][pSelected] == ITEM_COCAINE) {
 			    format(string, sizeof(string), "How much crack would you like to withdraw? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gCocaine], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_COCAINE));
-			} else if(PlayerData[playerid][pSelected] == ITEM_METH) {
-		        format(string, sizeof(string), "How much Heroin would you like to withdraw? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gMeth], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_METH));
+			} else if(PlayerData[playerid][pSelected] == ITEM_HEROIN) {
+		        format(string, sizeof(string), "How much Heroin would you like to withdraw? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gHeroin], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_HEROIN));
 			} else if(PlayerData[playerid][pSelected] == ITEM_PAINKILLERS) {
 			    format(string, sizeof(string), "How much painkillers would you like to withdraw? (The safe contains %i/%i.)", GangInfo[PlayerData[playerid][pGang]][gPainkillers], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_PAINKILLERS));
 			} else if(PlayerData[playerid][pSelected] == ITEM_MATERIALS) {
@@ -5956,8 +6101,8 @@ ShowDialogToPlayer(playerid, dialogid)
 		        format(string, sizeof(string), "How much weed would you like to deposit? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gWeed], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_WEED));
 			} else if(PlayerData[playerid][pSelected] == ITEM_COCAINE) {
 			    format(string, sizeof(string), "How much crack would you like to deposit? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gCocaine], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_COCAINE));
-			} else if(PlayerData[playerid][pSelected] == ITEM_METH) {
-		        format(string, sizeof(string), "How much Heroin would you like to deposit? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gMeth], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_METH));
+			} else if(PlayerData[playerid][pSelected] == ITEM_HEROIN) {
+		        format(string, sizeof(string), "How much Heroin would you like to deposit? (The safe contains %i/%i grams.)", GangInfo[PlayerData[playerid][pGang]][gHeroin], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_HEROIN));
 			} else if(PlayerData[playerid][pSelected] == ITEM_PAINKILLERS) {
 			    format(string, sizeof(string), "How much painkillers would you like to deposit? (The safe contains %i/%i.)", GangInfo[PlayerData[playerid][pGang]][gPainkillers], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_PAINKILLERS));
 			} else if(PlayerData[playerid][pSelected] == ITEM_MATERIALS) {
@@ -6010,7 +6155,7 @@ ShowDialogToPlayer(playerid, dialogid)
 		{
 		    if(VehicleInfo[PlayerData[playerid][pCocaineFrom]][vWeed]/20 > 0) format(string, sizeof(string), "%s\nWeed (%ig)", string, VehicleInfo[PlayerData[playerid][pCocaineFrom]][vWeed]/20);
             if(VehicleInfo[PlayerData[playerid][pCocaineFrom]][vCocaine]/20 > 0) format(string, sizeof(string), "%s\nCrack (%ig)", string, VehicleInfo[PlayerData[playerid][pCocaineFrom]][vCocaine]/20);
-            if(VehicleInfo[PlayerData[playerid][pCocaineFrom]][vMeth]/20 > 0) format(string, sizeof(string), "%s\nHeroin (%ig)", string, VehicleInfo[PlayerData[playerid][pCocaineFrom]][vMeth]/20);
+            if(VehicleInfo[PlayerData[playerid][pCocaineFrom]][vHeroin]/20 > 0) format(string, sizeof(string), "%s\nHeroin (%ig)", string, VehicleInfo[PlayerData[playerid][pCocaineFrom]][vHeroin]/20);
             if(VehicleInfo[PlayerData[playerid][pCocaineFrom]][vPainkillers]/20 > 0) format(string, sizeof(string), "%s\nPainkillers (%ig)", string, VehicleInfo[PlayerData[playerid][pCocaineFrom]][vPainkillers]/20);
             if(VehicleInfo[PlayerData[playerid][pCocaineFrom]][vMaterials]/20 > 0) format(string, sizeof(string), "%s\nMaterials (%i)", string, VehicleInfo[PlayerData[playerid][pCocaineFrom]][vMaterials]/20);
             if(VehicleInfo[PlayerData[playerid][pCocaineFrom]][vCash]/20 > 0) format(string, sizeof(string), "%s\nCash ($%i)", string, VehicleInfo[PlayerData[playerid][pCocaineFrom]][vCash]/20);
@@ -6207,8 +6352,8 @@ public SavePlayerVariables(playerid)
 		    PlayerData[playerid][pToggleReports], PlayerData[playerid][pToggleWhisper], PlayerData[playerid][pToggleBug], PlayerData[playerid][pNewbieMuteTime], PlayerData[playerid][pReportMuteTime], PlayerData[playerid][pGlobalMuteTime], PlayerData[playerid][pAdminHide], PlayerData[playerid][pTotalPatients], PlayerData[playerid][pTotalFires], PlayerData[playerid][pScannerOn], PlayerData[playerid][pRareTime], PlayerData[playerid][pBugged],PlayerData[playerid][pBuggedBy],PlayerData[playerid][pID]);
 		mysql_tquery(connectionID, queryBuffer);
 
-		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET weed = %d, cocaine = %d, meth = %d, materials = %d, rope = %d, spraycans = %d WHERE uid = %i",
-			PlayerData[playerid][pWeed], PlayerData[playerid][pCocaine], PlayerData[playerid][pMeth], PlayerData[playerid][pMaterials], PlayerData[playerid][pRope], PlayerData[playerid][pSpraycans], PlayerData[playerid][pID]);
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET weed = %d, cocaine = %d, heroin = %d, materials = %d, rope = %d, spraycans = %d WHERE uid = %i",
+			PlayerData[playerid][pWeed], PlayerData[playerid][pCocaine], PlayerData[playerid][pHeroin], PlayerData[playerid][pMaterials], PlayerData[playerid][pRope], PlayerData[playerid][pSpraycans], PlayerData[playerid][pID]);
 		mysql_tquery(connectionID, queryBuffer);
 
 		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET togglevehicle = %d WHERE uid = %d", PlayerData[playerid][pToggleVehCam], PlayerData[playerid][pID]);
@@ -6697,8 +6842,7 @@ LoadPickupsAndText()
 	CreateDynamic3DTextLabel("Garbage Pickup\n/garbage\nto begin delivery.", COLOR_YELLOW, 2404.9758, -2070.3882, 13.5469, 10.0);
 	CreateDynamicPickup(1239, 1, 2404.9758, -2070.3882, 13.5469);
 
-
-
+	// DMV
 	CreateDynamic3DTextLabel("Drivers test\nCost: $500\n/taketest to begin.", COLOR_YELLOW, -2033.2953, -117.4508, 1035.1719, 10.0);
 	CreateDynamicPickup(1239, 1, -2033.2953, -117.4508, 1035.1719);
 
@@ -6710,6 +6854,11 @@ LoadPickupsAndText()
 	CreateDynamic3DTextLabel("Paintball arena\n/paintball to play paintball!", COLOR_YELLOW, 1311.7522,-1367.2715,13.53, 10.0);
 	CreateDynamicPickup(1254, 1, 1311.7522,-1367.2715,13.53);
 
+	// Craft Table For Mafia
+    CreateDynamicPickup(1239, 1, 1332.7495, 1568.4010, 1030.9145);
+    CreateDynamic3DTextLabel("Craft table\ntype /gsellgun to sell a weapon.", COLOR_YELLOW, 1332.7495, 1568.4010, 1030.9145, 10.0);
+
+	// ChangeName
 	CreateDynamic3DTextLabel("Name changes\nCost: $7500/level\n/changename to request one.", COLOR_YELLOW, 360.7130,176.3916,1008.3828, 10.0);
 	CreateDynamicPickup(1239, 1, 360.7130,176.3916,1008.3828);
 
@@ -7490,7 +7639,7 @@ CancelZoneCreation(playerid)
 
 ResetCooking(playerid)
 {
-    PlayerData[playerid][pCookMeth] = 0;
+    PlayerData[playerid][pCookHeroin] = 0;
 	PlayerData[playerid][pCookGrams] = 0;
 	PlayerData[playerid][pCookTime] = 0;
 }
@@ -8068,7 +8217,7 @@ SetupGang(gangid, name[])
 	GangInfo[gangid][gMaterials] = 0;
 	GangInfo[gangid][gWeed] = 0;
 	GangInfo[gangid][gCocaine] = 0;
-	GangInfo[gangid][gMeth] = 0;
+	GangInfo[gangid][gHeroin] = 0;
 	GangInfo[gangid][gPainkillers] = 0;
     GangInfo[gangid][gArmsDealer] = 0;
     GangInfo[gangid][gDrugDealer] = 0;
@@ -8082,7 +8231,7 @@ SetupGang(gangid, name[])
     GangInfo[gangid][gDrugWorld] = 0;
     GangInfo[gangid][gDrugWeed] = 0;
     GangInfo[gangid][gDrugCocaine] = 0;
-    GangInfo[gangid][gDrugMeth] = 0;
+    GangInfo[gangid][gDrugHeroin] = 0;
     GangInfo[gangid][gArmsMaterials] = 0;
     GangInfo[gangid][gAlliance] = -1;
     GangInfo[gangid][gPickup] = -1;
@@ -8299,7 +8448,7 @@ RemoveGang(gangid)
 	GangInfo[gangid][gMaterials] = 0;
 	GangInfo[gangid][gWeed] = 0;
 	GangInfo[gangid][gCocaine] = 0;
-	GangInfo[gangid][gMeth] = 0;
+	GangInfo[gangid][gHeroin] = 0;
 	GangInfo[gangid][gPainkillers] = 0;
 	GangInfo[gangid][gArmsDealer] = 0;
     GangInfo[gangid][gDrugDealer] = 0;
@@ -8313,7 +8462,7 @@ RemoveGang(gangid)
     GangInfo[gangid][gDrugWorld] = 0;
     GangInfo[gangid][gDrugWeed] = 0;
     GangInfo[gangid][gDrugCocaine] = 0;
-    GangInfo[gangid][gDrugMeth] = 0;
+    GangInfo[gangid][gDrugHeroin] = 0;
     GangInfo[gangid][gArmsMaterials] = 0;
     GangInfo[gangid][gPickup] = -1;
     GangInfo[gangid][gActors][0] = INVALID_ACTOR_ID;
@@ -8766,7 +8915,7 @@ ResetVehicle(vehicleid)
 	VehicleInfo[vehicleid][vMaterials] = 0;
 	VehicleInfo[vehicleid][vWeed] = 0;
 	VehicleInfo[vehicleid][vCocaine] = 0;
-	VehicleInfo[vehicleid][vMeth] = 0;
+	VehicleInfo[vehicleid][vHeroin] = 0;
 	VehicleInfo[vehicleid][vPainkillers] = 0;
 	VehicleInfo[vehicleid][vWeapons][0] = 0;
 	VehicleInfo[vehicleid][vWeapons][1] = 0;
@@ -9743,6 +9892,19 @@ SendGMMessage(color, string2[])
 	}
 }
 
+SendHMMessage(color, string2[])
+{
+    foreach(new i : Player)
+    {
+        if (IsPlayerConnected(i) && PlayerData[i][pLogged])
+        {
+            if (PlayerData[i][pHelperManager] >= 1 || PlayerData[i][pGameAffairs] || IsAdmin(i, LEAD_HEAD_ADMIN))
+            {
+                SendClientMessage(i, color, string2);
+            }
+        }
+    }
+}
 
 SendAPMessage(color, string2[])
 {
@@ -10796,7 +10958,7 @@ public SecondTimer()
 					        }
 					    }
 
-						if(count == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vCocaine] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vMeth] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vWeed] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vPainkillers] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vMaterials] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vCash] == 0)
+						if(count == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vCocaine] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vHeroin] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vWeed] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vPainkillers] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vMaterials] == 0 && VehicleInfo[PlayerData[i][pCocaineTrunk]][vCash] == 0)
 						{
 						    SendProximityMessage(i, 20.0, COLOR_PURPLE, "* %s cracks open the trunk of the %s and finds nothing.", GetRPName(i), GetVehicleName(PlayerData[i][pCocaineTrunk]));
 						}
@@ -10917,7 +11079,7 @@ public SecondTimer()
 					PlayerData[i][pPickTime] = 0;
 				}
 			}
-			if(PlayerData[i][pCookMeth] > 0)
+			if(PlayerData[i][pCookHeroin] > 0)
 			{
                 PlayerData[i][pCookTime]--;
 
@@ -10933,7 +11095,7 @@ public SecondTimer()
                         SendClientMessage(i, COLOR_GREY, "Cooking failed. You have ran out of chemicals.");
                         ResetCooking(i);
 					}
-					else if(PlayerData[i][pMeth] + 2 > GetPlayerCapacity(i, CAPACITY_METH))
+					else if(PlayerData[i][pHeroin] + 2 > GetPlayerCapacity(i, CAPACITY_HEROIN))
                     {
                         SendClientMessage(i, COLOR_GREY, "Cooking failed. You have ran out of inventory space for Heroin.");
                         ResetCooking(i);
@@ -10943,7 +11105,7 @@ public SecondTimer()
 						GameTextForPlayer(i, "~g~+2~w~ grams of Heroin", 3000, 3);
 
 						PlayerData[i][pEphedrine] -= 1;
-						PlayerData[i][pMeth] += 2;
+						PlayerData[i][pHeroin] += 2;
 						PlayerData[i][pCookGrams] += 2;
 
 						if((PlayerData[i][pCookGrams] % 4) == 0)
@@ -10951,7 +11113,7 @@ public SecondTimer()
 						    PlayerData[i][pMuriaticAcid]--;
 						}
 
-						mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET ephedrine = %i, meth = %i, muriaticacid = %i WHERE uid = %i", PlayerData[i][pEphedrine], PlayerData[i][pMeth], PlayerData[i][pMuriaticAcid], PlayerData[i][pID]);
+						mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET ephedrine = %i, heroin = %i, muriaticacid = %i WHERE uid = %i", PlayerData[i][pEphedrine], PlayerData[i][pHeroin], PlayerData[i][pMuriaticAcid], PlayerData[i][pID]);
 						mysql_tquery(connectionID, queryBuffer);
 
 						if(!PlayerData[i][pEphedrine])
@@ -10964,7 +11126,7 @@ public SecondTimer()
 						    SendClientMessageEx(i, COLOR_LIGHTRED, "You ran out of muriatic acid therefore ending your cookoff. You made %i grams of Heroin from %i grams of chems.", PlayerData[i][pCookGrams], PlayerData[i][pCookGrams] / 2);
 							ResetCooking(i);
 					    }
-					    else if(PlayerData[i][pMeth] >= GetPlayerCapacity(i, CAPACITY_METH))
+					    else if(PlayerData[i][pHeroin] >= GetPlayerCapacity(i, CAPACITY_HEROIN))
 	                    {
 	                        SendClientMessageEx(i, COLOR_LIGHTRED, "You ran out of inventory space for heroin therefore ending your cookoff. You made %i grams of heroin from %i grams of chems.", PlayerData[i][pCookGrams], PlayerData[i][pCookGrams] / 2);
 							ResetCooking(i);
@@ -12000,7 +12162,7 @@ public OnPlayerSpawnVehicle(playerid, parked)
 	        VehicleInfo[vehicleid][vMaterials] = cache_get_field_content_int(0, "materials");
 	        VehicleInfo[vehicleid][vWeed] = cache_get_field_content_int(0, "weed");
 	        VehicleInfo[vehicleid][vCocaine] = cache_get_field_content_int(0, "cocaine");
-	        VehicleInfo[vehicleid][vMeth] = cache_get_field_content_int(0, "meth");
+	        VehicleInfo[vehicleid][vHeroin] = cache_get_field_content_int(0, "heroin");
 	        VehicleInfo[vehicleid][vPainkillers] = cache_get_field_content_int(0, "painkillers");
 	        VehicleInfo[vehicleid][vWeapons][0] = cache_get_field_content_int(0, "weapon_1");
 	        VehicleInfo[vehicleid][vWeapons][1] = cache_get_field_content_int(0, "weapon_2");
@@ -12277,8 +12439,6 @@ public OnAdminChangePassword(playerid, username[], password[])
 	}
 }
 
-
-
 forward OnAdminListVehiclesForRemoval(playerid, targetid);
 public OnAdminListVehiclesForRemoval(playerid, targetid)
 {
@@ -12340,6 +12500,55 @@ public OnAdminListVehicles(playerid, targetid)
 forward OnAdminOfflineDM(playerid, username[]);
 public OnAdminOfflineDM(playerid, username[])
 {
+    if (cache_get_row_count(connectionID))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The player specified doesn't exist.");
+    }
+
+    if (!IsAdmin(playerid, cache_get_field_content_int(0, "adminlevel")))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The player specified has a higher admin level than you. They cannot be banned.");
+    }
+
+    new userid = cache_get_field_content_int(0, "uid");
+    new warns  = cache_get_field_content_int(0, "warns");
+    new userip[16];
+    cache_get_field_content(0, "ip", userip);
+
+    warns++;
+
+    if (warns < 3)
+    {
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET jailtype = 2, jailtime = %i, dmwarnings = %i,"\
+            " weaponrestricted = %i, prisonedby = '%e', prisonreason = 'DM' WHERE uid = %i",
+            warns * 3600, warns, warns * 4, GetPlayerNameEx(playerid), userid);
+		mysql_tquery(connectionID, queryBuffer);
+
+        /*LogPlayerPunishment(playerid, userid, userip,
+            "DM", "%s was offline DM warned by %s %s. Prison: %i minutes. Weapon restriction: %i hours. DM (%i/3)",
+            username, GetAdminRank(playerid), GetRPName(playerid), warns * 60, warns*4, warns);
+		*/
+        SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s was offline DM Warned & Prisoned for %i minutes by %s %s, reason: DM (%i/3)", username, warns * 60, GetAdmCmdRank(playerid), GetRPName(playerid), warns);
+    }
+    else
+    {
+        OfflineBan(userid, username, userip, "DM (3/3 warnings)");
+
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET dmwarnings = 0 WHERE uid = %i", userid);
+		mysql_tquery(connectionID, queryBuffer);
+
+        /*LogPlayerPunishment(playerid, userid, userip,
+            "DM", "%s was offline DM warned by %s %s. DM (3/3)",
+            username, GetAdminRank(playerid), GetPlayerNameEx(playerid));
+		*/
+        SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s was offline banned by %s %s, reason: DM (3/3 warnings)", username, GetAdmCmdRank(playerid), GetRPName(playerid));
+    }
+    return 1;
+}
+
+/*forward OnAdminOfflineDM(playerid, username[]);
+public OnAdminOfflineDM(playerid, username[])
+{
 	if(cache_get_row_count(connectionID))
 	{
 		if(cache_get_field_content_int(0, "adminlevel") > PlayerData[playerid][pAdmin])
@@ -12348,7 +12557,7 @@ public OnAdminOfflineDM(playerid, username[])
 		}
 		else
 		{
-		    new ip[16], id = cache_get_field_content_int(0, "uid"), warns = cache_get_field_content_int(0, "warns");
+		    new userip[16], id = cache_get_field_content_int(0, "uid"), warns = cache_get_field_content_int(0, "warns");
 
 			warns++;
 
@@ -12377,7 +12586,7 @@ public OnAdminOfflineDM(playerid, username[])
 	{
 	    SendClientMessage(playerid, COLOR_GREY, "The player specified doesn't exist.");
 	}
-}
+}*/
 
 forward OnAdminCheckNameHistory(playerid, targetid);
 public OnAdminCheckNameHistory(playerid, targetid)
@@ -12484,233 +12693,6 @@ public OnAdminCreateLocation(playerid, location, name[], Float:x, Float:y, Float
     SendClientMessageEx(playerid, COLOR_GREEN, "* Location [%i] %s created at %.1f, %.1f, %.1f.", location, name, x, y, z);
 }
 
-forward OnAdminOfflineCheck(playerid, username[]);
-public OnAdminOfflineCheck(playerid, username[])
-{
-    if(!cache_get_row_count(connectionID))
-	{
-	    SendClientMessage(playerid, COLOR_GREY, "The player specified doesn't exist.");
-	}
-	else
-	{
-	    // At first I didn't know how I was going to do this. But then I came up with a plan.
-	    // Load everything into an unused player slot, use DisplayStats as normal, then destroy the data.
-	    // This ensures that whenever I add a new thing to /stats for instance, I don't have to maintain
-	    // two stats functions, I can just call DisplayStats and let the work do itself.
-
-	    PlayerData[MAX_PLAYERS][pID] = cache_get_field_content_int(0, "uid");
-		PlayerData[MAX_PLAYERS][pSetup] = cache_get_field_content_int(0, "setup");
-        PlayerData[MAX_PLAYERS][pGender] = cache_get_field_content_int(0, "gender");
-        PlayerData[MAX_PLAYERS][pAge] = cache_get_field_content_int(0, "age");
-        PlayerData[MAX_PLAYERS][pSkin] = cache_get_field_content_int(0, "skin");
-        PlayerData[MAX_PLAYERS][pCameraX] = cache_get_field_content_float(0, "camera_x");
-        PlayerData[MAX_PLAYERS][pCameraY] = cache_get_field_content_float(0, "camera_y");
-        PlayerData[MAX_PLAYERS][pCameraZ] = cache_get_field_content_float(0, "camera_z");
-        PlayerData[MAX_PLAYERS][pPosX] = cache_get_field_content_float(0, "pos_x");
-        PlayerData[MAX_PLAYERS][pPosY] = cache_get_field_content_float(0, "pos_y");
-        PlayerData[MAX_PLAYERS][pPosZ] = cache_get_field_content_float(0, "pos_z");
-        PlayerData[MAX_PLAYERS][pPosA] = cache_get_field_content_float(0, "pos_a");
-        PlayerData[MAX_PLAYERS][pInterior] = cache_get_field_content_int(0, "interior");
-        PlayerData[MAX_PLAYERS][pWorld] = cache_get_field_content_int(0, "world");
-        PlayerData[MAX_PLAYERS][pCash] = cache_get_field_content_int(0, "cash");
-        PlayerData[MAX_PLAYERS][pBank] = cache_get_field_content_int(0, "bank");
-        PlayerData[MAX_PLAYERS][pPaycheck] = cache_get_field_content_int(0, "paycheck");
-        PlayerData[MAX_PLAYERS][pLevel] = cache_get_field_content_int(0, "level");//pVehicleCMD
-        PlayerData[MAX_PLAYERS][pAdminStrike] = cache_get_field_content_int(0, "adminstrike");
-
-        PlayerData[MAX_PLAYERS][pGunLicense] = cache_get_field_content_int(0, "gunlicense");
-        PlayerData[MAX_PLAYERS][pvLock] = cache_get_field_content_int(0, "vehlock");
-        PlayerData[MAX_PLAYERS][pGraphic] = cache_get_field_content_int(0, "graphic");
-        PlayerData[MAX_PLAYERS][pEXP] = cache_get_field_content_int(0, "exp");
-        PlayerData[MAX_PLAYERS][pMinutes] = cache_get_field_content_int(0, "minutes");
-        PlayerData[MAX_PLAYERS][pHours] = cache_get_field_content_int(0, "hours");
-        PlayerData[MAX_PLAYERS][pAdmin] = cache_get_field_content_int(0, "adminlevel");
-        PlayerData[MAX_PLAYERS][pHelper] = cache_get_field_content_int(0, "helperlevel");
-        PlayerData[MAX_PLAYERS][pHealth] = cache_get_field_content_float(0, "health");
-        PlayerData[MAX_PLAYERS][pArmor] = cache_get_field_content_float(0, "armor");
-		PlayerData[MAX_PLAYERS][pUpgradePoints] = cache_get_field_content_int(0, "upgradepoints");
-		PlayerData[MAX_PLAYERS][pWarnings] = cache_get_field_content_int(0, "warnings");
-		PlayerData[MAX_PLAYERS][pInjured] = cache_get_field_content_int(0, "injured");
-		PlayerData[MAX_PLAYERS][pHospital] = cache_get_field_content_int(0, "hospital");
-		PlayerData[MAX_PLAYERS][pSpawnHealth] = cache_get_field_content_float(0, "spawnhealth");
-        PlayerData[MAX_PLAYERS][pSpawnArmor] = cache_get_field_content_float(0, "spawnarmor");
-        PlayerData[MAX_PLAYERS][pJailType] = cache_get_field_content_int(0, "jailtype");
-        PlayerData[MAX_PLAYERS][pJailTime] = cache_get_field_content_int(0, "jailtime");
-        PlayerData[MAX_PLAYERS][pNewbieMuted] = cache_get_field_content_int(0, "newbiemuted");
-        PlayerData[MAX_PLAYERS][pHelpMuted] = cache_get_field_content_int(0, "helpmuted");
-        PlayerData[MAX_PLAYERS][pAdMuted] = cache_get_field_content_int(0, "admuted");
-        PlayerData[MAX_PLAYERS][pLiveMuted] = cache_get_field_content_int(0, "livemuted");
-        PlayerData[MAX_PLAYERS][pGlobalMuted] = cache_get_field_content_int(0, "globalmuted");
-        PlayerData[MAX_PLAYERS][pReportMuted] = cache_get_field_content_int(0, "reportmuted");
-        PlayerData[MAX_PLAYERS][pReportWarns] = cache_get_field_content_int(0, "reportwarns");
-        PlayerData[MAX_PLAYERS][pFightStyle] = cache_get_field_content_int(0, "fightstyle");
-		PlayerData[MAX_PLAYERS][pPhone] = cache_get_field_content_int(0, "phone");
-		PlayerData[MAX_PLAYERS][pJob] = cache_get_field_content_int(0, "job");
-		PlayerData[MAX_PLAYERS][pSecondJob] = cache_get_field_content_int(0, "secondjob");
-		PlayerData[MAX_PLAYERS][pCrimes] = cache_get_field_content_int(0, "crimes");
-		PlayerData[MAX_PLAYERS][pArrested] = cache_get_field_content_int(0, "arrested");
-		PlayerData[MAX_PLAYERS][pWantedLevel] = cache_get_field_content_int(0, "wantedlevel");		
-		PlayerData[MAX_PLAYERS][pNotoriety] = cache_get_field_content_int(0, "notoriety");		
-		PlayerData[MAX_PLAYERS][pMaterials] = cache_get_field_content_int(0, "materials");
-		PlayerData[MAX_PLAYERS][pWeed] = cache_get_field_content_int(0, "weed");
-		PlayerData[MAX_PLAYERS][pCocaine] = cache_get_field_content_int(0, "cocaine");
-		PlayerData[MAX_PLAYERS][pMeth] = cache_get_field_content_int(0, "meth");
-		PlayerData[MAX_PLAYERS][pPainkillers] = cache_get_field_content_int(0, "painkillers");
-		PlayerData[MAX_PLAYERS][pSeeds] = cache_get_field_content_int(0, "seeds");
-		PlayerData[MAX_PLAYERS][pEphedrine] = cache_get_field_content_int(0, "ephedrine");
-		PlayerData[MAX_PLAYERS][pMuriaticAcid] = cache_get_field_content_int(0, "muriaticacid");
-		PlayerData[MAX_PLAYERS][pBakingSoda] = cache_get_field_content_int(0, "bakingsoda");
-		PlayerData[MAX_PLAYERS][pCigars] = cache_get_field_content_int(0, "cigars");
-		PlayerData[MAX_PLAYERS][pPrivateRadio] = cache_get_field_content_int(0, "walkietalkie");
-		PlayerData[MAX_PLAYERS][pChannel] = cache_get_field_content_int(0, "channel");
-		PlayerData[MAX_PLAYERS][pRentingHouse] = cache_get_field_content_int(0, "rentinghouse");
-		PlayerData[MAX_PLAYERS][pSpraycans] = cache_get_field_content_int(0, "spraycans");
-		PlayerData[MAX_PLAYERS][pBoombox] = cache_get_field_content_int(0, "boombox");
-		PlayerData[MAX_PLAYERS][pMP3Player] = cache_get_field_content_int(0, "mp3player");
-		PlayerData[MAX_PLAYERS][pPhonebook] = cache_get_field_content_int(0, "phonebook");
-		PlayerData[MAX_PLAYERS][pFishingRod] = cache_get_field_content_int(0, "fishingrod");
-		PlayerData[MAX_PLAYERS][pFishingBait] = cache_get_field_content_int(0, "fishingbait");
-		PlayerData[MAX_PLAYERS][pFishWeight] = cache_get_field_content_int(0, "fishweight");
-		PlayerData[MAX_PLAYERS][pComponents] = cache_get_field_content_int(0, "components");
-		PlayerData[MAX_PLAYERS][pSweep] = cache_get_field_content_int(0, "sweep");
-		PlayerData[MAX_PLAYERS][pSweepLeft] = cache_get_field_content_int(0, "sweepleft");
-		PlayerData[MAX_PLAYERS][pRccam] = cache_get_field_content_int(0, "rccam");
-		PlayerData[MAX_PLAYERS][pCondom] = cache_get_field_content_int(0, "condom");
-
-		PlayerData[MAX_PLAYERS][pMechanicSkill] = cache_get_field_content_int(0, "mechanicskill");
-		PlayerData[MAX_PLAYERS][pSmugglerSkill] = cache_get_field_content_int(0, "smugglerskill");
-		PlayerData[MAX_PLAYERS][pWeaponSkill] = cache_get_field_content_int(0, "weaponskill");
-		PlayerData[MAX_PLAYERS][pDrugDealerSkill] = cache_get_field_content_int(0, "drugdealerskill");
-		PlayerData[MAX_PLAYERS][pDetectiveSkill] = cache_get_field_content_int(0, "detectiveskill");
-		PlayerData[MAX_PLAYERS][pFarmerSkill] = cache_get_field_content_int(0, "farmerskill");
-		PlayerData[MAX_PLAYERS][pLawyerSkill] = cache_get_field_content_int(0, "lawyerskill");
-		PlayerData[MAX_PLAYERS][pForkliftSkill] = cache_get_field_content_int(0, "forkliftskill");
-		PlayerData[MAX_PLAYERS][pCarJackerSkill] = cache_get_field_content_int(0, "carjackerskill");
-		PlayerData[MAX_PLAYERS][pCraftSkill] = cache_get_field_content_int(0, "craftskill");
-		PlayerData[MAX_PLAYERS][pPizzaSkill] = cache_get_field_content_int(0, "pizzaskill");
-		PlayerData[MAX_PLAYERS][pTruckerSkill] = cache_get_field_content_int(0, "truckerskill");
-		PlayerData[MAX_PLAYERS][pHookerSkill] = cache_get_field_content_int(0, "hookerskill");
-		PlayerData[MAX_PLAYERS][pRobberySkill] = cache_get_field_content_int(0, "robberyskill");
-		PlayerData[MAX_PLAYERS][pFishingSkill] = cache_get_field_content_int(0, "fishingskill");
-		
-		PlayerData[MAX_PLAYERS][pToggleTextdraws] = cache_get_field_content_int(0, "toggletextdraws");
-		PlayerData[MAX_PLAYERS][pToggleOOC] = cache_get_field_content_int(0, "toggleooc");
-		PlayerData[MAX_PLAYERS][pTogglePhone] = cache_get_field_content_int(0, "togglephone");
-		PlayerData[MAX_PLAYERS][pToggleAdmin] = cache_get_field_content_int(0, "toggleadmin");
-		PlayerData[MAX_PLAYERS][pToggleHelper] = cache_get_field_content_int(0, "togglehelper");
-		PlayerData[MAX_PLAYERS][pTogglePoints] = cache_get_field_content_int(0, "togglepoints");
-		PlayerData[MAX_PLAYERS][pToggleTurfs] = cache_get_field_content_int(0, "toggleturfs");
-		PlayerData[MAX_PLAYERS][pToggleNewbie] = cache_get_field_content_int(0, "togglenewbie");
-		PlayerData[MAX_PLAYERS][pTogglePR] = cache_get_field_content_int(0, "togglewt");
-		PlayerData[MAX_PLAYERS][pToggleRadio] = cache_get_field_content_int(0, "toggleradio");
-		PlayerData[MAX_PLAYERS][pTogglePM] = cache_get_field_content_int(0, "togglepm");
-		PlayerData[MAX_PLAYERS][pToggleVIP] = cache_get_field_content_int(0, "togglevip");
-		PlayerData[MAX_PLAYERS][pToggleMusic] = cache_get_field_content_int(0, "togglemusic");
-		PlayerData[MAX_PLAYERS][pToggleFaction] = cache_get_field_content_int(0, "togglefaction");
-		PlayerData[MAX_PLAYERS][pToggleNews] = cache_get_field_content_int(0, "togglenews");
-		PlayerData[MAX_PLAYERS][pToggleGlobal] = cache_get_field_content_int(0, "toggleglobal");
-		PlayerData[MAX_PLAYERS][pToggleCam] = cache_get_field_content_int(0, "togglecam");
-		PlayerData[MAX_PLAYERS][pToggleHUD] = cache_get_field_content_int(0, "togglehud");
-		PlayerData[MAX_PLAYERS][pToggleReports] = cache_get_field_content_int(0, "togglereports");
-		PlayerData[MAX_PLAYERS][pToggleWhisper] = cache_get_field_content_int(0, "togglewhisper");
-		PlayerData[MAX_PLAYERS][pCarLicense] = cache_get_field_content_int(0, "carlicense");
-		PlayerData[MAX_PLAYERS][pDonator] = cache_get_field_content_int(0, "vippackage");
-		PlayerData[MAX_PLAYERS][pVIPTime] = cache_get_field_content_int(0, "viptime");
-		PlayerData[MAX_PLAYERS][pVIPCooldown] = cache_get_field_content_int(0, "vipcooldown");
-		PlayerData[MAX_PLAYERS][pWeapons][0] = cache_get_field_content_int(0, "weapon_0");
-		PlayerData[MAX_PLAYERS][pWeapons][1] = cache_get_field_content_int(0, "weapon_1");
-		PlayerData[MAX_PLAYERS][pWeapons][2] = cache_get_field_content_int(0, "weapon_2");
-		PlayerData[MAX_PLAYERS][pWeapons][3] = cache_get_field_content_int(0, "weapon_3");
-		PlayerData[MAX_PLAYERS][pWeapons][4] = cache_get_field_content_int(0, "weapon_4");
-		PlayerData[MAX_PLAYERS][pWeapons][5] = cache_get_field_content_int(0, "weapon_5");
-		PlayerData[MAX_PLAYERS][pWeapons][6] = cache_get_field_content_int(0, "weapon_6");
-		PlayerData[MAX_PLAYERS][pWeapons][7] = cache_get_field_content_int(0, "weapon_7");
-		PlayerData[MAX_PLAYERS][pWeapons][8] = cache_get_field_content_int(0, "weapon_8");
-		PlayerData[MAX_PLAYERS][pWeapons][9] = cache_get_field_content_int(0, "weapon_9");
-		PlayerData[MAX_PLAYERS][pWeapons][10] = cache_get_field_content_int(0, "weapon_10");
-		PlayerData[MAX_PLAYERS][pWeapons][11] = cache_get_field_content_int(0, "weapon_11");
-		PlayerData[MAX_PLAYERS][pWeapons][12] = cache_get_field_content_int(0, "weapon_12");
-		PlayerData[MAX_PLAYERS][pAmmo][0] = cache_get_field_content_int(0, "ammo_0");
-		PlayerData[MAX_PLAYERS][pAmmo][1] = cache_get_field_content_int(0, "ammo_1");
-		PlayerData[MAX_PLAYERS][pAmmo][2] = cache_get_field_content_int(0, "ammo_2");
-		PlayerData[MAX_PLAYERS][pAmmo][3] = cache_get_field_content_int(0, "ammo_3");
-		PlayerData[MAX_PLAYERS][pAmmo][4] = cache_get_field_content_int(0, "ammo_4");
-		PlayerData[MAX_PLAYERS][pAmmo][5] = cache_get_field_content_int(0, "ammo_5");
-		PlayerData[MAX_PLAYERS][pAmmo][6] = cache_get_field_content_int(0, "ammo_6");
-		PlayerData[MAX_PLAYERS][pAmmo][7] = cache_get_field_content_int(0, "ammo_7");
-		PlayerData[MAX_PLAYERS][pAmmo][8] = cache_get_field_content_int(0, "ammo_8");
-		PlayerData[MAX_PLAYERS][pAmmo][9] = cache_get_field_content_int(0, "ammo_9");
-		PlayerData[MAX_PLAYERS][pAmmo][10] = cache_get_field_content_int(0, "ammo_10");
-		PlayerData[MAX_PLAYERS][pAmmo][11] = cache_get_field_content_int(0, "ammo_11");
-		PlayerData[MAX_PLAYERS][pAmmo][12] = cache_get_field_content_int(0, "ammo_12");
-		PlayerData[MAX_PLAYERS][pFaction] = cache_get_field_content_int(0, "faction");
-		PlayerData[MAX_PLAYERS][pFactionRank] = cache_get_field_content_int(0, "factionrank");
-		PlayerData[MAX_PLAYERS][pFactionLeader] = cache_get_field_content_int(0, "factionleader");
-		PlayerData[MAX_PLAYERS][pGang] = cache_get_field_content_int(0, "gang");
-		PlayerData[MAX_PLAYERS][pGangRank] = cache_get_field_content_int(0, "gangrank");
-		PlayerData[MAX_PLAYERS][pDivision] = cache_get_field_content_int(0, "division");
-		PlayerData[MAX_PLAYERS][pCrew] = cache_get_field_content_int(0, "crew");
-		PlayerData[MAX_PLAYERS][pContracted] = cache_get_field_content_int(0, "contracted");
-		PlayerData[MAX_PLAYERS][pBombs] = cache_get_field_content_int(0, "bombs");
-		PlayerData[MAX_PLAYERS][pCompletedHits] = cache_get_field_content_int(0, "completedhits");
-		PlayerData[MAX_PLAYERS][pFailedHits] = cache_get_field_content_int(0, "failedhits");
-		PlayerData[MAX_PLAYERS][pReports] = cache_get_field_content_int(0, "reports");
-		PlayerData[MAX_PLAYERS][pNewbies] = cache_get_field_content_int(0, "newbies");
-		PlayerData[MAX_PLAYERS][pHelpRequests] = cache_get_field_content_int(0, "helprequests");
-		PlayerData[MAX_PLAYERS][pSpeedometer] = cache_get_field_content_int(0, "speedometer");
-		PlayerData[MAX_PLAYERS][pFactionMod] = cache_get_field_content_int(0, "factionmod");
-		PlayerData[MAX_PLAYERS][pWebDev] = cache_get_field_content_int(0, "webdev");
-		PlayerData[MAX_PLAYERS][pGangMod] = cache_get_field_content_int(0, "gangmod");
-		PlayerData[MAX_PLAYERS][pBanAppealer] = cache_get_field_content_int(0, "banappealer");
-		PlayerData[MAX_PLAYERS][pFormerAdmin] = cache_get_field_content_int(0, "FormerAdmin");
-		PlayerData[MAX_PLAYERS][pDeveloper] = cache_get_field_content_int(0, "scripter");
-		PlayerData[MAX_PLAYERS][pWeedPlanted] = cache_get_field_content_int(0, "weedplanted");
-		PlayerData[MAX_PLAYERS][pWeedTime] = cache_get_field_content_int(0, "weedtime");
-		PlayerData[MAX_PLAYERS][pWeedGrams] = cache_get_field_content_int(0, "weedgrams");
-		PlayerData[MAX_PLAYERS][pWeedX] = cache_get_field_content_float(0, "weed_x");
-		PlayerData[MAX_PLAYERS][pWeedY] = cache_get_field_content_float(0, "weed_y");
-		PlayerData[MAX_PLAYERS][pWeedZ] = cache_get_field_content_float(0, "weed_z");
-		PlayerData[MAX_PLAYERS][pWeedA] = cache_get_field_content_float(0, "weed_a");
-		PlayerData[MAX_PLAYERS][pInventoryUpgrade] = cache_get_field_content_int(0, "inventoryupgrade");
-		PlayerData[MAX_PLAYERS][pAddictUpgrade] = cache_get_field_content_int(0, "addictupgrade");
-        PlayerData[MAX_PLAYERS][pTraderUpgrade] = cache_get_field_content_int(0, "traderupgrade");
-        PlayerData[MAX_PLAYERS][pAssetUpgrade] = cache_get_field_content_int(0, "assetupgrade");
-        PlayerData[MAX_PLAYERS][pLaborUpgrade] = cache_get_field_content_int(0, "laborupgrade");
-		PlayerData[MAX_PLAYERS][pDMWarnings] = cache_get_field_content_int(0, "dmwarnings");
-		PlayerData[MAX_PLAYERS][pWeaponRestricted] = cache_get_field_content_int(0, "weaponrestricted");
-		PlayerData[MAX_PLAYERS][pReferralUID] = cache_get_field_content_int(0, "referral_uid");
-		PlayerData[MAX_PLAYERS][pWatch] = cache_get_field_content_int(0, "watch");
-		PlayerData[MAX_PLAYERS][pGPS] = cache_get_field_content_int(0, "gps");
-		PlayerData[MAX_PLAYERS][pClothes] = cache_get_field_content_int(0, "clothes");
-		PlayerData[MAX_PLAYERS][pShowLands] = cache_get_field_content_int(0, "showlands");
-		PlayerData[MAX_PLAYERS][pShowTurfs] = cache_get_field_content_int(0, "showturfs");
-		PlayerData[MAX_PLAYERS][pWatchOn] = cache_get_field_content_int(0, "watchon");
-		PlayerData[MAX_PLAYERS][pGPSOn] = cache_get_field_content_int(0, "gpson");
-		PlayerData[MAX_PLAYERS][pDoubleXP] = cache_get_field_content_int(0, "doublexp");
-        PlayerData[MAX_PLAYERS][pDetectiveCooldown] = cache_get_field_content_int(0, "detectivecooldown");
-        PlayerData[MAX_PLAYERS][pThiefCooldown] = cache_get_field_content_int(0, "thiefcooldown");
-        PlayerData[MAX_PLAYERS][pCocaineCooldown] = cache_get_field_content_int(0, "crackcooldown");
-    	PlayerData[MAX_PLAYERS][pGasCan] = cache_get_field_content_int(0, "gascan");
-    	PlayerData[MAX_PLAYERS][pDuty] = cache_get_field_content_int(0, "duty");
-    	PlayerData[MAX_PLAYERS][pBandana] = cache_get_field_content_int(0, "bandana");
-        PlayerData[MAX_PLAYERS][pPassport] = cache_get_field_content_int(0, "passport");
-        PlayerData[MAX_PLAYERS][pPassportLevel] = cache_get_field_content_int(0, "passportlevel");
-        PlayerData[MAX_PLAYERS][pPassportSkin] = cache_get_field_content_int(0, "passportskin");
-        PlayerData[MAX_PLAYERS][pPassportPhone] = cache_get_field_content_int(0, "passportphone");
-        PlayerData[MAX_PLAYERS][pNewbieMuteTime] = cache_get_field_content_int(0, "newbiemutetime");
-		PlayerData[MAX_PLAYERS][pReportMuteTime] = cache_get_field_content_int(0, "reportmutetime");
-		PlayerData[MAX_PLAYERS][pGlobalMuteTime] = cache_get_field_content_int(0, "globalmutetime");
-		PlayerData[MAX_PLAYERS][pAdminHide] = cache_get_field_content_int(0, "adminhide");
-		PlayerData[MAX_PLAYERS][pInsurance] = cache_get_field_content_int(0, "insurance");
-		PlayerData[MAX_PLAYERS][pRope] = cache_get_field_content_int(0, "rope");
-		PlayerData[MAX_PLAYERS][pTotalPatients] = cache_get_field_content_int(0, "totalpatients");
-		PlayerData[MAX_PLAYERS][pTotalFires] = cache_get_field_content_int(0, "totalfires");
-
-		strcpy(PlayerData[MAX_PLAYERS][pUsername], username, MAX_PLAYER_NAME);
-		DisplayStats(MAX_PLAYERS, playerid);
-	}
-}
-
 forward OnAdminOfflineFlag(playerid, username[], desc[]);
 public OnAdminOfflineFlag(playerid, username[], desc[])
 {
@@ -12814,7 +12796,6 @@ public OnAdminSetAdminLevel(playerid, username[], level)
 	    Log_Write("log_admin", "%s (uid: %i) has offline set %s's admin level to %i.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], username, level);
 	}
 }
-
 
 forward OnAdminCreateLand(playerid, landid, price, Float:minx, Float:miny, Float:maxx, Float:maxy, Float:heightx, Float:heighty, Float:heightz);
 public OnAdminCreateLand(playerid, landid, price, Float:minx, Float:miny, Float:maxx, Float:maxy, Float:heightx, Float:heighty, Float:heightz)
@@ -13075,8 +13056,6 @@ public OnAdminListShots(playerid, targetid)
 	}
 }
 
-
-
 forward OnAdminCheckBan(playerid, string[]);
 public OnAdminCheckBan(playerid, string[])
 {
@@ -13113,6 +13092,86 @@ public OnAdminCheckBan(playerid, string[])
 	}
 }
 
+/*stock UnbanPlayer(playerid, username[])
+{
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT * FROM users_bans WHERE username = '%e'", username);
+    mysql_tquery(connectionID, queryBuffer, "UnbanPlayer", "is", playerid, username);
+}
+
+DB:UnbanPlayer(playerid, username[])
+{
+    if (cache_get_row_count(connectionID))
+    {
+        //new userid   = cache_get_field_content_int(0, "userid");
+        new duration = cache_get_field_content_int(0, "duration");
+        new isbanned = cache_get_field_content_int(0, "isbanned");
+        new userip[16];
+        cache_get_field_content(0, "userip", userip);
+
+        if (duration == PERMANENT_BAN_DURATION && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
+        {
+            return SendClientMessage(playerid, COLOR_GREY, "This player is permanently banned. Permabans may only be lifted by management.");
+        }
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "DELETE FROM users_bans WHERE userid = %i", userid);
+		mysql_tquery(connectionID, queryBuffer);
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "DELETE FROM users_bans WHERE userid = %i", cache_get_row_int(0, 0));
+		mysql_tquery(connectionID, queryBuffer);
+
+        if (!isbanned)
+        {
+            return SendClientMessage(playerid, COLOR_GREY, "This player is not banned. Cleaning ban cache.");
+        }
+        RemoveIPBan(userip);
+        LogPlayerPunishment(playerid, userid, userip,
+            "UNBAN", "%s was unbanned by %s %s.",
+            username, GetAdminRank(playerid), GetRPName(playerid));
+		
+        SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s %s has unbanned %s.", GetAdmCmdRank(playerid), GetRPName(playerid), username);
+    }
+    else
+    {
+        SendClientMessage(playerid, COLOR_GREY, "There is no banned player known by that name.");
+    }
+
+    return 1;
+}*/
+
+forward OnAdminUnbanUser(playerid, username[]);
+public OnAdminUnbanUser(playerid, username[])
+{
+	if(cache_get_row_count(connectionID))
+	{
+	    new duration = cache_get_field_content_int(0, "duration");
+
+	    if(duration == PERMANENT_BAN_DURATION && PlayerData[playerid][pAdmin] < GENERAL_MANAGER)
+	    {
+	        return SendClientMessage(playerid, COLOR_GREY, "This player is permanently banned. Permabans may only be lifted by management.");
+		}
+
+		new userid = cache_get_field_content_int(0, "userid");
+
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "DELETE FROM users_bans WHERE userid = %i", userid);
+		mysql_tquery(connectionID, queryBuffer);
+
+		new userip[16];
+		cache_get_field_content(0, "userip", userip, sizeof(userip));
+		RemoveIPBan(userip);
+
+		SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s %s has unbanned %s.", GetAdmCmdRank(playerid), GetRPName(playerid), username);
+		Log_Write("log_punishments", "%s (uid: %i) has unbanned %s.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], username);
+	}
+	else
+	{
+	    SendClientMessage(playerid, COLOR_GREY, "There is no banned player known by that name.");
+	}
+
+	return 1;
+}
+
+/*
+
+// Old Methode
+
 forward OnAdminUnbanUser(playerid, username[]);
 public OnAdminUnbanUser(playerid, username[])
 {
@@ -13123,12 +13182,14 @@ public OnAdminUnbanUser(playerid, username[])
 	        return SendClientMessage(playerid, COLOR_GREY, "This player is permanently banned. Permabans may only be lifted by management.");
 		}
 
-		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "DELETE FROM bans WHERE id = %i", cache_get_row_int(0, 0));
+		new userid   = cache_get_field_content_int(0, "userid");
+
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "DELETE FROM users_bans WHERE userid = %i", userid);
 		mysql_tquery(connectionID, queryBuffer);
 
-		new ip[16];
-		cache_get_row(0, 2, ip);
-		RemoveIPBan(ip);
+		new userip[16];
+		cache_get_row(0, 2, userip);
+		RemoveIPBan(userip);
 
 		SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s %s has unbanned %s.",GetAdmCmdRank(playerid), GetRPName(playerid), username);
 		Log_Write("log_punishments", "%s (uid: %i) has unbanned %s.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], username);
@@ -13140,6 +13201,8 @@ public OnAdminUnbanUser(playerid, username[])
 
 	return 1;
 }
+
+*/
 
 forward OnAdminLockAccount(playerid, username[]);
 public OnAdminLockAccount(playerid, username[])
@@ -13205,7 +13268,38 @@ public OnAdminChangeName(playerid, targetid, name[])
 	}
 }
 
-publish OnAdminOfflineBan(playerid, username[], duration, reason[])
+forward OBanCheckPlayer(playerid, username[], duration, reason[]);
+public OBanCheckPlayer(playerid, username[], duration, reason[])
+{
+    if (cache_get_row_count(connectionID))
+    {
+		if (!IsAdmin(playerid, cache_get_field_content_int(0, "adminlevel") + 1))
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "The player specified has a higher admin level than you. They cannot be banned.");
+		}
+
+		new userid = cache_get_field_content_int(0, "uid");
+		new userip[16];
+		cache_get_field_content(0, "ip", userip);
+
+		OfflineBan(userid, username, userip, reason, playerid, duration);
+
+		/*LogPlayerPunishment(playerid, userid, userip,
+			"BAN", "%s was offline banned by %s %s for %d days. Reason: %s",
+			username, GetAdminRank(playerid), GetRPName(playerid), duration, reason);
+		*/
+		
+		SendAdminMessage(COLOR_LIGHTRED,"AdmCmd: %s (IP: %s) was offline banned by %s %s. Reason: %s",username, userip, GetAdmCmdRank(playerid), GetPlayerNameEx(playerid), reason);
+	}
+	else 
+	{
+		SendClientMessage(playerid, COLOR_GREY, "That player is not registered.");
+	}
+
+    return 1;
+}
+
+/*publish OnAdminOfflineBan(playerid, username[], duration, reason[])
 {
     if(cache_get_row_count(connectionID))
 	{
@@ -13219,7 +13313,7 @@ publish OnAdminOfflineBan(playerid, username[], duration, reason[])
 
         OfflineBan(username, ip, reason, playerid, duration);
 
-    	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO log_bans VALUES(null, %i, NOW(), '%s (IP: %s) was banned by %s, reason: %e')", cache_get_field_content_int(0, "uid"), username, ip, GetPlayerNameEx(playerid), reason);
+    	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO log_bans VALUES(null, %i, NOW(), '%s (IP: %s) was banned by %s, reason: %e')", cache_get_field_content_int(0, "uid"), username, userip, GetPlayerNameEx(playerid), reason);
 		mysql_tquery(connectionID, queryBuffer);
 
         SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s was offline banned by %s %s, reason: %s", username, GetAdmCmdRank(playerid), GetPlayerNameEx(playerid), reason);
@@ -13231,7 +13325,7 @@ publish OnAdminOfflineBan(playerid, username[], duration, reason[])
 	}
 
 	return 1;
-}
+}*/
 
 forward OnAdminOfflinePrison(playerid, username[], minutes, reason[]);
 public OnAdminOfflinePrison(playerid, username[], minutes, reason[])
@@ -13380,7 +13474,7 @@ public OnQueryFinished(threadid, extraid)
 		        HouseInfo[i][hMaterials] = cache_get_field_content_int(i, "materials");
                 HouseInfo[i][hWeed] = cache_get_field_content_int(i, "weed");
                 HouseInfo[i][hCocaine] = cache_get_field_content_int(i, "cocaine");
-                HouseInfo[i][hMeth] = cache_get_field_content_int(i, "meth");
+                HouseInfo[i][hHeroin] = cache_get_field_content_int(i, "heroin");
                 HouseInfo[i][hPainkillers] = cache_get_field_content_int(i, "painkillers");
                 HouseInfo[i][hWeapons][0] = cache_get_field_content_int(i, "weapon_1");
                 HouseInfo[i][hWeapons][1] = cache_get_field_content_int(i, "weapon_2");
@@ -13720,7 +13814,7 @@ public OnQueryFinished(threadid, extraid)
 		        GangInfo[gangid][gMaterials] = cache_get_field_content_int(i, "materials");
 		        GangInfo[gangid][gWeed] = cache_get_field_content_int(i, "weed");
 		        GangInfo[gangid][gCocaine] = cache_get_field_content_int(i, "cocaine");
-		        GangInfo[gangid][gMeth] = cache_get_field_content_int(i, "meth");
+		        GangInfo[gangid][gHeroin] = cache_get_field_content_int(i, "heroin");
 		        GangInfo[gangid][gPainkillers] = cache_get_field_content_int(i, "painkillers");
 		        GangInfo[gangid][gAlliance] = cache_get_field_content_int (i, "alliance");
 				GangInfo[gangid][gMatLevel] = cache_get_field_content_int (i, "matlevel");
@@ -13775,7 +13869,7 @@ public OnQueryFinished(threadid, extraid)
 		        GangInfo[gangid][gDrugWorld] = cache_get_field_content_int(i, "drugworld");
                 GangInfo[gangid][gDrugWeed] = cache_get_field_content_int(i, "drugweed");
                 GangInfo[gangid][gDrugCocaine] = cache_get_field_content_int(i, "drugcocaine");
-                GangInfo[gangid][gDrugMeth] = cache_get_field_content_int(i, "drugmeth");
+                GangInfo[gangid][gDrugHeroin] = cache_get_field_content_int(i, "drugHeroin");
                 GangInfo[gangid][gArmsMaterials] = cache_get_field_content_int(i, "armsmaterials");
                 GangInfo[gangid][gArmsPrices][0] = cache_get_field_content_int(i, "armsprice_1");
                 GangInfo[gangid][gArmsPrices][1] = cache_get_field_content_int(i, "armsprice_2");
@@ -13791,7 +13885,7 @@ public OnQueryFinished(threadid, extraid)
                 GangInfo[gangid][gArmsPrices][11] = cache_get_field_content_int(i, "armsprice_12");
                 GangInfo[gangid][gDrugPrices][0] = cache_get_field_content_int(i, "weed_price");
                 GangInfo[gangid][gDrugPrices][1] = cache_get_field_content_int(i, "cocaine_price");
-                GangInfo[gangid][gDrugPrices][2] = cache_get_field_content_int(i, "meth_price");
+                GangInfo[gangid][gDrugPrices][2] = cache_get_field_content_int(i, "heroin_price");
 
 		        GangInfo[gangid][gText][0] = Text3D:INVALID_3DTEXT_ID;
 		        GangInfo[gangid][gText][1] = Text3D:INVALID_3DTEXT_ID;
@@ -14557,8 +14651,6 @@ public OnQueryFinished(threadid, extraid)
 		{
 		    printf("[Script] %i vips removed.", rows);
 		}
-
-
 		case LOADCRATE_THREAD:
 		{
 		}
@@ -14575,22 +14667,6 @@ public OnQueryFinished(threadid, extraid)
 			else
 			{
 	  			printf("fucks");
-			}
-		}
-		case THREAD_GANGLOGS:
-		{
-		    new ganglogs[250], date[24], strings[1040];
-		    strings = "Date\tDescription";
-		    for(new i = 0; i < rows; i ++)
-		    {
-		        cache_get_field_content(i, "description", ganglogs);
-		        cache_get_field_content(i, "date", date);
-		        format(strings, sizeof(strings), "%s\n%s\t%s\n",strings, date, ganglogs);
-			    if(strlen(strings) > 0)
-				{
-					Dialog_Show(extraid, DIALOG_NONE, DIALOG_STYLE_TABLIST_HEADERS, "Testing Gang LOgs", strings, "Okay", "");
-					//else Dialog_Show(extraid, DIALOG_ADMINLIST, DIALOG_STYLE_TABLIST_HEADERS, "Admin Team", strings, "Okay", "");
-				}
 			}
 		}
 	}
@@ -14620,7 +14696,6 @@ public OnLoadPayphones()
 	    UpdatePayphone(i);
 	}
 }
-
 
 hook OnGameModeInit()
 {
@@ -14744,8 +14819,8 @@ hook OnGameModeInit()
 	printf("                                                      ");
 
     printf("____________________________________________________");
-    printf("| arp_next by BOURAOUI AL-Moez L.A                 |");
-    printf("| Gamemode loaded successfully.                     |");
+    printf("| arp_next by Khalil Zoldyck                       |");
+    printf("| Gamemode loaded successfully.                    |");
     printf("____________________________________________________");
     for(new o; o < CountDynamicObjects(); o++)
     {
@@ -14765,12 +14840,240 @@ hook OnGameModeInit()
 	return 1;
 }
 
-
-
 hook OnGameModeExit()
 {
 	mysql_close(connectionID);
 	return 1;
+}
+
+
+
+forward OnAdminOfflineCheck(playerid, username[]);
+public OnAdminOfflineCheck(playerid, username[])
+{
+    if(!cache_get_row_count(connectionID))
+	{
+	    SendClientMessage(playerid, COLOR_GREY, "The player specified doesn't exist.");
+	}
+	else
+	{
+	    // At first I didn't know how I was going to do this. But then I came up with a plan.
+	    // Load everything into an unused player slot, use DisplayStats as normal, then destroy the data.
+	    // This ensures that whenever I add a new thing to /stats for instance, I don't have to maintain
+	    // two stats functions, I can just call DisplayStats and let the work do itself.
+
+	    PlayerData[MAX_PLAYERS][pID] = cache_get_field_content_int(0, "uid");
+		PlayerData[MAX_PLAYERS][pSetup] = cache_get_field_content_int(0, "setup");
+        PlayerData[MAX_PLAYERS][pGender] = cache_get_field_content_int(0, "gender");
+        PlayerData[MAX_PLAYERS][pAge] = cache_get_field_content_int(0, "age");
+        PlayerData[MAX_PLAYERS][pSkin] = cache_get_field_content_int(0, "skin");
+        PlayerData[MAX_PLAYERS][pCameraX] = cache_get_field_content_float(0, "camera_x");
+        PlayerData[MAX_PLAYERS][pCameraY] = cache_get_field_content_float(0, "camera_y");
+        PlayerData[MAX_PLAYERS][pCameraZ] = cache_get_field_content_float(0, "camera_z");
+        PlayerData[MAX_PLAYERS][pPosX] = cache_get_field_content_float(0, "pos_x");
+        PlayerData[MAX_PLAYERS][pPosY] = cache_get_field_content_float(0, "pos_y");
+        PlayerData[MAX_PLAYERS][pPosZ] = cache_get_field_content_float(0, "pos_z");
+        PlayerData[MAX_PLAYERS][pPosA] = cache_get_field_content_float(0, "pos_a");
+        PlayerData[MAX_PLAYERS][pInterior] = cache_get_field_content_int(0, "interior");
+        PlayerData[MAX_PLAYERS][pWorld] = cache_get_field_content_int(0, "world");
+        PlayerData[MAX_PLAYERS][pCash] = cache_get_field_content_int(0, "cash");
+        PlayerData[MAX_PLAYERS][pBank] = cache_get_field_content_int(0, "bank");
+        PlayerData[MAX_PLAYERS][pPaycheck] = cache_get_field_content_int(0, "paycheck");
+        PlayerData[MAX_PLAYERS][pLevel] = cache_get_field_content_int(0, "level");//pVehicleCMD
+        PlayerData[MAX_PLAYERS][pAdminStrike] = cache_get_field_content_int(0, "adminstrike");
+
+        PlayerData[MAX_PLAYERS][pGunLicense] = cache_get_field_content_int(0, "gunlicense");
+        PlayerData[MAX_PLAYERS][pvLock] = cache_get_field_content_int(0, "vehlock");
+        PlayerData[MAX_PLAYERS][pGraphic] = cache_get_field_content_int(0, "graphic");
+        PlayerData[MAX_PLAYERS][pEXP] = cache_get_field_content_int(0, "exp");
+        PlayerData[MAX_PLAYERS][pMinutes] = cache_get_field_content_int(0, "minutes");
+        PlayerData[MAX_PLAYERS][pHours] = cache_get_field_content_int(0, "hours");
+        PlayerData[MAX_PLAYERS][pAdmin] = cache_get_field_content_int(0, "adminlevel");
+        PlayerData[MAX_PLAYERS][pHelper] = cache_get_field_content_int(0, "helperlevel");
+        PlayerData[MAX_PLAYERS][pHealth] = cache_get_field_content_float(0, "health");
+        PlayerData[MAX_PLAYERS][pArmor] = cache_get_field_content_float(0, "armor");
+		PlayerData[MAX_PLAYERS][pUpgradePoints] = cache_get_field_content_int(0, "upgradepoints");
+		PlayerData[MAX_PLAYERS][pWarnings] = cache_get_field_content_int(0, "warnings");
+		PlayerData[MAX_PLAYERS][pInjured] = cache_get_field_content_int(0, "injured");
+		PlayerData[MAX_PLAYERS][pHospital] = cache_get_field_content_int(0, "hospital");
+		PlayerData[MAX_PLAYERS][pSpawnHealth] = cache_get_field_content_float(0, "spawnhealth");
+        PlayerData[MAX_PLAYERS][pSpawnArmor] = cache_get_field_content_float(0, "spawnarmor");
+        PlayerData[MAX_PLAYERS][pJailType] = cache_get_field_content_int(0, "jailtype");
+        PlayerData[MAX_PLAYERS][pJailTime] = cache_get_field_content_int(0, "jailtime");
+        PlayerData[MAX_PLAYERS][pNewbieMuted] = cache_get_field_content_int(0, "newbiemuted");
+        PlayerData[MAX_PLAYERS][pHelpMuted] = cache_get_field_content_int(0, "helpmuted");
+        PlayerData[MAX_PLAYERS][pAdMuted] = cache_get_field_content_int(0, "admuted");
+        PlayerData[MAX_PLAYERS][pLiveMuted] = cache_get_field_content_int(0, "livemuted");
+        PlayerData[MAX_PLAYERS][pGlobalMuted] = cache_get_field_content_int(0, "globalmuted");
+        PlayerData[MAX_PLAYERS][pReportMuted] = cache_get_field_content_int(0, "reportmuted");
+        PlayerData[MAX_PLAYERS][pReportWarns] = cache_get_field_content_int(0, "reportwarns");
+        PlayerData[MAX_PLAYERS][pFightStyle] = cache_get_field_content_int(0, "fightstyle");
+		PlayerData[MAX_PLAYERS][pPhone] = cache_get_field_content_int(0, "phone");
+		PlayerData[MAX_PLAYERS][pJob] = cache_get_field_content_int(0, "job");
+		PlayerData[MAX_PLAYERS][pSecondJob] = cache_get_field_content_int(0, "secondjob");
+		PlayerData[MAX_PLAYERS][pCrimes] = cache_get_field_content_int(0, "crimes");
+		PlayerData[MAX_PLAYERS][pArrested] = cache_get_field_content_int(0, "arrested");
+		PlayerData[MAX_PLAYERS][pWantedLevel] = cache_get_field_content_int(0, "wantedlevel");		
+		PlayerData[MAX_PLAYERS][pNotoriety] = cache_get_field_content_int(0, "notoriety");		
+		PlayerData[MAX_PLAYERS][pMaterials] = cache_get_field_content_int(0, "materials");
+		PlayerData[MAX_PLAYERS][pWeed] = cache_get_field_content_int(0, "weed");
+		PlayerData[MAX_PLAYERS][pCocaine] = cache_get_field_content_int(0, "cocaine");
+		PlayerData[MAX_PLAYERS][pHeroin] = cache_get_field_content_int(0, "heroin");
+		PlayerData[MAX_PLAYERS][pPainkillers] = cache_get_field_content_int(0, "painkillers");
+		PlayerData[MAX_PLAYERS][pSeeds] = cache_get_field_content_int(0, "seeds");
+		PlayerData[MAX_PLAYERS][pEphedrine] = cache_get_field_content_int(0, "ephedrine");
+		PlayerData[MAX_PLAYERS][pMuriaticAcid] = cache_get_field_content_int(0, "muriaticacid");
+		PlayerData[MAX_PLAYERS][pBakingSoda] = cache_get_field_content_int(0, "bakingsoda");
+		PlayerData[MAX_PLAYERS][pCigars] = cache_get_field_content_int(0, "cigars");
+		PlayerData[MAX_PLAYERS][pPrivateRadio] = cache_get_field_content_int(0, "walkietalkie");
+		PlayerData[MAX_PLAYERS][pChannel] = cache_get_field_content_int(0, "channel");
+		PlayerData[MAX_PLAYERS][pRentingHouse] = cache_get_field_content_int(0, "rentinghouse");
+		PlayerData[MAX_PLAYERS][pSpraycans] = cache_get_field_content_int(0, "spraycans");
+		PlayerData[MAX_PLAYERS][pBoombox] = cache_get_field_content_int(0, "boombox");
+		PlayerData[MAX_PLAYERS][pMP3Player] = cache_get_field_content_int(0, "mp3player");
+		PlayerData[MAX_PLAYERS][pPhonebook] = cache_get_field_content_int(0, "phonebook");
+		PlayerData[MAX_PLAYERS][pFishingRod] = cache_get_field_content_int(0, "fishingrod");
+		PlayerData[MAX_PLAYERS][pFishingBait] = cache_get_field_content_int(0, "fishingbait");
+		PlayerData[MAX_PLAYERS][pFishWeight] = cache_get_field_content_int(0, "fishweight");
+		PlayerData[MAX_PLAYERS][pComponents] = cache_get_field_content_int(0, "components");
+		PlayerData[MAX_PLAYERS][pSweep] = cache_get_field_content_int(0, "sweep");
+		PlayerData[MAX_PLAYERS][pSweepLeft] = cache_get_field_content_int(0, "sweepleft");
+		PlayerData[MAX_PLAYERS][pRccam] = cache_get_field_content_int(0, "rccam");
+		PlayerData[MAX_PLAYERS][pCondom] = cache_get_field_content_int(0, "condom");
+
+		PlayerData[MAX_PLAYERS][pMechanicSkill] = cache_get_field_content_int(0, "mechanicskill");
+		PlayerData[MAX_PLAYERS][pSmugglerSkill] = cache_get_field_content_int(0, "smugglerskill");
+		PlayerData[MAX_PLAYERS][pWeaponSkill] = cache_get_field_content_int(0, "weaponskill");
+		PlayerData[MAX_PLAYERS][pDrugDealerSkill] = cache_get_field_content_int(0, "drugdealerskill");
+		PlayerData[MAX_PLAYERS][pDetectiveSkill] = cache_get_field_content_int(0, "detectiveskill");
+		PlayerData[MAX_PLAYERS][pFarmerSkill] = cache_get_field_content_int(0, "farmerskill");
+		PlayerData[MAX_PLAYERS][pLawyerSkill] = cache_get_field_content_int(0, "lawyerskill");
+		PlayerData[MAX_PLAYERS][pForkliftSkill] = cache_get_field_content_int(0, "forkliftskill");
+		PlayerData[MAX_PLAYERS][pCarJackerSkill] = cache_get_field_content_int(0, "carjackerskill");
+		PlayerData[MAX_PLAYERS][pCraftSkill] = cache_get_field_content_int(0, "craftskill");
+		PlayerData[MAX_PLAYERS][pPizzaSkill] = cache_get_field_content_int(0, "pizzaskill");
+		PlayerData[MAX_PLAYERS][pTruckerSkill] = cache_get_field_content_int(0, "truckerskill");
+		PlayerData[MAX_PLAYERS][pHookerSkill] = cache_get_field_content_int(0, "hookerskill");
+		PlayerData[MAX_PLAYERS][pRobberySkill] = cache_get_field_content_int(0, "robberyskill");
+		PlayerData[MAX_PLAYERS][pFishingSkill] = cache_get_field_content_int(0, "fishingskill");
+		
+		PlayerData[MAX_PLAYERS][pToggleTextdraws] = cache_get_field_content_int(0, "toggletextdraws");
+		PlayerData[MAX_PLAYERS][pToggleOOC] = cache_get_field_content_int(0, "toggleooc");
+		PlayerData[MAX_PLAYERS][pTogglePhone] = cache_get_field_content_int(0, "togglephone");
+		PlayerData[MAX_PLAYERS][pToggleAdmin] = cache_get_field_content_int(0, "toggleadmin");
+		PlayerData[MAX_PLAYERS][pToggleHelper] = cache_get_field_content_int(0, "togglehelper");
+		PlayerData[MAX_PLAYERS][pTogglePoints] = cache_get_field_content_int(0, "togglepoints");
+		PlayerData[MAX_PLAYERS][pToggleTurfs] = cache_get_field_content_int(0, "toggleturfs");
+		PlayerData[MAX_PLAYERS][pToggleNewbie] = cache_get_field_content_int(0, "togglenewbie");
+		PlayerData[MAX_PLAYERS][pTogglePR] = cache_get_field_content_int(0, "togglewt");
+		PlayerData[MAX_PLAYERS][pToggleRadio] = cache_get_field_content_int(0, "toggleradio");
+		PlayerData[MAX_PLAYERS][pTogglePM] = cache_get_field_content_int(0, "togglepm");
+		PlayerData[MAX_PLAYERS][pToggleVIP] = cache_get_field_content_int(0, "togglevip");
+		PlayerData[MAX_PLAYERS][pToggleMusic] = cache_get_field_content_int(0, "togglemusic");
+		PlayerData[MAX_PLAYERS][pToggleFaction] = cache_get_field_content_int(0, "togglefaction");
+		PlayerData[MAX_PLAYERS][pToggleNews] = cache_get_field_content_int(0, "togglenews");
+		PlayerData[MAX_PLAYERS][pToggleGlobal] = cache_get_field_content_int(0, "toggleglobal");
+		PlayerData[MAX_PLAYERS][pToggleCam] = cache_get_field_content_int(0, "togglecam");
+		PlayerData[MAX_PLAYERS][pToggleHUD] = cache_get_field_content_int(0, "togglehud");
+		PlayerData[MAX_PLAYERS][pToggleReports] = cache_get_field_content_int(0, "togglereports");
+		PlayerData[MAX_PLAYERS][pToggleWhisper] = cache_get_field_content_int(0, "togglewhisper");
+		PlayerData[MAX_PLAYERS][pCarLicense] = cache_get_field_content_int(0, "carlicense");
+		PlayerData[MAX_PLAYERS][pDonator] = cache_get_field_content_int(0, "vippackage");
+		PlayerData[MAX_PLAYERS][pVIPTime] = cache_get_field_content_int(0, "viptime");
+		PlayerData[MAX_PLAYERS][pVIPCooldown] = cache_get_field_content_int(0, "vipcooldown");
+		PlayerData[MAX_PLAYERS][pWeapons][0] = cache_get_field_content_int(0, "weapon_0");
+		PlayerData[MAX_PLAYERS][pWeapons][1] = cache_get_field_content_int(0, "weapon_1");
+		PlayerData[MAX_PLAYERS][pWeapons][2] = cache_get_field_content_int(0, "weapon_2");
+		PlayerData[MAX_PLAYERS][pWeapons][3] = cache_get_field_content_int(0, "weapon_3");
+		PlayerData[MAX_PLAYERS][pWeapons][4] = cache_get_field_content_int(0, "weapon_4");
+		PlayerData[MAX_PLAYERS][pWeapons][5] = cache_get_field_content_int(0, "weapon_5");
+		PlayerData[MAX_PLAYERS][pWeapons][6] = cache_get_field_content_int(0, "weapon_6");
+		PlayerData[MAX_PLAYERS][pWeapons][7] = cache_get_field_content_int(0, "weapon_7");
+		PlayerData[MAX_PLAYERS][pWeapons][8] = cache_get_field_content_int(0, "weapon_8");
+		PlayerData[MAX_PLAYERS][pWeapons][9] = cache_get_field_content_int(0, "weapon_9");
+		PlayerData[MAX_PLAYERS][pWeapons][10] = cache_get_field_content_int(0, "weapon_10");
+		PlayerData[MAX_PLAYERS][pWeapons][11] = cache_get_field_content_int(0, "weapon_11");
+		PlayerData[MAX_PLAYERS][pWeapons][12] = cache_get_field_content_int(0, "weapon_12");
+		PlayerData[MAX_PLAYERS][pAmmo][0] = cache_get_field_content_int(0, "ammo_0");
+		PlayerData[MAX_PLAYERS][pAmmo][1] = cache_get_field_content_int(0, "ammo_1");
+		PlayerData[MAX_PLAYERS][pAmmo][2] = cache_get_field_content_int(0, "ammo_2");
+		PlayerData[MAX_PLAYERS][pAmmo][3] = cache_get_field_content_int(0, "ammo_3");
+		PlayerData[MAX_PLAYERS][pAmmo][4] = cache_get_field_content_int(0, "ammo_4");
+		PlayerData[MAX_PLAYERS][pAmmo][5] = cache_get_field_content_int(0, "ammo_5");
+		PlayerData[MAX_PLAYERS][pAmmo][6] = cache_get_field_content_int(0, "ammo_6");
+		PlayerData[MAX_PLAYERS][pAmmo][7] = cache_get_field_content_int(0, "ammo_7");
+		PlayerData[MAX_PLAYERS][pAmmo][8] = cache_get_field_content_int(0, "ammo_8");
+		PlayerData[MAX_PLAYERS][pAmmo][9] = cache_get_field_content_int(0, "ammo_9");
+		PlayerData[MAX_PLAYERS][pAmmo][10] = cache_get_field_content_int(0, "ammo_10");
+		PlayerData[MAX_PLAYERS][pAmmo][11] = cache_get_field_content_int(0, "ammo_11");
+		PlayerData[MAX_PLAYERS][pAmmo][12] = cache_get_field_content_int(0, "ammo_12");
+		PlayerData[MAX_PLAYERS][pFaction] = cache_get_field_content_int(0, "faction");
+		PlayerData[MAX_PLAYERS][pFactionRank] = cache_get_field_content_int(0, "factionrank");
+		PlayerData[MAX_PLAYERS][pFactionLeader] = cache_get_field_content_int(0, "factionleader");
+		PlayerData[MAX_PLAYERS][pGang] = cache_get_field_content_int(0, "gang");
+		PlayerData[MAX_PLAYERS][pGangRank] = cache_get_field_content_int(0, "gangrank");
+		PlayerData[MAX_PLAYERS][pDivision] = cache_get_field_content_int(0, "division");
+		PlayerData[MAX_PLAYERS][pCrew] = cache_get_field_content_int(0, "crew");
+		PlayerData[MAX_PLAYERS][pContracted] = cache_get_field_content_int(0, "contracted");
+		PlayerData[MAX_PLAYERS][pBombs] = cache_get_field_content_int(0, "bombs");
+		PlayerData[MAX_PLAYERS][pCompletedHits] = cache_get_field_content_int(0, "completedhits");
+		PlayerData[MAX_PLAYERS][pFailedHits] = cache_get_field_content_int(0, "failedhits");
+		PlayerData[MAX_PLAYERS][pReports] = cache_get_field_content_int(0, "reports");
+		PlayerData[MAX_PLAYERS][pNewbies] = cache_get_field_content_int(0, "newbies");
+		PlayerData[MAX_PLAYERS][pHelpRequests] = cache_get_field_content_int(0, "helprequests");
+		PlayerData[MAX_PLAYERS][pSpeedometer] = cache_get_field_content_int(0, "speedometer");
+		PlayerData[MAX_PLAYERS][pFactionMod] = cache_get_field_content_int(0, "factionmod");
+		PlayerData[MAX_PLAYERS][pWebDev] = cache_get_field_content_int(0, "webdev");
+		PlayerData[MAX_PLAYERS][pGangMod] = cache_get_field_content_int(0, "gangmod");
+		PlayerData[MAX_PLAYERS][pBanAppealer] = cache_get_field_content_int(0, "banappealer");
+		PlayerData[MAX_PLAYERS][pFormerAdmin] = cache_get_field_content_int(0, "FormerAdmin");
+		PlayerData[MAX_PLAYERS][pDeveloper] = cache_get_field_content_int(0, "scripter");
+		PlayerData[MAX_PLAYERS][pWeedPlanted] = cache_get_field_content_int(0, "weedplanted");
+		PlayerData[MAX_PLAYERS][pWeedTime] = cache_get_field_content_int(0, "weedtime");
+		PlayerData[MAX_PLAYERS][pWeedGrams] = cache_get_field_content_int(0, "weedgrams");
+		PlayerData[MAX_PLAYERS][pWeedX] = cache_get_field_content_float(0, "weed_x");
+		PlayerData[MAX_PLAYERS][pWeedY] = cache_get_field_content_float(0, "weed_y");
+		PlayerData[MAX_PLAYERS][pWeedZ] = cache_get_field_content_float(0, "weed_z");
+		PlayerData[MAX_PLAYERS][pWeedA] = cache_get_field_content_float(0, "weed_a");
+		PlayerData[MAX_PLAYERS][pInventoryUpgrade] = cache_get_field_content_int(0, "inventoryupgrade");
+		PlayerData[MAX_PLAYERS][pAddictUpgrade] = cache_get_field_content_int(0, "addictupgrade");
+        PlayerData[MAX_PLAYERS][pTraderUpgrade] = cache_get_field_content_int(0, "traderupgrade");
+        PlayerData[MAX_PLAYERS][pAssetUpgrade] = cache_get_field_content_int(0, "assetupgrade");
+        PlayerData[MAX_PLAYERS][pLaborUpgrade] = cache_get_field_content_int(0, "laborupgrade");
+		PlayerData[MAX_PLAYERS][pDMWarnings] = cache_get_field_content_int(0, "dmwarnings");
+		PlayerData[MAX_PLAYERS][pWeaponRestricted] = cache_get_field_content_int(0, "weaponrestricted");
+		PlayerData[MAX_PLAYERS][pReferralUID] = cache_get_field_content_int(0, "referral_uid");
+		PlayerData[MAX_PLAYERS][pWatch] = cache_get_field_content_int(0, "watch");
+		PlayerData[MAX_PLAYERS][pGPS] = cache_get_field_content_int(0, "gps");
+		PlayerData[MAX_PLAYERS][pClothes] = cache_get_field_content_int(0, "clothes");
+		PlayerData[MAX_PLAYERS][pShowLands] = cache_get_field_content_int(0, "showlands");
+		PlayerData[MAX_PLAYERS][pShowTurfs] = cache_get_field_content_int(0, "showturfs");
+		PlayerData[MAX_PLAYERS][pWatchOn] = cache_get_field_content_int(0, "watchon");
+		PlayerData[MAX_PLAYERS][pGPSOn] = cache_get_field_content_int(0, "gpson");
+		PlayerData[MAX_PLAYERS][pDoubleXP] = cache_get_field_content_int(0, "doublexp");
+        PlayerData[MAX_PLAYERS][pDetectiveCooldown] = cache_get_field_content_int(0, "detectivecooldown");
+        PlayerData[MAX_PLAYERS][pThiefCooldown] = cache_get_field_content_int(0, "thiefcooldown");
+        PlayerData[MAX_PLAYERS][pCocaineCooldown] = cache_get_field_content_int(0, "crackcooldown");
+    	PlayerData[MAX_PLAYERS][pGasCan] = cache_get_field_content_int(0, "gascan");
+    	PlayerData[MAX_PLAYERS][pDuty] = cache_get_field_content_int(0, "duty");
+    	PlayerData[MAX_PLAYERS][pBandana] = cache_get_field_content_int(0, "bandana");
+        PlayerData[MAX_PLAYERS][pPassport] = cache_get_field_content_int(0, "passport");
+        PlayerData[MAX_PLAYERS][pPassportLevel] = cache_get_field_content_int(0, "passportlevel");
+        PlayerData[MAX_PLAYERS][pPassportSkin] = cache_get_field_content_int(0, "passportskin");
+        PlayerData[MAX_PLAYERS][pPassportPhone] = cache_get_field_content_int(0, "passportphone");
+		//
+        PlayerData[MAX_PLAYERS][pNewbieMuteTime] = cache_get_field_content_int(0, "newbiemutetime");
+		PlayerData[MAX_PLAYERS][pReportMuteTime] = cache_get_field_content_int(0, "reportmutetime");
+		PlayerData[MAX_PLAYERS][pGlobalMuteTime] = cache_get_field_content_int(0, "globalmutetime");
+		PlayerData[MAX_PLAYERS][pAdminHide] = cache_get_field_content_int(0, "adminhide");
+		PlayerData[MAX_PLAYERS][pInsurance] = cache_get_field_content_int(0, "insurance");
+		PlayerData[MAX_PLAYERS][pRope] = cache_get_field_content_int(0, "rope");
+		PlayerData[MAX_PLAYERS][pTotalPatients] = cache_get_field_content_int(0, "totalpatients");
+		PlayerData[MAX_PLAYERS][pTotalFires] = cache_get_field_content_int(0, "totalfires");
+
+		strcpy(PlayerData[MAX_PLAYERS][pUsername], username, MAX_PLAYER_NAME);
+		DisplayStats(MAX_PLAYERS, playerid);
+	}
 }
 
 PlayNearbySound(playerid, soundid)
@@ -14790,6 +15093,7 @@ PlayNearbySound(playerid, soundid)
 		}
 	}
 }
+
 forward HandlePhoneRing(playerid);
 public HandlePhoneRing(playerid)
 {
@@ -14867,7 +15171,7 @@ public OnPhoneResponse(playerid, number)
 
 IsValidUsername(username[])
 {
-    if(strcmp(username, "Mike_Zodiac", true)==0) return true;
+    if(strcmp(username, "Khalil_Zoldyck", true)==0) return true;
     new arrForbiddenNames[][] = {
             "com1", "com2", "com3", "com4",
             "com5", "com6", "com7", "com8",
@@ -14875,7 +15179,7 @@ IsValidUsername(username[])
             "lpt7", "lpt8", "lpt9", "nul",
             "clock$", "aux", "prn", "con",
             "InvalidNick", "BannedPlayer","rex",
-            "Mike","Zodiac","Bot"
+            "Khalil","Zoldyck","Bot"
         },
         iLength,
         i;
@@ -15054,8 +15358,6 @@ hook OnRemoveBuildings(playerid)
 	RemoveBuildingForPlayer(playerid, 5422, 2071.4766, -1831.4219, 14.5625, 0.25);
 	RemoveBuildingForPlayer(playerid, 11327, -2026.9141, 129.4063, 30.4531, 0.25);
 	RemoveBuildingForPlayer(playerid, 11319, -1904.5313, 277.8984, 42.9531, 0.25);
-
-
 
 	// House objects
 	RemoveBuildingForPlayer(playerid, 14862, 245.5547, 300.8594, 998.8359, 0.25); // int 1
@@ -15322,7 +15624,7 @@ hook OnPlayerInit(playerid)
 	PlayerData[playerid][pMaterials] = 0;
 	PlayerData[playerid][pWeed] = 0;
 	PlayerData[playerid][pCocaine] = 0;
-	PlayerData[playerid][pMeth] = 0;
+	PlayerData[playerid][pHeroin] = 0;
 	PlayerData[playerid][pPainkillers] = 0;
 	PlayerData[playerid][pSeeds] = 0;
 	PlayerData[playerid][pEphedrine] = 0;
@@ -15544,7 +15846,7 @@ hook OnPlayerInit(playerid)
     PlayerData[playerid][pWeedObject] = INVALID_OBJECT_ID;
     PlayerData[playerid][pPickPlant] = INVALID_PLAYER_ID;
     PlayerData[playerid][pPickTime] = 0;
-    PlayerData[playerid][pCookMeth] = 0;
+    PlayerData[playerid][pCookHeroin] = 0;
     PlayerData[playerid][pCookTime] = 0;
     PlayerData[playerid][pCookGrams] = 0;
     PlayerData[playerid][pDrugsUsed] = 0;
@@ -15906,7 +16208,7 @@ hook OnPlayerDisconnect(playerid, reason)
 		{
 		    OnUndercover(playerid, 0, "", 0, 0.0, 0.0);
 		}
-		if(PlayerData[playerid][pHurt] - 45 > 0)
+		if(PlayerData[playerid][pHurt] - 5 > 0)
 		{
 		    SendAdminMessage(COLOR_YELLOW, "AdmWarning: %s possibly left the server while in a gunfight.", GetRPName(playerid));
 			PlayerData[playerid][pInjured] = gettime();
@@ -16038,7 +16340,7 @@ LoadGeneralTextdraws()
 
  	/////////////////////////////////////////////
     new welc[128];
-    format(welc, sizeof(welc), "Welcome to ~g~%s~w~!", GetServerName());
+    format(welc, sizeof(welc), "Welcome to ~g~Arabica RolePlay ~w~!");
 	welcomenew = TextDrawCreate(327.496246, 153.999984, welc);
 	TextDrawLetterSize(welcomenew, 0.449999, 1.600000);
 	TextDrawAlignment(welcomenew, 2);
@@ -16928,7 +17230,7 @@ public OnPlayerEnterCheckpoint(playerid)
 					PlayerData[playerid][pGarbage] = 0;
 					DisablePlayerCheckpoint(playerid);
 
-					new amount = 800 + random(300);
+					new amount = 8000 + random(3000);
 					PlayerData[playerid][pCash] = PlayerData[playerid][pCash] + amount;
 					SendClientMessageEx(playerid, COLOR_AQUA, "Paycheck: You've earned $%i for your time working as a garbage man.", amount);
 
@@ -16972,8 +17274,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				}				
 				new vehicleid = GetPlayerVehicleID(playerid);
 				new money = Random(GetJobLevel(playerid, JOB_TRUCKER) * 500, 1500 + GetJobLevel(playerid, JOB_TRUCKER) * 500);
-				if(GetVehicleModel(vehicleid) != 515 && money > 2000)
-					money = 2000;
+				if(GetVehicleModel(vehicleid) != 515 && money > 14000)
+					money = 14000;
 				SendClientMessageEx(playerid, COLOR_AQUA, "TRUCKER: You Delivered goods and you got $%d.",money);
 				GivePlayerCash(playerid,money);
 				PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0);				
@@ -16990,8 +17292,8 @@ public OnPlayerEnterCheckpoint(playerid)
 							new qte = min(joblevel-1,3);
 							PlayerData[playerid][pCocaine] += qte;
 							PlayerData[playerid][pWeed] += qte;
-							PlayerData[playerid][pMeth] += qte;
-							SendClientMessageEx(playerid, COLOR_RED, "TRUCKER: You got %d crack, %d Pot, %d Heroin as a gift.",qte,qte,qte);	
+							PlayerData[playerid][pHeroin] += qte;
+							SendClientMessageEx(playerid, COLOR_RED, "TRUCKER: You got %d cocaine, %d weed, %d Heroin as a gift.",qte,qte,qte);	
 						}
 						case tIllegalMaterials:{
                             GivePlayerRankPointIllegalJob(playerid, 60);
@@ -17222,12 +17524,12 @@ public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 		mysql_tquery(connectionID, queryBuffer);
 	}
 
-	if(bodypart == 9 && GetPlayerState(playerid) != PLAYER_STATE_WASTED && GetPlayerFaction(playerid) == FACTION_HITMAN && IsPlayerIdle(playerid))
-	{
-		SetPlayerHealth(damagedid, 0);
-		ShowPlayerFooter(playerid, "Headshot", 2000);
-		ShowPlayerFooter(damagedid, "Headshot", 2000);
-	}
+	if (!PlayerData[playerid][pNoKnife] && bodypart == 9 && GetPlayerState(playerid) != PLAYER_STATE_WASTED && GetPlayerFaction(playerid) == FACTION_HITMAN && IsPlayerIdle(playerid))
+    {
+        SetPlayerHealth(damagedid, 0);
+        ShowPlayerFooter(playerid, "Headshot", 2000);
+        ShowPlayerFooter(damagedid, "Headshot", 2000);
+    }
 	return 1;
 }
 
@@ -17270,7 +17572,7 @@ public OnPlayerTakeDamage(playerid, issuerid, Float: amount, weaponid, bodypart)
 		}
 
 	}
-	PlayerData[playerid][pHurt] = 60;
+	PlayerData[playerid][pHurt] = 20;
 	return 1;
 }
 forward OnLoadGunDamages();
@@ -17372,7 +17674,7 @@ public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY
     {
         return 0;// Anti-WeaponId change hack
     }
-    if(!IsPlayerConnected(hitid))
+    if(hittype == BULLET_HIT_TYPE_PLAYER && !IsPlayerConnected(hitid))
     {
         return 0;
     }
@@ -17550,13 +17852,6 @@ public OnPlayerSelectionMenuResponse(playerid, extraid, response, listitem, mode
 			    PurchaseVehicle(playerid);
 			}
 		}
-		case MODEL_SELECTION_VIPVEHICLES:
-		{
-			if(response)
-			{
-				SCM(playerid, COLOR_GREY, "Nuffin happened");
-			}
-		}
 	}
 	return 1;
 }
@@ -17630,7 +17925,7 @@ public OnPlayerUpdate(playerid)
 
 	    if((!IsABoat(vehicleid) && GetVehicleModel(vehicleid) != 539) && PlayerData[playerid][pVehicleCount] >= 4 && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked])
 	    {
-	        BanPlayer(playerid, "Car warping");
+	        KickPlayer(playerid, "Car warping");
 	        return 0;
 		}
 	}
@@ -17727,9 +18022,9 @@ public OnPlayerUpdate(playerid)
 	    PlayerData[playerid][pSniper] = 0;
 	}
 	if(PlayerData[playerid][pNoKnife] && GetPlayerWeapon(playerid) == 4)
-	{
-		SetPlayerArmedWeapon(playerid, 0);
-	}
+    {
+        SetPlayerArmedWeapon(playerid, 0);
+    }
 	if(PlayerData[playerid][pAnimation] != index)
 	{
 	    if(PlayerData[playerid][pLockBreak] != INVALID_VEHICLE_ID)
@@ -18577,7 +18872,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
             if(PlayerData[playerid][pInjured] == 0 && PlayerData[playerid][pTazedTime] == 0 && PlayerData[playerid][pCuffed] == 0 && PlayerData[playerid][pDueling] == INVALID_PLAYER_ID)
 			{
-			    if(PlayerData[playerid][pHurt] - 30 > 0)
+			    if(PlayerData[playerid][pHurt] - 5 > 0)
 			        return SendClientMessageEx(playerid, COLOR_GREY, "You are too hurt to operate/enter anything. Please wait %i seconds before trying again.", (PlayerData[playerid][pHurt] - 30));
 
 				if((success = EnterCheck(playerid)) == 0)
@@ -19630,6 +19925,62 @@ Dialog:DIALOG_HELPCMD(playerid, response, listitem, inputtext[])
 			case 9:
 			{
 				callcmd::adminhelp(playerid, inputtext);
+			}
+		}
+	}
+	return 1;
+}
+
+Dialog:GotoEventMap(playerid, response, listitem, inputtext[])
+{
+	if (response)
+	{
+		switch (listitem)
+		{
+			case 0:
+			{
+				TeleportToCoords(playerid, 20.918, -31.048, 908.136, 0, 70, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Aim_HeadShot.");
+			}
+			case 1:
+			{
+				TeleportToCoords(playerid, 517.5441, -2308.7917, 23.2757, 0, 71, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Dust2Long.");
+			}
+			case 2:
+			{
+				TeleportToCoords(playerid, 517.5441, -2308.7917, 23.2757, 0, 72, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Jungle.");
+			}
+			case 3:
+			{
+				TeleportToCoords(playerid, 606.1862, -2439.0649, 19.6221, 0, 73, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to KingOfTheHill.");
+			}
+			case 4:
+			{
+				TeleportToCoords(playerid, 489.8854, -2480.6743, 14.3775, 0, 74, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Market.");
+			}
+			case 5:
+			{
+				TeleportToCoords(playerid, 623.9836, -2424.1206, 24.7619, 0, 75, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to NarrowPassage.");
+			}
+			case 6:
+			{
+				TeleportToCoords(playerid, 605.6020, -2391.9084, 10.7158, 0, 76, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Olympia.");
+			}
+			case 7:
+			{
+				TeleportToCoords(playerid, 1149.037, -142.320, 822.153, 0, 77, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Pool.");
+			}
+			case 8:
+			{
+				TeleportToCoords(playerid, 609.459411, 894.457519, 6003.559082, 0, 78, 0, true);
+				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Settlement.");
 			}
 		}
 	}
@@ -24392,21 +24743,21 @@ Dialog:DIALOG_CRACKTRUNK(playerid, response, listitem, inputtext[])
 
   			ShowActionBubble(playerid, "* %s steals %i grams of crack from the trunk.", GetRPName(playerid), amount);
         }
-        else if(strfind(inputtext, "Heroin") != -1 && (amount = VehicleInfo[vehicleid][vMeth]/20) > 0)
+        else if(strfind(inputtext, "Heroin") != -1 && (amount = VehicleInfo[vehicleid][vHeroin]/20) > 0)
         {
-            if(PlayerData[playerid][pMeth] + amount > GetPlayerCapacity(playerid, CAPACITY_METH))
+            if(PlayerData[playerid][pHeroin] + amount > GetPlayerCapacity(playerid, CAPACITY_HEROIN))
 			{
-			    SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pMeth], GetPlayerCapacity(playerid, CAPACITY_METH));
+			    SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pHeroin], GetPlayerCapacity(playerid, CAPACITY_HEROIN));
 			    return ShowDialogToPlayer(playerid, DIALOG_CRACKTRUNK);
 			}
 
-  			VehicleInfo[vehicleid][vMeth] -= amount;
-  			PlayerData[playerid][pMeth] += amount;
+  			VehicleInfo[vehicleid][vHeroin] -= amount;
+  			PlayerData[playerid][pHeroin] += amount;
 
-  			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET meth = %i WHERE id = %i", VehicleInfo[vehicleid][vMeth], VehicleInfo[vehicleid][vID]);
+  			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE vehicles SET heroin = %i WHERE id = %i", VehicleInfo[vehicleid][vHeroin], VehicleInfo[vehicleid][vID]);
   			mysql_tquery(connectionID, queryBuffer);
 
-  			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+  			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
   			mysql_tquery(connectionID, queryBuffer);
 
   			ShowActionBubble(playerid, "* %s steals %i grams of Heroin from the trunk.", GetRPName(playerid), amount);
@@ -25445,12 +25796,11 @@ public BreakCuffs(playerid, userid)
 	return 1;
 }
 
-
-
 IsProductionServer()
 {
     return (GetServerVarAsInt("port") == 10412);
 }
+
 forward GetAdminLevel(playerid);
 public GetAdminLevel(playerid)
 {
@@ -25459,21 +25809,22 @@ public GetAdminLevel(playerid)
 
 CMD:whoami(playerid,params[])
 {
-    SendClientMessage(playerid, COLOR_GREEN, "I'm a script create by a developer named A B D A L M O E Z");
-    SendClientMessage(playerid, COLOR_GREEN, "This script is orignally made for L A W L E S S - W O R L D - O F - R O L E - P L A Y");
+    SendClientMessage(playerid, COLOR_GREEN, "I'm a script create by a developer named K H A L I L");
+    SendClientMessage(playerid, COLOR_GREEN, "This script is orignally made for A R A B I C A - W O R L D - O F - R O L E - P L A Y");
     return 1;
 }
 
 #include "core\core.cmd.inc"
 #include "cmd\cmd.func.inc"
 #include "misc\misc.inc"
-#include "mapping/index.map"
+#include "mapping/index.pwn"
 #include "modules/Announce.pwn"
 #include "modules/YourID.pwn"
 #include "modules/SniperInfo.pwn"
 #include "modules/RentSystem.pwn"
 #include "modules/ServerLogo.pwn"
 #include "modules/GreenZone.pwn"
+#include "modules/GtaWasted.pwn"
 #include "modules/FuelSystem.pwn"
 #include "modules/MainParking.pwn"
 #include "modules/MiniMapRadar.pwn"
@@ -25491,16 +25842,20 @@ CMD:whoami(playerid,params[])
 #include "modules/LawEnforcementRadar.pwn"
 #include "modules/LoginSignup.pwn"
 #include "modules/SFWhitelist.pwn"
+#include "modules/SurveillanceCamera.pwn"
 #include "modules/Cookies.pwn"
 #include "modules/Gym.pwn"
 #include "modules/CarTuning.pwn"
 #include "modules/AdSystem.pwn"
+//#include "modules/DiscordBot.pwn"
+#include "modules/TollGuard.pwn"
 #include "modules/StorageSystem.pwn"
 #include "modules/AdminReportIndicator.pwn"
 #include "modules/ServerStats.pwn"
 #include "modules/ServerState.pwn"
 #include "modules/PlayerRespawn.pwn"
 #include "modules/Gates.pwn"
+#include "modules/GangTags.pwn"
 #include "modules/Meter.pwn"
 #include "modules/AutoGift.pwn"
 #include "modules/FightClub.pwn"
@@ -25511,6 +25866,8 @@ CMD:whoami(playerid,params[])
 #include "modules/PlayerIDCard.pwn"
 #include "modules/CustomWantedLevel.pwn"
 #include "modules/ImpoundSystem.pwn"
+#include "modules/IsMobile.pwn"
+#include "modules/HelpCounter.pwn"
 
 #include "rex/Anti-Lag.pwn"
 #include "rex/Anti-UnFreeze.pwn"
@@ -25529,15 +25886,21 @@ CMD:whoami(playerid,params[])
 #include "rex/Anti-CBug.pwn"
 #include "rex/Anti-GodMod.pwn"
 
+//#include "dev\WishSystem.pwn"
+#include "dev/StaffLogs.pwn"
+#include "dev/Sprunk.pwn"
 
 CMD:credits(playerid, params[])
 {
     SendClientMessageEx(playerid, COLOR_AQUA, "Arabica RolePlay is using %s game mode %s", SERVER_SHORT_NAME, SERVER_REVISION);
-    
-    SendClientMessageEx(playerid, COLOR_AQUA, " - Mike_Zodiac: Scripting + Mapping");
-    SendClientMessageEx(playerid, COLOR_AQUA, " - PiZZA: Mapping");
-    SendClientMessageEx(playerid, COLOR_AQUA, " - Mickey: Scripting");
-    SendClientMessageEx(playerid, COLOR_AQUA, " - Eric_Lancer: Mapping");
+
+    SendClientMessageEx(playerid, COLOR_WHITE, " - Khalil Zoldyck       : {ED6A28}Server Devlopper");
+	SendClientMessageEx(playerid, COLOR_WHITE, " - Ali Eltrabelsi		: {8000FF}Server Mapper");
+    SendClientMessageEx(playerid, COLOR_WHITE, " - Troy		   			: {FF0000}Scripting");
+	SendClientMessageEx(playerid, COLOR_WHITE, " - Pirlo Castellano		: {FF0000}Mapping");
+	SendClientMessageEx(playerid, COLOR_WHITE, " - Kelsy Moger		   	: {FF0000}Mapping");
+	SendClientMessageEx(playerid, COLOR_WHITE, " - Houssem Zoldyck		: {FF0000}Mapping");
+	SendClientMessageEx(playerid, COLOR_WHITE, " - Cristiano Zoldyck	: {FF0000}Mapping");
 
     return 1;
 }

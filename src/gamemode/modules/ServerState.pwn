@@ -1,3 +1,8 @@
+/// @file      ServerState.pwn
+/// @author    Khalil
+/// @date      Created at 2023-09-10 10:59:45 +0100
+/// @copyright Copyright (c) 2023
+
 #include <YSI\y_hooks>
 
 #define TABLE_SERVER_STATE     "server_state"
@@ -63,7 +68,7 @@ SetDoubleXPState(s)
 {
     gDoubleXP = (s!=0);
     gStateIsUpToDate = false;
-    if(gDoubleXP)
+    /*if(gDoubleXP)
     {
         new hostname[256];
         format(hostname, sizeof(hostname), "%s | Double XP!", GetHostName());
@@ -72,7 +77,7 @@ SetDoubleXPState(s)
     else
     {
         SetServerHostName(GetHostName());
-    }
+    }*/
 }
 
 IsDoubleXPEnabled()

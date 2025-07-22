@@ -470,7 +470,7 @@ publish OnAdminCreateTurf(playerid, turfid, name[], type, Float:minx, Float:miny
 	TurfInfo[turfid][tExists] = 1;
 	TurfInfo[turfid][tCapturedGang] = -1;
 	TurfInfo[turfid][tBeingCaptured] = false;
-	TurfInfo[turfid][tTime] = 12;
+	TurfInfo[turfid][tTime] = 24;
 	TurfInfo[turfid][tType] = type;
 	TurfInfo[turfid][tMinX] = minx;
 	TurfInfo[turfid][tMinY] = miny;
@@ -696,14 +696,14 @@ hook OnNewMinute(timestamp)
 
 						if(TurfType[typeid][TurfType_Heroin])
 						{
-							new heroin = GangInfo[gangid][gMeth] + TurfType[typeid][TurfType_Heroin];
-							new limit  = GetGangStashCapacity(gangid, STASH_CAPACITY_METH);
+							new heroin = GangInfo[gangid][gHeroin] + TurfType[typeid][TurfType_Heroin];
+							new limit  = GetGangStashCapacity(gangid, STASH_CAPACITY_HEROIN);
 
-							GangInfo[gangid][gMeth]    =  heroin  > limit  ? limit  : heroin;
+							GangInfo[gangid][gHeroin]    =  heroin  > limit  ? limit  : heroin;
 							
 							SendGangMessage(gangid, COLOR_YELLOW, "Your gang earned %ig of heroin in the stash for capturing this turf!", TurfType[typeid][TurfType_Heroin]);
 
-							mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET meth = %i WHERE id = %i", GangInfo[gangid][gMeth], gangid);
+							mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET heroin = %i WHERE id = %i", GangInfo[gangid][gHeroin], gangid);
 							mysql_tquery(connectionID, queryBuffer);
 						}
                         new weaponlimit = GetGangStashCapacity(gangid, STASH_CAPACITY_WEAPONS);
@@ -761,12 +761,12 @@ hook OnNewMinute(timestamp)
 						}
                     }
 					
-                    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE turfs SET capturedby = '%s', capturedgang = %i, time = 12 WHERE id = %i", TurfInfo[i][tCapturedBy], TurfInfo[i][tCapturedGang], i);
+                    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE turfs SET capturedby = '%s', capturedgang = %i, time = 24 WHERE id = %i", TurfInfo[i][tCapturedBy], TurfInfo[i][tCapturedGang], i);
                     mysql_tquery(connectionID, queryBuffer);
 					
 					TurfInfo[i][tCapturer] = INVALID_PLAYER_ID;
                     TurfInfo[i][tCaptureTime] = 0;
-                    TurfInfo[i][tTime] = 12;
+                    TurfInfo[i][tTime] = 24;
 					
 					ReloadTurf(i);
                 }
@@ -967,7 +967,7 @@ CMD:editturf(playerid, params[])
 {
 	new turfid, option[14], param[32];
 
-	if(PlayerData[playerid][pAdmin] < ASST_MANAGEMENT && !PlayerData[playerid][pGangMod])
+	if(PlayerData[playerid][pAdmin] < ASST_MANAGEMENT)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}

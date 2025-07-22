@@ -77,6 +77,7 @@ GetFurnitureHouse(playerid)
 
 	return -1;
 }
+
 GetNearbyHouse(playerid)
 {
 	foreach(new i : House)
@@ -145,45 +146,44 @@ CountPlayerHouses(playerid)
 
 ReloadHouse(houseid)
 {
-	if(HouseInfo[houseid][hExists])
-	{
-	    new
-	        string[268],
-			type[16];
+    if (HouseInfo[houseid][hExists])
+    {
+        new string[268];
+        new type[16];
 
-		DestroyDynamic3DTextLabel(HouseInfo[houseid][hText]);
+        DestroyDynamic3DTextLabel(HouseInfo[houseid][hText]);
         DestroyDynamicPickup(HouseInfo[houseid][hPickup]);
 
-		if(HouseInfo[houseid][hType] == -1)
-		{
-		    type = "Other";
-		}
-		else
-		{
-		    strcpy(type, houseInteriors[HouseInfo[houseid][hType]][intClass]);
-		}
-
-        if(HouseInfo[houseid][hOwnerID] == 0)
+        if (HouseInfo[houseid][hType] == -1)
         {
-	        format(string, sizeof(string), "{AAC4E5}[HOUSE FOR SALE] ({FFFFFF}ID %i{AAC4E5})\n{FFFFFF}Class: {AAC4E5}%s\n{FFFFFF}House Level: {AAC4E5}%i\n{FFFFFF}Price: {AAC4E5}%s", houseid, type, HouseInfo[houseid][hLevel], FormatCash(HouseInfo[houseid][hPrice]));
-            HouseInfo[houseid][hPickup] = CreateDynamicPickup(1273, 1, HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ], .worldid = HouseInfo[houseid][hOutsideVW], .interiorid = HouseInfo[houseid][hOutsideInt]);
-		}
-		else
-		{
-		    if(HouseInfo[houseid][hRentPrice] > 0)
-		    {
-		        format(string, sizeof(string), "{AAC4E5}[HOUSE] ({FFFFFF}ID %i{AAC4E5})\n{FFFFFF}Owner: {AAC4E5}%s\n{FFFFFF}Class: {AAC4E5}%s\n{FFFFFF}Rent: {AAC4E5}$%i\n{FFFFFF}House Level: {AAC4E5}%i", houseid, HouseInfo[houseid][hOwner], type, HouseInfo[houseid][hRentPrice], HouseInfo[houseid][hLevel]);
-			}
-		    else
-		    {
-			    format(string, sizeof(string), "{AAC4E5}[HOUSE] ({FFFFFF}ID %i{AAC4E5})\n{FFFFFF}Owner: {AAC4E5}%s\n{FFFFFF}Class: {AAC4E5}%s\n{FFFFFF}House Level: {AAC4E5}%i", houseid, HouseInfo[houseid][hOwner], type, HouseInfo[houseid][hLevel]);
-			}
-			HouseInfo[houseid][hPickup] = CreateDynamicPickup(19522, 1, HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ], .worldid = HouseInfo[houseid][hOutsideVW], .interiorid = HouseInfo[houseid][hOutsideInt]);
-		}
+            type = "Other";
+        }
+        else
+        {
+            strcpy(type, houseInteriors[HouseInfo[houseid][hType]][intClass]);
+        }
 
-		HouseInfo[houseid][hText] = CreateDynamic3DTextLabel(string, COLOR_WHITE, HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ]+0.3, 20.0, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, 1, HouseInfo[houseid][hOutsideVW], HouseInfo[houseid][hOutsideInt], -1 , 10.0);
-  	    //HouseInfo[houseid][hMapIcon] = CreateDynamicMapIcon(HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ], 31, 1, -1, -1, -1, 100.0);
-	}
+        if (HouseInfo[houseid][hOwnerID] == 0)
+        {
+            format(string, sizeof(string), "{AAC4E5}[HOUSE FOR SALE] ({FFFFFF}ID %i{AAC4E5})\n{FFFFFF}Class: {AAC4E5}%s\n{FFFFFF}House Level: {AAC4E5}%i\n{FFFFFF}Price: {AAC4E5}%s", houseid, type, HouseInfo[houseid][hLevel], FormatCash(HouseInfo[houseid][hPrice]));
+            HouseInfo[houseid][hPickup] = CreateDynamicPickup(1273, 1, HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ], .worldid = HouseInfo[houseid][hOutsideVW], .interiorid = HouseInfo[houseid][hOutsideInt]);
+        }
+        else
+        {
+            if (HouseInfo[houseid][hRentPrice] > 0)
+            {
+                format(string, sizeof(string), "{AAC4E5}[HOUSE] ({FFFFFF}ID %i{AAC4E5})\n{FFFFFF}Owner: {AAC4E5}%s\n{FFFFFF}Class: {AAC4E5}%s\n{FFFFFF}Rent: {AAC4E5}$%i\n{FFFFFF}House Level: {AAC4E5}%i", houseid, HouseInfo[houseid][hOwner], type, HouseInfo[houseid][hRentPrice], HouseInfo[houseid][hLevel]);
+            }
+            else
+            {
+                format(string, sizeof(string), "{AAC4E5}[HOUSE] ({FFFFFF}ID %i{AAC4E5})\n{FFFFFF}Owner: {AAC4E5}%s\n{FFFFFF}Class: {AAC4E5}%s\n{FFFFFF}House Level: {AAC4E5}%i", houseid, HouseInfo[houseid][hOwner], type, HouseInfo[houseid][hLevel]);
+            }
+            HouseInfo[houseid][hPickup] = CreateDynamicPickup(19522, 1, HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ], .worldid = HouseInfo[houseid][hOutsideVW], .interiorid = HouseInfo[houseid][hOutsideInt]);
+        }
+
+        HouseInfo[houseid][hText] = CreateDynamic3DTextLabel(string, COLOR_WHITE, HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ]+0.3, 20.0, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, 1, HouseInfo[houseid][hOutsideVW], HouseInfo[houseid][hOutsideInt], -1 , 10.0);
+        //HouseInfo[houseid][hMapIcon] = CreateDynamicMapIcon(HouseInfo[houseid][hPosX], HouseInfo[houseid][hPosY], HouseInfo[houseid][hPosZ], 31, 1, -1, -1, -1, 100.0);
+    }
 }
 
 
@@ -584,7 +584,7 @@ public OnAdminCreateHouse(playerid, houseid, type, Float:x, Float:y, Float:z, Fl
 	HouseInfo[houseid][hMaterials] = 0;
 	HouseInfo[houseid][hWeed] = 0;
 	HouseInfo[houseid][hCocaine] = 0;
-	HouseInfo[houseid][hMeth] = 0;
+	HouseInfo[houseid][hHeroin] = 0;
 	HouseInfo[houseid][hPainkillers] = 0;
 	HouseInfo[houseid][hLabels] = 0;
 	HouseInfo[houseid][hText] = Text3D:INVALID_3DTEXT_ID;
@@ -798,7 +798,7 @@ Dialog:PlayerHousesList(playerid, response, listitem, inputtext[])
 		format(
 			liststr, 
 		sizeof(liststr),
-		"hID\t %i \nOwner\t %s \nType\t %s \nPrice\t $ %i \nRentPrice\t %i \nLevel\t %i \nLocked\t %s \nAlarm\t %i \nCash\t %i \nMaterials\t %i \nWeed\t %i \nCocaine\t %i \nMeth\t %i \nPainkillers\t %i \nDelivery\t %s   \nLights\t %s \nWeapon slot 0\t %s \nWeapon slot 1\t %s \nWeapon slot 2\t %s \nWeapon slot 3\t %s \nWeapon slot 4\t %s \nWeapon slot 5\t %s \nWeapon slot 6\t %s \nWeapon slot 7\t %s \nWeapon slot 8\t %s \nWeapon slot 9\t %s",
+		"hID\t %i \nOwner\t %s \nType\t %s \nPrice\t $ %i \nRentPrice\t %i \nLevel\t %i \nLocked\t %s \nAlarm\t %i \nCash\t %i \nMaterials\t %i \nWeed\t %i \nCocaine\t %i \nHeroin\t %i \nPainkillers\t %i \nDelivery\t %s   \nLights\t %s \nWeapon slot 0\t %s \nWeapon slot 1\t %s \nWeapon slot 2\t %s \nWeapon slot 3\t %s \nWeapon slot 4\t %s \nWeapon slot 5\t %s \nWeapon slot 6\t %s \nWeapon slot 7\t %s \nWeapon slot 8\t %s \nWeapon slot 9\t %s",
 			HouseInfo[houseid][hID],
 			HouseInfo[houseid][hOwner],
 			type,
@@ -811,7 +811,7 @@ Dialog:PlayerHousesList(playerid, response, listitem, inputtext[])
 			HouseInfo[houseid][hMaterials],
 			HouseInfo[houseid][hWeed],
 			HouseInfo[houseid][hCocaine],
-			HouseInfo[houseid][hMeth],
+			HouseInfo[houseid][hHeroin],
 			HouseInfo[houseid][hPainkillers],
 			HouseInfo[houseid][hDelivery]?("Enabled"):("Disabled"),
 			HouseInfo[houseid][hLights]?("On"):("Off"),

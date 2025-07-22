@@ -1,44 +1,50 @@
 
 CMD:countdown(playerid, params[])
 {
-    if(!IsAdmin(playerid, JUNIOR_ADMIN))
+    if(PlayerData[playerid][pAdmin] < GENERAL_ADMIN)
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
+    if (!IsAdminOnDuty(playerid))
     {
-        return SendClientErrorUnauthorizedCmd(playerid);
+        return SendClientMessage(playerid, COLOR_GREY, "This command requires you to be on admin duty. /aduty to go on duty.");
     }
+    SetTimer("Count_Five",   1000, 0);
+    SetTimer("Count_Four",   2000, 0);
+    SetTimer("Count_Three",  3000, 0);
+    SetTimer("Count_Two",    4000, 0);
+    SetTimer("Count_One",    5000, 0);
+    SetTimer("Count_GoGoGo", 6000, 0);
+    return 1;
+}
 
-    if(!IsAdminOnDuty(playerid))
-    {
-        return SendClientErrorUnauthorizedCmd(playerid);
-    }
+publish Count_Five()
+{
+    return GameTextForAll("5", 1000, 6);
+}
 
-    SetTimer("Count_Three", 1000, 0);
-    SetTimer("Count_Two", 2000, 0);
-    SetTimer("Count_One", 3000, 0);
-    SetTimer("Count_GoGoGo", 4000, 0);
-	
-	return 1;
+publish Count_Four()
+{
+
+    return GameTextForAll("4", 1000, 6);
 }
 
 publish Count_Three()
 {
- 	SendClientMessageToAllEx(COLOR_AQUA, "3");
-	return 1;
+    return GameTextForAll("3", 1000, 6);
 }
 
 publish Count_Two()
 {
-	SendClientMessageToAllEx(COLOR_AQUA, "2");
-	return 1;
+    return GameTextForAll("2", 1000, 6);
 }
 
 publish Count_One()
 {
-	SendClientMessageToAllEx(COLOR_AQUA, "1");
- 	return 1;
+    return GameTextForAll("1", 1000, 6);
 }
 
 publish Count_GoGoGo()
 {
-	SendClientMessageToAllEx(COLOR_AQUA, "Go!");
- 	return 1;
+    return GameTextForAll("Go!", 1000, 6);
 }

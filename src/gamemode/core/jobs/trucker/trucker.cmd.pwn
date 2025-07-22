@@ -116,7 +116,7 @@ CMD:tcheck(playerid,params[])
 		}
 	}
 	if(truckindex == -1){
-		return SendClientMessage(playerid, COLOR_RED, "There is an internal error contact Mike_Zodiac to fix that.");
+		return SendClientMessage(playerid, COLOR_RED, "There is an internal error contact Khalil_Zoldyck to fix that.");
 	}
 	
 	new TruckerGoodsType:goodtype = truckersGoods[truckindex][pGoodType];

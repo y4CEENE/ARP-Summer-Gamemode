@@ -1,12 +1,13 @@
 #define SERVER_CFG   "server.cfg"
 
-static  host_name                  [256] = "Arabica RolePlay | Voice";
+static  host_name                  [256] = "ArabicaRolePlay | Voice";
 static  server_name                [256] = "ArabicaRolePlay";
-static  server_website             [256] = "arabicarp.com";
-static  server_discord             [256] = "discord.gg/arabica";
-static  faction_discord            [256] = "discord.gg/factionsarabica";
-static  server_ucp                 [256] = "www.arabicarp.com/ucp";
-static  server_shop                [256] = "www.arabicarp.com/shop";
+static  server_website             [256] = "arabica-rp.web.app";
+static  server_discord             [256] = "https://discord.gg/arabicarp";
+static  faction_discord            [256] = "discord.gg";
+static  gang_discord               [256] = "discord.gg";
+static  server_ucp                 [256] = "arabica-rp.web.app";
+static  server_shop                [256] = "arabica-rp.web.app/shop";
 static  server_music_url           [256] = "example.net/music";
 static  server_fetch_url           [256] = "example.net/music";
 static  vip_music_url              [256] = "example.net/music";
@@ -64,10 +65,11 @@ LoadServerConfig()
         key = INIGetKey(data);
 
         if(strcmp(key , "host_name"                  , true) == 0) { val = INIGetValue(data); strmid(host_name                  , val, 0, strlen(val)-1, 255); }
-        if(strcmp(key , "server_name"                , true) == 0) { val = INIGetValue(data); strmid(server_name                , val, 0, strlen(val)-1, 255); }
+        //if(strcmp(key , "server_name"                , true) == 0) { val = INIGetValue(data); strmid(server_name                , val, 0, strlen(val)-1, 255); }
         if(strcmp(key , "server_website"             , true) == 0) { val = INIGetValue(data); strmid(server_website             , val, 0, strlen(val)-1, 255); }
         if(strcmp(key , "server_discord"             , true) == 0) { val = INIGetValue(data); strmid(server_discord             , val, 0, strlen(val)-1, 255); }
-        if(strcmp(key , "faction_discord"            , true) == 0) { val = INIGetValue(data); strmid(faction_discord            , val, 0, strlen(val)-1, 255); }
+        if(strcmp(key , "faction_discord"             , true) == 0) { val = INIGetValue(data); strmid(faction_discord             , val, 0, strlen(val)-1, 255); }
+        if(strcmp(key , "gang_discord"             , true) == 0) { val = INIGetValue(data); strmid(gang_discord             , val, 0, strlen(val)-1, 255); }
         if(strcmp(key , "server_ucp"                 , true) == 0) { val = INIGetValue(data); strmid(server_ucp                 , val, 0, strlen(val)-1, 255); }
         if(strcmp(key , "server_shop"                , true) == 0) { val = INIGetValue(data); strmid(server_shop                , val, 0, strlen(val)-1, 255); }
         if(strcmp(key , "server_music_url"           , true) == 0) { val = INIGetValue(data); strmid(server_music_url           , val, 0, strlen(val)-1, 255); }
@@ -83,13 +85,12 @@ LoadServerConfig()
     return 1;
 }
 
-
-
-stock GetHostName               () { return host_name                  ; }
+stock GetHostName               () { return host_name                ; }
 stock GetServerName             () { return server_name                ; }
 stock GetServerWebsite          () { return server_website             ; }
 stock GetServerDiscord          () { return server_discord             ; }
 stock GetFactionDiscord         () { return faction_discord            ; }
+stock GetGangDiscord            () { return gang_discord               ; }
 stock GetServerUCP              () { return server_ucp                 ; }
 stock GetServerShop             () { return server_shop                ; }
 stock GetServerMusicUrl         () { return server_music_url           ; }

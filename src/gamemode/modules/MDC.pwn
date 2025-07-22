@@ -80,7 +80,7 @@ enum CriminalRecordEnum {
 	mdc_cr_served
 };
 new	Iterator:RecordIterator[MAX_PLAYERS]<MAX_CRIMINAL_RECORDS>;
-#pragma unused Iter_Init@RecordIterator
+//#pragma unused Iter_Init@RecordIterator
 
 static CriminalRecordData[MAX_PLAYERS][MAX_CRIMINAL_RECORDS][CriminalRecordEnum];
 
@@ -89,6 +89,11 @@ static Float:mdc_coordinates[][] = {
 	{1559.6234,-1669.4209,2110.5361},
 	{-506.1294,316.9367,2004.5859}
 };
+
+hook OnScriptInit()
+{
+    Iter_Init(RecordIterator);
+}
 
 hook OnPlayerInit(playerid)
 {

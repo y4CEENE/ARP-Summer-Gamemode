@@ -205,9 +205,9 @@ CMD:editentrance(playerid, params[])
 	    {
 	        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /editentrance [entranceid] [adminlevel] [level]");
 		}
-		if(!(0 <= level <= 7))
+		if(!(0 <= level <= 8))
 		{
-		    return SendClientMessage(playerid, COLOR_GREY, "Invalid level. Valid levels range from 0 to 7.");
+		    return SendClientMessage(playerid, COLOR_GREY, "Invalid level. Valid levels range from 0 to 8.");
 		}
 
 		EntranceInfo[entranceid][eAdminLevel] = level;

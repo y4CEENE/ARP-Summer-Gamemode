@@ -88,11 +88,11 @@ hook OnPlayerEnterCheckpoint(playerid)
 
         if(MiningRock[playerid] == 1) 
         {
-            cost = 300 + random(50);
+            cost = 300 + random(300);
         }
         else if(MiningRock[playerid] == 2)
         {
-            cost = 250 + random(50);
+            cost = 250 + random(500);
         }
         else if(MiningRock[playerid] == 3)
         {
@@ -101,17 +101,17 @@ hook OnPlayerEnterCheckpoint(playerid)
             {
                 case 0..250:
                 {
-                    cost = 595 + random(50);
+                    cost = 595 + random(500);
                     SendClientMessageEx(playerid, COLOR_WHITE, "Bam, a great stone indeed, the fact you can find stuff in this dump makes me wonder whether theres a diamond hidden in there somewhere.");
                 }
                 case 251..380:
                 {
-                    cost = 695 + random(200);
+                    cost = 650 + random(600);
                     SendClientMessage(playerid, COLOR_WHITE, "Looks like a ruby, awesome. I'll be sending this Mining Enterprises immediately.");
                 }
                 case 381..400:
                 {
-                    cost = 759 + random(500);
+                    cost = 859 + random(500);
                     AwardAchievement(playerid, ACH_Diamond);
                     SendClientMessage(playerid, COLOR_WHITE, "BINGO!, It's a freakin' diamond, we're going to be damn rich!");
                     SendClientMessage(playerid, COLOR_WHITE, "Boss: You know what? since you found it, you should get to keep it.");
@@ -121,7 +121,7 @@ hook OnPlayerEnterCheckpoint(playerid)
                 }
                 case 401..552:
                 {
-                    cost = 657 + random(500);
+                    cost = 757 + random(900);
                     SendClientMessage(playerid, COLOR_WHITE, "Looks like you've found a sapphire, damn good job. Let's go for that diamond!");
                 }
             }

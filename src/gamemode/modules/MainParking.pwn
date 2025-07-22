@@ -1,3 +1,8 @@
+/// @file      MainParking.pwn
+/// @author    Khalil
+/// @date      Created at 2021-03-31 15:18:30 +0100
+/// @copyright Copyright (c) 2022
+
 #include <YSI_Coding\y_hooks>
 
 static Float:ParkingGetCarPosition[][] = {{1232.1295, -1308.2200, 13.5124}, {-2035.0459, 307.3203, 35.6635}, {1626.1976,-1137.2291,23.9063}};
@@ -233,7 +238,7 @@ public OnParkingSpawnVehicle(playerid, parked)
 	        VehicleInfo[vehicleid][vMaterials] = cache_get_field_content_int(0, "materials");
 	        VehicleInfo[vehicleid][vWeed] = cache_get_field_content_int(0, "weed");
 	        VehicleInfo[vehicleid][vCocaine] = cache_get_field_content_int(0, "cocaine");
-	        VehicleInfo[vehicleid][vMeth] = cache_get_field_content_int(0, "meth");
+	        VehicleInfo[vehicleid][vHeroin] = cache_get_field_content_int(0, "heroin");
 	        VehicleInfo[vehicleid][vPainkillers] = cache_get_field_content_int(0, "painkillers");
 	        VehicleInfo[vehicleid][vWeapons][0] = cache_get_field_content_int(0, "weapon_1");
 	        VehicleInfo[vehicleid][vWeapons][1] = cache_get_field_content_int(0, "weapon_2");

@@ -845,7 +845,7 @@ Dialog:DIALOG_GANGSTASHDRUGS1(playerid, response, listitem, inputtext[])
         {
             case 0: PlayerData[playerid][pSelected] = ITEM_WEED;
             case 1: PlayerData[playerid][pSelected] = ITEM_COCAINE;
-            case 2: PlayerData[playerid][pSelected] = ITEM_METH;
+            case 2: PlayerData[playerid][pSelected] = ITEM_HEROIN;
             case 3: PlayerData[playerid][pSelected] = ITEM_PAINKILLERS;
         }
 
@@ -956,26 +956,26 @@ Dialog:DIALOG_GANGWITHDRAW(playerid, response, listitem, inputtext[])
 				SendClientMessageEx(playerid, COLOR_AQUA, "* You have withdrawn %i grams of crack from the gang stash.", amount);
 				Log_Write("log_gang", "%s (uid: %i) withdraws %i grams of crack from the gang stash.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], amount);
 			}
-            case ITEM_METH:
+            case ITEM_HEROIN:
 		    {
-		        if(amount < 1 || amount > GangInfo[PlayerData[playerid][pGang]][gMeth])
+		        if(amount < 1 || amount > GangInfo[PlayerData[playerid][pGang]][gHeroin])
 		        {
 		            SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 		            return ShowDialogToPlayer(playerid, DIALOG_GANGWITHDRAW);
 				}
-				if(PlayerData[playerid][pMeth] + amount > GetPlayerCapacity(playerid, CAPACITY_METH))
+				if(PlayerData[playerid][pHeroin] + amount > GetPlayerCapacity(playerid, CAPACITY_HEROIN))
 				{
-				    SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pMeth], GetPlayerCapacity(playerid, CAPACITY_METH));
+				    SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pHeroin], GetPlayerCapacity(playerid, CAPACITY_HEROIN));
 				    return ShowDialogToPlayer(playerid, DIALOG_GANGWITHDRAW);
 				}
 
-				GangInfo[PlayerData[playerid][pGang]][gMeth] -= amount;
-				PlayerData[playerid][pMeth] += amount;
+				GangInfo[PlayerData[playerid][pGang]][gHeroin] -= amount;
+				PlayerData[playerid][pHeroin] += amount;
 
-				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET meth = %i WHERE id = %i", GangInfo[PlayerData[playerid][pGang]][gMeth], PlayerData[playerid][pGang]);
+				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET heroin = %i WHERE id = %i", GangInfo[PlayerData[playerid][pGang]][gHeroin], PlayerData[playerid][pGang]);
 				mysql_tquery(connectionID, queryBuffer);
 
-				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 				mysql_tquery(connectionID, queryBuffer);
 
 				ShowActionBubble(playerid, "* %s withdraws some Heroin from the gang stash.", GetRPName(playerid));
@@ -1136,26 +1136,26 @@ Dialog:DIALOG_GANGDEPOSIT(playerid, response, listitem, inputtext[])
 				SendClientMessageEx(playerid, COLOR_AQUA, "* You have deposited %i grams of crack in the gang stash.", amount);
 				Log_Write("log_gang", "%s (uid: %i) deposits %i grams of crack in the gang stash.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], amount);
 			}
-            case ITEM_METH:
+            case ITEM_HEROIN:
 		    {
-		        if(amount < 1 || amount > PlayerData[playerid][pMeth])
+		        if(amount < 1 || amount > PlayerData[playerid][pHeroin])
 		        {
 		            SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 		            return ShowDialogToPlayer(playerid, DIALOG_GANGDEPOSIT);
 				}
-				if(GangInfo[PlayerData[playerid][pGang]][gMeth] + amount > GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_METH))
+				if(GangInfo[PlayerData[playerid][pGang]][gHeroin] + amount > GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_HEROIN))
 				{
-				    SendClientMessageEx(playerid, COLOR_GREY, "The gang stash can't contain more than %i grams of meth.", GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_METH));
+				    SendClientMessageEx(playerid, COLOR_GREY, "The gang stash can't contain more than %i grams of heroin.", GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_HEROIN));
 				    return ShowDialogToPlayer(playerid, DIALOG_GANGDEPOSIT);
 				}
 
-				GangInfo[PlayerData[playerid][pGang]][gMeth] += amount;
-				PlayerData[playerid][pMeth] -= amount;
+				GangInfo[PlayerData[playerid][pGang]][gHeroin] += amount;
+				PlayerData[playerid][pHeroin] -= amount;
 
-				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET meth = %i WHERE id = %i", GangInfo[PlayerData[playerid][pGang]][gMeth], PlayerData[playerid][pGang]);
+				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET heroin = %i WHERE id = %i", GangInfo[PlayerData[playerid][pGang]][gHeroin], PlayerData[playerid][pGang]);
 				mysql_tquery(connectionID, queryBuffer);
 
-				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 				mysql_tquery(connectionID, queryBuffer);
 
 				ShowActionBubble(playerid, "* %s deposits some Heroin in the gang stash.", GetRPName(playerid));
@@ -1543,14 +1543,14 @@ Dialog:DIALOG_GANGPOINTSHOP(playerid, response, listitem, inputtext[])
 				GangInfo[PlayerData[playerid][pGang]][gDrugY] = 0.0;
 				GangInfo[PlayerData[playerid][pGang]][gDrugZ] = 0.0;
 				GangInfo[PlayerData[playerid][pGang]][gDrugWeed] = 0;
-				GangInfo[PlayerData[playerid][pGang]][gDrugMeth] = 0;
+				GangInfo[PlayerData[playerid][pGang]][gDrugHeroin] = 0;
 				GangInfo[PlayerData[playerid][pGang]][gDrugCocaine] = 0;
 				GangInfo[PlayerData[playerid][pGang]][gDrugPrices][0] = 500;
 				GangInfo[PlayerData[playerid][pGang]][gDrugPrices][1] = 1000;
 				GangInfo[PlayerData[playerid][pGang]][gDrugPrices][2] = 1500;
 				GangInfo[PlayerData[playerid][pGang]][gPoints] -= 500;
 
-				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET drugdealer = 1, drug_x = 0.0, drug_y = 0.0, drug_z = 0.0, drugweed = 0, drugcocaine = 0, drugmeth = 0, weed_price = 500, cocaine_price = 1000, meth_price = 1500, points = %i WHERE id = %i", GangInfo[PlayerData[playerid][pGang]][gPoints], PlayerData[playerid][pGang]);
+				mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGS" SET drugdealer = 1, drug_x = 0.0, drug_y = 0.0, drug_z = 0.0, drugweed = 0, drugcocaine = 0, drugHeroin = 0, weed_price = 500, cocaine_price = 1000, heroin_price = 1500, points = %i WHERE id = %i", GangInfo[PlayerData[playerid][pGang]][gPoints], PlayerData[playerid][pGang]);
 				mysql_tquery(connectionID, queryBuffer);
 
 				GivePlayerCash(playerid, -50000);
@@ -2197,7 +2197,7 @@ publish OnGangInformation(playerid)
 		SendClientMessageEx(playerid, COLOR_GREY2, "Leader: %s - Level: %i/3 - Strikes: %i/3 - Members: %i/%i - Vehicles: %i/%i", GangInfo[PlayerData[playerid][pGang]][gLeader], GangInfo[PlayerData[playerid][pGang]][gLevel], GangInfo[PlayerData[playerid][pGang]][gStrikes], cache_get_row_int(0, 0), GetGangMemberLimit(PlayerData[playerid][pGang]), GetGangVehicles(PlayerData[playerid][pGang]), GetGangVehicleLimit(PlayerData[playerid][pGang]));
 		SendClientMessageEx(playerid, COLOR_GREY2, "Gang Points: %s GP - Turf Tokens: %s - Cash: $%s/$%s - Materials: %s/%s", FormatNumber(GangInfo[PlayerData[playerid][pGang]][gPoints]), FormatNumber(GangInfo[PlayerData[playerid][pGang]][gTurfTokens]), FormatNumber(GangInfo[PlayerData[playerid][pGang]][gCash]), FormatNumber(GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_CASH)),
 			FormatNumber(GangInfo[PlayerData[playerid][pGang]][gMaterials]), FormatNumber(GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_MATERIALS)));
-		SendClientMessageEx(playerid, COLOR_GREY2, "Turfs: %i/%i - Weed: %i/%ig - Crack: %i/%ig - Heroin: %i/%ig - Painkillers: %i/%i", count, total, GangInfo[PlayerData[playerid][pGang]][gWeed], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_WEED), GangInfo[PlayerData[playerid][pGang]][gCocaine], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_COCAINE), GangInfo[PlayerData[playerid][pGang]][gMeth], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_METH),
+		SendClientMessageEx(playerid, COLOR_GREY2, "Turfs: %i/%i - Weed: %i/%ig - Crack: %i/%ig - Heroin: %i/%ig - Painkillers: %i/%i", count, total, GangInfo[PlayerData[playerid][pGang]][gWeed], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_WEED), GangInfo[PlayerData[playerid][pGang]][gCocaine], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_COCAINE), GangInfo[PlayerData[playerid][pGang]][gHeroin], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_HEROIN),
 		GangInfo[PlayerData[playerid][pGang]][gPainkillers], GetGangStashCapacity(PlayerData[playerid][pGang], STASH_CAPACITY_PAINKILLERS));
 	}
 	return 1;

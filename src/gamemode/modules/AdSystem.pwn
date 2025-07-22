@@ -126,7 +126,78 @@ CMD:ad(playerid, params[])
  	return 1;
 }
 
+stock PerformBusinessPurchase(playerid, businessid, price, materials = 0)
+{
+    if (BusinessInfo[businessid][bProducts] > 0 && BusinessInfo[businessid][bOwnerID] != PlayerData[playerid][pID])
+    {
+        BusinessInfo[businessid][bCash] += price;
+        BusinessInfo[businessid][bMaterials] += materials;
+        BusinessInfo[businessid][bProducts]--;
 
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE businesses SET cash = %i, materials = %i, products = %i WHERE id = %i",
+                BusinessInfo[businessid][bCash], BusinessInfo[businessid][bMaterials], BusinessInfo[businessid][bProducts], BusinessInfo[businessid][bID]);
+        mysql_tquery(connectionID, queryBuffer);
+    }
+}
+
+CMD:darkweb(playerid, params[]) return callcmd::dw(playerid, params);
+CMD:dw(playerid, params[])
+{
+    if(PlayerData[playerid][pAdMuted])
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "You are muted from submitting advertisements. /report for an unmute.");
+	}
+    if (isnull(params))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "USAGE: /darkweb(dw) [text]");
+    }
+    if (!PlayerData[playerid][pPhone])
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "You don't have a mobile phone. You need a phone so people can contact you.");
+    }
+    if (PlayerData[playerid][pHours] < 1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You need to play at least 2 hours in order to post an advertisement.");
+    }
+    if (PlayerData[playerid][pTogglePhone] == 1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can not /ad while your phone is turned off");
+    }
+    if (PlayerData[playerid][pJailTime] > 0)
+    {
+        SendClientMessage(playerid, COLOR_GREY, "You can't use DarkWeb while in jail.");
+    }
+    if (gettime() - LastAdTime < 59)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Advertisements can only be posted every 1 minute.");
+    }
+
+    new businessid = GetInsideBusiness(playerid), price = strlen(params) * 30;
+
+    if ((PlayerData[playerid][pDonator] == 0) && (businessid == -1 || BusinessInfo[businessid][bType] != 5))
+    {
+        if (GetClosestBusiness(playerid, BUSINESS_AGENCY) == -1)
+        {
+            return SendClientMessage(playerid, COLOR_GREY, "There are no advertisement agencies in town.");
+        }
+        businessid = GetClosestBusiness(playerid, BUSINESS_AGENCY);
+    }
+
+    new string[20];
+    format(string, sizeof(string), "~r~-$%i", price);
+    GameTextForPlayer(playerid, string, 5000, 1);
+    GivePlayerCash(playerid, -price);
+
+    LastAdTime = gettime();
+    if (businessid >= 0)
+    {
+        PerformBusinessPurchase(playerid, businessid, price);
+    }
+
+    SendAdminWarning(2, "%s[%i] has just write %s in dark web.", GetRPName(playerid), playerid, params);
+    SendClientMessageToAllEx(COLOR_RED, "DarkWeb:{FFFFFF} %s, Contact (%i)", params, PlayerData[playerid][pPhone]);
+    return 1;
+}
 
 CMD:resetadtimer(playerid, params[])
 {

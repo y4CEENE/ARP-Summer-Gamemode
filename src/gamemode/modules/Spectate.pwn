@@ -70,6 +70,10 @@ CMD:spectate(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 
 	if(!strcmp(params, "off", true) && GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
 	{

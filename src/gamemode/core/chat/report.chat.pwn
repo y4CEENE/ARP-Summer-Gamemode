@@ -149,6 +149,10 @@ CMD:tr(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "Invalid report ID.");
 	}
+	if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
     if(ReportInfo[reportid][rAccepted])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "The report specified is being handled by another admin.");

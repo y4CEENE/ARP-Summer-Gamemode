@@ -6,7 +6,7 @@ mapname San Andreas
 language Arabic/English
 password
 rcon_password f7gqh8jg9fqhu4fqhjf
-maxplayers 500
+maxplayers 200
 port 7770
 maxnpc 0
 rcon 0

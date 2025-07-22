@@ -1,6 +1,6 @@
 #include <YSI_Coding\y_hooks>
 
-#define SFWHITELIST_MIN_LEVEL 17
+#define SFWHITELIST_MIN_LEVEL 15
 static SFWhiteList[MAX_PLAYERS];
 static SFW_PlayerHP[MAX_PLAYERS];
 

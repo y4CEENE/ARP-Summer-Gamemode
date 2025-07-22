@@ -473,13 +473,14 @@ CMD:uninstallhousealarm(playerid, params[])
 	mysql_tquery(connectionID, queryBuffer);
 	return 1;
 }
+
 CMD:furniture(playerid, params[])
 {
 	new id = GetInsideHouse(playerid);
-	if(id == -1)
-	{
-		id = GetFurnitureHouse(playerid);
-	}
+    if (id == -1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not inside any house.");
+    }
     if (!IsHouseOwner(playerid, id) && PlayerData[playerid][pFurniturePerms] != id)
 	{
 		return SendErrorMessage(playerid, "You don't have permissions to furnish this house.");
@@ -571,7 +572,7 @@ CMD:stash(playerid, params[])
 	        SendClientMessageEx(playerid, COLOR_GREY2, "Cash: $%i/$%i", HouseInfo[houseid][hCash], GetHouseStashCapacity(houseid, STASH_CAPACITY_CASH));
 			SendClientMessageEx(playerid, COLOR_GREY2, "Materials: %i/%i | Weapons: %i/%i", HouseInfo[houseid][hMaterials], GetHouseStashCapacity(houseid, STASH_CAPACITY_MATERIALS), count, GetHouseStashCapacity(houseid, STASH_CAPACITY_WEAPONS));
 	        SendClientMessageEx(playerid, COLOR_GREY2, "Weed: %i/%i grams | Crack: %i/%i grams", HouseInfo[houseid][hWeed], GetHouseStashCapacity(houseid, STASH_CAPACITY_WEED), HouseInfo[houseid][hCocaine], GetHouseStashCapacity(houseid, STASH_CAPACITY_COCAINE));
-	        SendClientMessageEx(playerid, COLOR_GREY2, "Heroin: %i/%i grams | Painkillers: %i/%i pills", HouseInfo[houseid][hMeth], GetHouseStashCapacity(houseid, STASH_CAPACITY_METH), HouseInfo[houseid][hPainkillers], GetHouseStashCapacity(houseid, STASH_CAPACITY_PAINKILLERS));
+	        SendClientMessageEx(playerid, COLOR_GREY2, "Heroin: %i/%i grams | Painkillers: %i/%i pills", HouseInfo[houseid][hHeroin], GetHouseStashCapacity(houseid, STASH_CAPACITY_HEROIN), HouseInfo[houseid][hPainkillers], GetHouseStashCapacity(houseid, STASH_CAPACITY_PAINKILLERS));
 
 			if(count > 0)
 			{
@@ -703,22 +704,22 @@ CMD:stash(playerid, params[])
 			    {
 			        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /stash [deposit] [heroin] [amount]");
 				}
-				if(value < 1 || value > PlayerData[playerid][pMeth])
+				if(value < 1 || value > PlayerData[playerid][pHeroin])
 				{
 				    return SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 			    }
-			    if(GetHouseStashCapacity(houseid, STASH_CAPACITY_METH) < HouseInfo[houseid][hMeth] + value)
+			    if(GetHouseStashCapacity(houseid, STASH_CAPACITY_HEROIN) < HouseInfo[houseid][hHeroin] + value)
 			    {
-			        return SendClientMessageEx(playerid, COLOR_GREY, "Your stash can only hold up to %i grams of Heroin at your house's level.", GetHouseStashCapacity(houseid, STASH_CAPACITY_METH));
+			        return SendClientMessageEx(playerid, COLOR_GREY, "Your stash can only hold up to %i grams of Heroin at your house's level.", GetHouseStashCapacity(houseid, STASH_CAPACITY_HEROIN));
 			    }
 
-			    PlayerData[playerid][pMeth] -= value;
-			    HouseInfo[houseid][hMeth] += value;
+			    PlayerData[playerid][pHeroin] -= value;
+			    HouseInfo[houseid][hHeroin] += value;
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE houses SET meth = %i WHERE id = %i", HouseInfo[houseid][hMeth], HouseInfo[houseid][hID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE houses SET heroin = %i WHERE id = %i", HouseInfo[houseid][hHeroin], HouseInfo[houseid][hID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
 			    SendClientMessageEx(playerid, COLOR_AQUA, "* You have stored %ig of Heroin in your house stash.", value);
@@ -900,24 +901,24 @@ CMD:stash(playerid, params[])
 			{
 			    if(sscanf(param, "i", value))
 			    {
-			        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /stash [withdraw] [meth] [amount]");
+			        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /stash [withdraw] [heroin] [amount]");
 				}
-				if(value < 1 || value > HouseInfo[houseid][hMeth])
+				if(value < 1 || value > HouseInfo[houseid][hHeroin])
 				{
 				    return SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
 			    }
-			    if(PlayerData[playerid][pMeth] + value > GetPlayerCapacity(playerid, CAPACITY_METH))
+			    if(PlayerData[playerid][pHeroin] + value > GetPlayerCapacity(playerid, CAPACITY_HEROIN))
 			    {
-			        return SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pMeth], GetPlayerCapacity(playerid, CAPACITY_METH));
+			        return SendClientMessageEx(playerid, COLOR_GREY, "You currently have %i/%i Heroin. You can't carry anymore until you upgrade your inventory skill.", PlayerData[playerid][pHeroin], GetPlayerCapacity(playerid, CAPACITY_HEROIN));
 				}
 
-			    PlayerData[playerid][pMeth] += value;
-			    HouseInfo[houseid][hMeth] -= value;
+			    PlayerData[playerid][pHeroin] += value;
+			    HouseInfo[houseid][hHeroin] -= value;
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE houses SET meth = %i WHERE id = %i", HouseInfo[houseid][hMeth], HouseInfo[houseid][hID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE houses SET heroin = %i WHERE id = %i", HouseInfo[houseid][hHeroin], HouseInfo[houseid][hID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
-			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET meth = %i WHERE uid = %i", PlayerData[playerid][pMeth], PlayerData[playerid][pID]);
+			    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET heroin = %i WHERE uid = %i", PlayerData[playerid][pHeroin], PlayerData[playerid][pID]);
 			    mysql_tquery(connectionID, queryBuffer);
 
 			    SendClientMessageEx(playerid, COLOR_AQUA, "* You have taken %ig of Heroin from your house stash.", value);

@@ -35,7 +35,7 @@ hook OnPlayerInit(playerid)
 	PlayerTextDrawSetProportional(playerid, ShowID[playerid][1], 1);
 	PlayerTextDrawSetSelectable(playerid, ShowID[playerid][1], 0);
 
-	ShowID[playerid][2] = CreatePlayerTextDraw(playerid, 494.000000, 168.000000, "Mike_Zodiac");
+	ShowID[playerid][2] = CreatePlayerTextDraw(playerid, 494.000000, 168.000000, "Khalil_Zoldyck");
 	PlayerTextDrawFont(playerid, ShowID[playerid][2], 2);
 	PlayerTextDrawLetterSize(playerid, ShowID[playerid][2], 0.250000, 1.000000);
 	PlayerTextDrawTextSize(playerid, ShowID[playerid][2], 400.000000, 17.000000);
