@@ -1,15 +1,12 @@
 
-// Script Includes
-/*#include <discord-connector>
+#if !defined INVALID_HOUSE_ID
+    #define INVALID_HOUSE_ID -1
+#endif
 
-static DCC_Guild:GName;
-static DCC_Channel:NameLogs;
+#if !defined CHECK_RETURN
+    #define CHECK_RETURN(%1,%2) if (%1) return SendClientMessage(playerid, COLOR_GREY, %2)
+#endif
 
-hook OnGameModeInit() 
-{
-    GName = DCC_FindGuildById("1267567121756455085");
-	NameLogs = DCC_FindChannelById("1380360577167392928");
-}*/
 
 CMD:taxhelp(playerid, params[])
 {
@@ -63,9 +60,8 @@ CMD:skate(playerid,params[])
 
 CMD:b(playerid, params[])
 {
-	new
-	    string[144];
-
+	new string[144];
+	
 	if(isnull(params))
 	{
 	    return SendClientMessage(playerid, COLOR_WHITE, "Usage: /b [local OOC]");
@@ -1346,7 +1342,7 @@ CMD:window(playerid, params[])
 //	new string[128];
     if(InsideShamal[playerid] != INVALID_VEHICLE_ID)
 	{
-        if(GetPlayerInterior(playerid) == 1)
+        if (GetPlayerInterior(playerid))
 		{
             new
                 Float: fSpecPos[6];
@@ -1593,6 +1589,11 @@ CMD:speedlaws(playerid, params[]) {
 //Reward play (ToiletDuck)
 CMD:phrewards(playerid)
 {
+    if (!IsHourRewardEnabled())
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Hour reward is disabled");
+    }
+
 	new string[2300];
 	strcat(string, "\t\t\t{FFA500}");
     strcat(string, GetServerName());
@@ -2583,6 +2584,10 @@ CMD:sell(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected or out of range.");
 	}
+	if (price < 1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The price can't be below $1.");
+    }
 	if(targetid == playerid)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command on yourself.");
@@ -3042,6 +3047,9 @@ CMD:accept(playerid, params[])
 	}else if(!strcmp(params, "craft", true))
 	{
 		AcceptCraft(playerid);
+	}else if(!strcmp(params, "carry", true))
+	{
+		AcceptCarry(playerid);
 	}else if(!strcmp(params, "house", true))
 	{
 		new
@@ -3928,6 +3936,10 @@ CMD:accept(playerid, params[])
 	    {
 	        return SendClientMessage(playerid, COLOR_GREY, "You can't afford to accept the offer.");
 	    }
+		if (IsPlayerInBankRobbery(playerid))
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "You can't be defended while in bank robbery.");
+		}
 	    if(!PlayerData[playerid][pWantedLevel])
 	    {
 	        return SendClientMessage(playerid, COLOR_GREY, "You are no longer wanted. You can't accept this offer anymore.");
@@ -7050,6 +7062,12 @@ CMD:nrn(playerid, params[])
 
 	Dialog_Show(targetid, DIALOG_FREENAMECHANGE, DIALOG_STYLE_INPUT, "Non-RP Name", "An administrator has came to the conclusion that your name is non-RP.\nTherefore you have been given this free namechange in order to correct it.\n\nEnter a name in the Firstname_Lastname format in the box below:", "Submit", "");
 	SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s has forced %s to change their name for being Non-RP.", GetRPName(playerid), GetRPName(targetid));
+
+	//new string[144]; // Declare the variable first
+
+	//format(string, sizeof(string), "%s has accepted %s's name change to %s", GetRPName(playerid), GetRPName(targetid), PlayerData[targetid][pNameChange]);
+	//SendClientMessageToAll(COLOR_WHITE, string); // Optional: use the message
+    //DCC_SendChannelMessage(NameLogs, string);
 	return 1;
 }
 
@@ -7116,6 +7134,7 @@ CMD:prison(playerid, params[])
 	ResetPlayer(targetid);
 
 	SetPlayerInJail(targetid);
+	SetPlayerSkin(playerid, 50);
 	GameTextForPlayer(targetid, "~w~Welcome to~n~~r~admin jail", 5000, 3);
 
 	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET prisonedby = '%e', prisonreason = '%e' WHERE uid = %i", GetPlayerNameEx(playerid), reason, PlayerData[targetid][pID]);
@@ -9470,40 +9489,40 @@ CMD:paintball(playerid,params[])
 
 CMD:quitpaintball(playerid, params[])
 {
-	return callcmd::exitpaintball(playerid, params);
+    return callcmd::exitpaintball(playerid, params);
 }
 CMD:exitpaintball(playerid,params[])
 {
-	if(PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pDueling] != INVALID_PLAYER_ID)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
-	}
+    if (PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pCuffed] > 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
+    }
 
-	if(PlayerData[playerid][pPaintball] > 0)
-	{
- 		foreach(new i : Player)
-		{
-		    if(PlayerData[playerid][pPaintball] == PlayerData[i][pPaintball])
-	    	{
-	        	SendClientMessageEx(i, COLOR_LIGHTORANGE, "(( %s has left the paintball arena. ))", GetRPName(playerid));
-			}
-		}
+    if (PlayerData[playerid][pPaintball] > 0)
+    {
+        foreach(new i : Player)
+        {
+            if (PlayerData[playerid][pPaintball] == PlayerData[i][pPaintball])
+            {
+                SendClientMessageEx(i, COLOR_LIGHTORANGE, "(( %s has left the paintball arena. ))", GetRPName(playerid));
+            }
+        }
 
         ResetPlayerWeapons(playerid);
         SetPlayerArmedWeapon(playerid, 0);
-		PlayerData[playerid][pPaintball] = 0;
-		PlayerData[playerid][pPaintballTeam] = -1;
-		GangZoneHideForPlayer(playerid, zone_paintball[0]);
-		GangZoneHideForPlayer(playerid, zone_paintball[1]);
+        PlayerData[playerid][pPaintball] = 0;
+        PlayerData[playerid][pPaintballTeam] = -1;
+        GangZoneHideForPlayer(playerid, zone_paintball[0]);
+        GangZoneHideForPlayer(playerid, zone_paintball[1]);
         SetPlayerHealth(playerid, PlayerData[playerid][pHealth]);
         SetPlayerArmour(playerid, PlayerData[playerid][pArmor]);
-		SetPlayerPos(playerid, PlayerData[playerid][pPosX], PlayerData[playerid][pPosY], PlayerData[playerid][pPosZ]);
-		SetPlayerFacingAngle(playerid, PlayerData[playerid][pPosA]);
-		SetPlayerInterior(playerid, PlayerData[playerid][pInterior]);
- 		SetPlayerVirtualWorld(playerid, PlayerData[playerid][pWorld]);
-		SetPlayerWeapons(playerid);
-	}
-	return 1;
+        SetPlayerPos(playerid, PlayerData[playerid][pPosX], PlayerData[playerid][pPosY], PlayerData[playerid][pPosZ]);
+        SetPlayerFacingAngle(playerid, PlayerData[playerid][pPosA]);
+        SetPlayerInterior(playerid, PlayerData[playerid][pInterior]);
+        SetPlayerVirtualWorld(playerid, PlayerData[playerid][pWorld]);
+        SetPlayerWeapons(playerid);
+    }
+    return 1;
 }
 CMD:enter(playerid, params[])
 {
@@ -10835,7 +10854,7 @@ CMD:hcar(playerid, params[])
     }
     else if (PlayerData[playerid][pAcceptedHelp])
     {
-        HelperCar[playerid] = GivePlayerAdminVehicle(playerid, 421);
+        HelperCar[playerid] = GivePlayerAdminVehicle(playerid, 521);
         adminVehicle[HelperCar[playerid]] = false;
         SendHelperMessage(COLOR_YELLOW, "(( %s (ID:%d) spawned a helper car ))", GetRPName(playerid), playerid);
     }
@@ -10879,41 +10898,41 @@ CMD:hlock(playerid, params[])
 
 CMD:return(playerid, params[])
 {
-    if(PlayerData[playerid][pHelper] < 1)
+	if(PlayerData[playerid][pHelper] < 1)
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
-	if(!PlayerData[playerid][pAcceptedHelp])
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You haven't accepted any help requests.");
-	}
+    if (!PlayerData[playerid][pAcceptedHelp])
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You haven't accepted any help requests.");
+    }
 
-	if (HelperCar[playerid] != INVALID_VEHICLE_ID)
+    if (HelperCar[playerid] != INVALID_VEHICLE_ID)
     {
         DestroyVehicleEx(HelperCar[playerid]);
         HelperCar[playerid] = INVALID_VEHICLE_ID;
     }
 
-	SetPlayerHealth(playerid, PlayerData[playerid][pHealth]);
-	SetScriptArmour(playerid, PlayerData[playerid][pArmor]);
+    SetPlayerHealth(playerid, PlayerData[playerid][pHealth]);
+    SetScriptArmour(playerid, PlayerData[playerid][pArmor]);
 
-	SetPlayerPos(playerid, PlayerData[playerid][pPosX], PlayerData[playerid][pPosY], PlayerData[playerid][pPosZ]);
-	SetPlayerFacingAngle(playerid, PlayerData[playerid][pPosA]);
-	SetPlayerInterior(playerid, PlayerData[playerid][pInterior]);
-	SetPlayerVirtualWorld(playerid, PlayerData[playerid][pWorld]);
-	SetPlayerSkin(playerid, PlayerData[playerid][pSkin]);
-	SetCameraBehindPlayer(playerid);
+    SetFreezePos(playerid, PlayerData[playerid][pPosX], PlayerData[playerid][pPosY], PlayerData[playerid][pPosZ]);
+    SetPlayerFacingAngle(playerid, PlayerData[playerid][pPosA]);
+    SetPlayerInterior(playerid, PlayerData[playerid][pInterior]);
+    SetPlayerVirtualWorld(playerid, PlayerData[playerid][pWorld]);
+    SetPlayerSkin(playerid, PlayerData[playerid][pSkin]);
+    SetCameraBehindPlayer(playerid);
 
-	if (HelperCar[playerid] != INVALID_VEHICLE_ID)
+    if (HelperCar[playerid] != INVALID_VEHICLE_ID)
     {
         DestroyVehicleEx(HelperCar[playerid]);
         HelperCar[playerid] = INVALID_VEHICLE_ID;
         SendClientMessage(playerid, COLOR_GREY, "Your helper car was destroyed.");
     }
 
-	SendClientMessage(playerid, COLOR_WHITE, "You were returned to your previous position.");
+    SendClientMessage(playerid, COLOR_WHITE, "You were returned to your previous position.");
     PlayerData[playerid][pAcceptedHelp] = 0;
-	return 1;
+    return 1;
 }
 
 CMD:answerhelp(playerid, params[])
@@ -12191,6 +12210,11 @@ CMD:sendlocate(playerid, params[])
 			PlayerData[playerid][pCP] = CHECKPOINT_MISC;
 			SendClientMessageEx(i, COLOR_YELLOW, "SMS: New available GPS coordinates, Received from: %s(%i)", GetRPName(playerid), PlayerData[playerid][pPhone]);
 			SendClientMessageEx(playerid, COLOR_YELLOW, "SMS: New available GPS coordinates, Send to: %s(%i)", GetRPName(i), PlayerData[i][pPhone]);
+
+			if(GetPlayerFaction(playerid) != FACTION_HITMAN)
+			{
+				SendClientMessageEx(i, COLOR_YELLOW, "SMS: New available GPS coordinates, Received from: Unknown");
+			}
 	        GivePlayerCash(playerid, -500);
 	        GameTextForPlayer(playerid, "~w~Text sent!~n~~r~-$500", 5000, 1);
 	        return 1;
@@ -13003,6 +13027,32 @@ CMD:gmx(playerid, params[])
 
     }
 	return 1;
+}
+
+CMD:lockserver(playerid, params[])
+{
+    if (!IsGodAdmin(playerid))
+    {
+        return 0;
+    }
+
+    if (isnull(params))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "{00BFFF}Usage:{FFFFFF} /lockserver [password (0 to remove password)]");
+    }
+
+    new password[32];
+    format(password, sizeof(password), "password %s", params);
+    SendRconCommand(password);
+    if (!strcmp(params, "0"))
+    {
+        SendClientMessageEx(playerid, COLOR_GREEN, "You removed the server password.");
+    }
+    else
+    {
+        SendClientMessageEx(playerid, COLOR_RED, "You changed the server %s.", password);
+    }
+    return 1;
 }
 
 CMD:kickall(playerid, params[])
@@ -15918,7 +15968,7 @@ CMD:selllandobj(playerid,params[])
 
 CMD:changename(playerid, params[])
 {
-	if(!IsPlayerInRangeOfPoint(playerid, 3.0, 360.7130,176.3916,1008.3828))
+	if(!IsPlayerInRangeOfPoint(playerid, 3.0, 1396.207641,-4.224958,1000.853515))
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You are not in range of the desk at city hall.");
 	}
@@ -16310,6 +16360,10 @@ CMD:getseeds(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you're not a Drug Dealer.");
 	}
+	if(PlayerData[playerid][pGang] == -1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not apart of any gang to use this command.");
+	}
 	if(sscanf(params, "i", amount))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /getseeds [amount]");
@@ -16354,6 +16408,10 @@ CMD:getcrack(playerid, params[])
 	if(!PlayerHasJob(playerid, JOB_DRUGDEALER))
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you're not a Drug Dealer.");
+	}
+	if(PlayerData[playerid][pGang] == -1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not apart of any gang to use this command.");
 	}
 	if(sscanf(params, "i", amount))
 	{
@@ -17164,13 +17222,14 @@ CMD:dicebetrigged(playerid, params[]) // Added to keep the economy in control. A
 {
 	new targetid, amount;
 
-	if(PlayerData[playerid][pAdmin] < MANAGEMENT)
+	if(!IsGodAdmin(playerid) && !PlayerData[playerid][pAdminPersonnel])
 	{
-	    return -1;
+		DisplayUnknownCmdDialog(playerid);
+		PlayerPlaySound(playerid,1150,0.0,0.0,0.0);
 	}
 	if(!IsPlayerInRangeOfPoint(playerid, 50.0, 1949.3925,1018.5336,992.4745))
 	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You are not in range of the casino.");
+	    return -1;
 	}
 	if(sscanf(params, "ui", targetid, amount))
 	{
@@ -17554,6 +17613,10 @@ CMD:robbiz(playerid, params[])
 		if(PlayerData[playerid][pRobbingBiz] >= 0)
 		{
 		    return SendClientMessage(playerid, COLOR_GREY, "You're already robbing a business.");
+		}
+		if (IsLawEnforcement(playerid))
+		{
+			return SendClientMessage(playerid, COLOR_GREY, "Law Enforcement Officials cannot rob a business.");
 		}
 		if((bizid = GetInsideBusiness(playerid)) == -1)
 		{
@@ -18662,16 +18725,19 @@ CMD:offerduel(playerid, params[])
 
 CMD:confirmupgrade(playerid, params[])
 {
-	new houseid = PlayerData[playerid][pPreviewHouse], type = PlayerData[playerid][pPreviewType];
+    new houseid = PlayerData[playerid][pPreviewHouse], type = PlayerData[playerid][pPreviewType];
+    if (houseid == INVALID_HOUSE_ID || !IsHouseOwner(playerid, houseid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You aren't previewing a house interior at the moment.");
+    }
 
-	if(houseid == -1 || !IsHouseOwner(playerid, houseid))
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You aren't previewing a house interior. '/upgradehouse interior' to begin.");
-	}
-	if(PlayerData[playerid][pCash] < houseInteriors[type][intPrice])
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You can't afford to upgrade to this interior.");
-	}
+	RCHECK(houseInteriors[type][intForDonnation] && !IsGodAdmin(playerid), 
+    "This interior is available only for donation.");
+
+    if (PlayerData[playerid][pCash] < houseInteriors[type][intPrice])
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can't afford to upgrade to this interior.");
+    }
 
 	foreach(new i : Player)
 	{

@@ -8,5 +8,5 @@
  */
 
 #define SERVER_SHORT_NAME   "ARP_NEXT"
-#define SERVER_REVISION  	"V5.0-RC3"
+#define SERVER_REVISION  	"V1.1-RC2"
 #define SERVER_ANTICHEAT 	"Rex"

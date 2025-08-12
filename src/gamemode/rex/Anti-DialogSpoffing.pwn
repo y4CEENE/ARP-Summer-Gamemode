@@ -87,7 +87,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
     if(GetPVarInt(playerid, "DialogID") != dialogid && dialogid != DIALOG_MSTORE) // Confirm the dialogid matches what we have in the PVar
     { 
         
-        format(string, sizeof(string), "{AA3333}AdmWarning{FFFF00}: %s (ID %d) is possibly trying to spoof a dialog ID (%d).", GetPlayerNameEx(playerid), playerid, dialogid);
+        //format(string, sizeof(string), "{AA3333}AdmWarning{FFFF00}: %s (ID %d) is possibly trying to spoof a dialog ID (%d).", GetPlayerNameEx(playerid), playerid, dialogid);
         ABroadCast(COLOR_YELLOW, string, 2);
 
         //format(string, sizeof(string), "%s has possibly tried to spoof a dialog ID.", GetPlayerNameEx(playerid));

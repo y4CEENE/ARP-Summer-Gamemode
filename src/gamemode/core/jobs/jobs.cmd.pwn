@@ -29,45 +29,130 @@ CMD:asellbiz(playerid, params[])
 	return 1;
 }
 
+GetMaxPlayerJobs(playerid)
+{
+    if (PlayerData[playerid][pDonator] >= 55 || PlayerData[playerid][pLevel] >= 25)
+    {
+        return 2;
+    }
+    return 1;
+}
+
 CMD:join(playerid, params[])
 {
-	for(new i = 0; i < sizeof(jobLocations); i ++)
-	{
-	    if(IsPlayerInRangeOfPoint(playerid, 3.0, jobLocations[i][jobX], jobLocations[i][jobY], jobLocations[i][jobZ]))
-	    {
-			new string[140];
-	        if(PlayerData[playerid][pJob] != JOB_NONE)
-	        {
-	            if(PlayerData[playerid][pDonator] >= 2 || PlayerData[playerid][pLevel] >= 25)
-	        	{
-	        	    if(PlayerData[playerid][pSecondJob] != JOB_NONE)
-	        	    {
-	        	        return SendClientMessage(playerid, COLOR_GREY, "You have two jobs already. Please quit one of them before getting another one.");
-	        	    }
-	        	    if(PlayerData[playerid][pJob] == jobLocations[i][jobID])
-	        	    {
-	        	        return SendClientMessage(playerid, COLOR_GREY, "You have this job already.");
-	        	    }
-					format(string, sizeof(string), "Are you sure to become a {FBBC05}%s{FFFFFF}.", jobLocations[i][jobName]);
-					Dialog_Show(playerid, JobJoinConfirm, DIALOG_STYLE_MSGBOX, "Job recruiter", string, "Yes", "No");
-	            }
-	            else
-	            {
-	            	SendClientMessage(playerid, COLOR_GREY, "You have a job already. Please quit your current job before getting another one.");
-				}
+    if(!IsPlayerInRangeOfPoint(playerid, 3.0, 1396.207641,-4.224958,1000.853515))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not in range of the desk at city hall.");
+    }
 
-				return 1;
-			}
-			
-			format(string, sizeof(string), "Are you sure to become a {FBBC05}%s{FFFFFF}.", jobLocations[i][jobName]);
-			Dialog_Show(playerid, JobJoinConfirm, DIALOG_STYLE_MSGBOX, "Job recruiter", string, "Yes", "No");
-            return 1;
+    return Dialog_Show(playerid, JobDialog, DIALOG_STYLE_LIST, 
+        "Job Center - Choose Your Career",
+        "ID: 00\t{FF9900}Job Name:{FFFFFF} Pizzaman\n\
+        ID: 01\t{FF9900}Job Name:{FFFFFF} Trucker\n\
+        ID: 02\t{FF9900}Job Name:{FFFFFF} Fisherman\n\
+        ID: 03\t{FF9900}Job Name:{FFFFFF} Arms Dealer\n\
+        ID: 04\t{FF9900}Job Name:{FFFFFF} Mechanic\n\
+        ID: 05\t{FF9900}Job Name:{FFFFFF} SF Mechanic\n\
+        ID: 06\t{FF9900}Job Name:{FFFFFF} Miner\n\
+        ID: 07\t{FF9900}Job Name:{FFFFFF} Taxi Driver\n\
+        ID: 08\t{FF9900}Job Name:{FFFFFF} Lawyer\n\
+        ID: 09\t{FF9900}Job Name:{FFFFFF} Detective\n\
+        ID: 10\t{FF9900}Job Name:{FFFFFF} Garbageman\n\
+        ID: 11\t{FF9900}Job Name:{FFFFFF} Farmer\n\
+        ID: 12\t{FF9900}Job Name:{FFFFFF} Hooker\n\
+        ID: 13\t{FF9900}Job Name:{FFFFFF} Bartender\n\
+        ID: 14\t{FF9900}Job Name:{FFFFFF} Craftman\n\
+        ID: 15\t{FF9900}Job Name:{FFFFFF} Forklift\n\
+        ID: 16\t{FF9900}Job Name:{FFFFFF} Lumberjack\n\
+        ID: 17\t{FF9900}Job Name:{FFFFFF} Construction\n\
+        ID: 18\t{FF9900}Job Name:{FFFFFF} Butcher\n\
+        ID: 19\t{FF9900}Job Name:{FFFFFF} Brinks\n\
+        ID: 20\t{FF9900}Job Name:{FFFFFF} Recycle\n\
+        ID: 21\t{FF9900}Job Name:{FFFFFF} Milker",
+        "Select", "Close");
+}
 
-		}
+// Map dialog list index to actual job constants
+new const JobListMap[] =
+{
+    JOB_PIZZAMAN,
+    JOB_TRUCKER,
+    JOB_FISHERMAN,
+    JOB_ARMSDEALER,
+    JOB_MECHANIC,
+    JOB_MECHANIC,
+    JOB_MINER,
+    JOB_TAXIDRIVER,
+    JOB_LAWYER,
+    JOB_DETECTIVE,
+    JOB_GARBAGEMAN,
+    JOB_FARMER,
+    JOB_HOOKER,
+    JOB_BARTENDER,
+    JOB_CRAFTMAN,
+    JOB_FORKLIFT,
+    JOB_LUMBERJACK,
+    JOB_CONSTRUCTION,
+    JOB_BUTCHER,
+    JOB_BRINKS,
+    JOB_RECYCLE,
+    JOB_MILKER
+};
 
-	}
-	SendClientMessage(playerid, COLOR_GREY, "You are not in range of any job icon.");
-	return 1;
+Dialog:JobDialog(playerid, response, listitem, inputtext[])
+{
+    if (response)
+    {
+        if (listitem >= 0 && listitem < sizeof(JobListMap))
+        {
+            return TryJoinJob(playerid, JobListMap[listitem]); // Use mapped job ID
+        }
+        else
+        {
+            return SendClientMessage(playerid, COLOR_GREY, "Invalid job selection.");
+        }
+    }
+    return 1;
+}
+
+TryJoinJob(playerid, jobid)
+{
+    new query[140];
+
+    // Already has both jobs?
+    if (PlayerData[playerid][pJob] != JOB_NONE && 
+        PlayerData[playerid][pSecondJob] != JOB_NONE)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You already have two jobs. Please quit one before getting another.");
+    }
+
+    // Prevent duplicate job
+    if (PlayerData[playerid][pJob] == jobid || PlayerData[playerid][pSecondJob] == jobid)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You already have this job.");
+    }
+
+    // Assign first job if empty
+    if (PlayerData[playerid][pJob] == JOB_NONE)
+    {
+        PlayerData[playerid][pJob] = jobid;
+        format(query, sizeof(query), "UPDATE "#TABLE_USERS" SET job = %i WHERE uid = %i", jobid, PlayerData[playerid][pID]);
+        mysql_tquery(connectionID, query);
+    }
+    // Assign second job if allowed and empty
+    else if (GetMaxPlayerJobs(playerid) >= 2 && PlayerData[playerid][pSecondJob] == JOB_NONE)
+    {
+        PlayerData[playerid][pSecondJob] = jobid;
+        format(query, sizeof(query), "UPDATE "#TABLE_USERS" SET secondjob = %i WHERE uid = %i", jobid, PlayerData[playerid][pID]);
+        mysql_tquery(connectionID, query);
+    }
+    else
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You cannot take another job until you quit one.");
+    }
+
+    SendClientMessageEx(playerid, COLOR_WHITE, "You are now a {ffff00}%s{ffffff}. Use /jobhelp for a list of commands related to your new job.", GetJobName(jobid));
+    return 1;
 }
 
 CMD:quitjob(playerid, params[])
@@ -89,11 +174,11 @@ CMD:quitjob(playerid, params[])
 	{
 		case 2:
 		{
-			// Second job
-			if(PlayerData[playerid][pSecondJob] == JOB_NONE)
-			{
-				return SendClientMessage(playerid, COLOR_GREY, "You don't have a job in this slot which you can quit.");
-			}
+            // Second job
+            if (PlayerData[playerid][pSecondJob] == JOB_NONE)
+            {
+                return SendClientMessage(playerid, COLOR_GREY, "You don't have a job in this slot which you can quit.");
+            }
 
 			format(string, sizeof(string), "Are you sure to quit the job {FBBC05}%s{FFFFFF}.", GetJobName(PlayerData[playerid][pSecondJob]));
 			Dialog_Show(playerid, JobQuitConfirm, DIALOG_STYLE_MSGBOX, "Job recruiter", string, "Yes", "No");
@@ -101,11 +186,11 @@ CMD:quitjob(playerid, params[])
 		}
 		default:
 		{
-			// First job
-			if(PlayerData[playerid][pJob] == JOB_NONE)
-			{
-				return SendClientMessage(playerid, COLOR_GREY, "You don't have a job which you can quit.");
-			}
+            // First job
+            if (PlayerData[playerid][pJob] == JOB_NONE)
+            {
+                return SendClientMessage(playerid, COLOR_GREY, "You don't have a job which you can quit.");
+            }
 			
 			format(string, sizeof(string), "Are you sure to quit the job {FBBC05}%s{FFFFFF}.", GetJobName(PlayerData[playerid][pJob]));
 			Dialog_Show(playerid, JobQuitConfirm, DIALOG_STYLE_MSGBOX, "Job recruiter", string, "Yes", "No");

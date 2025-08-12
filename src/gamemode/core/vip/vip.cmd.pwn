@@ -46,7 +46,7 @@ CMD:viplocker(playerid, params[])
 	}
 	else if(PlayerData[playerid][pDonator] == 3)
 	{
-		Dialog_Show(playerid, DIALOG_BLACKMARKET2, DIALOG_STYLE_LIST, "Legendary VIP Locker", "Katana\nDeagle\nMp5\nRifle\nAk47\nM4", "Select", "Cancel");
+		Dialog_Show(playerid, DIALOG_BLACKMARKET2, DIALOG_STYLE_LIST, "Legendary VIP Locker", "Katana\nDeagle\nMp5\nSniper Rifle\nAk47\nM4", "Select", "Cancel");
 	}
 	return 1;
 }

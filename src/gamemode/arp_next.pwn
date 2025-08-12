@@ -30,8 +30,6 @@
 #include <a_mysql>
 #include <foreach>
 #include <sampvoice>
-//#include <discord-connector>
-//#include <discord-cmd>
 #define ITER_NONE						(cellmin) // Temporary fix for https://github.com/Misiur/YSI-Includes/issues/109
 
 #include <MenuStore>
@@ -182,7 +180,8 @@ enum
 	DIALOG_DELETEOBJECT,
 	DIALOG_PAINTBALL,
 	GotoEventMap,
-	DIALOG_BUYVEHICLE
+	DIALOG_BUYVEHICLE,
+	DIALOG_JOBCENTER
 }
 
 enum
@@ -738,6 +737,15 @@ enum pEnum
 	pBizPrice,
 	pVestOffer,
 	pVestPrice,
+	pBocketFull,
+	pBocket,
+	pBodyCam,
+	pGlassItem,
+	pMetalItem,
+	pRubberItem,
+	pIronItem,
+	pPlasticItem,
+	pRecycleStage,
 	pCarOffer,
 	pCarOffered,
 	pCarPrice,
@@ -1280,7 +1288,7 @@ new gListedItems[MAX_PLAYERS][100], gTargetName[MAX_PLAYERS][MAX_PLAYER_NAME];
 new gPreviewFurniture[MAX_PLAYERS] = {-1, ...};
 new DamageData[MAX_PLAYERS][MAX_DAMAGES][e_Damages];
 new InsideShamal[MAX_PLAYERS];
-new VehicleStatus[MAX_VEHICLES char] = 0; // 0 == none, 1 == vehicle dead about to respawn
+//new VehicleStatus[MAX_VEHICLES char] = 0; // 0 == none, 1 == vehicle dead about to respawn
 new RobberyInfo[robberyEnum];
 new MarkedPositions[MAX_PLAYERS][3][mEnum];
 new PlayerData[MAX_PLAYERS+1][pEnum];
@@ -1621,49 +1629,59 @@ new const randomFireSpawns[][fireEnum] =
 
 new const Float:minerPositions[][] =
 {
-    {1276.6024, -1252.0608, 13.8471},
-	{1264.3618, -1240.3776, 16.0091},
-	{1255.6558, -1242.5010, 17.6045},
-	{1255.5265, -1251.3208, 13.8461}
+    //{1276.6024, -1252.0608, 13.8471},
+	//{1264.3618, -1240.3776, 16.0091},
+	//{1255.6558, -1242.5010, 17.6045},
+	//{1255.5265, -1251.3208, 13.8461},
+	{ 571.8854, 889.3759, -88.1907 }
 };
 new const Float:paintballTSpawns[][] =
 { // TDM Arena
-	//   X         Y        Z          R
-	{1303.8156, 1.8952, 1001.0244, 146.4729}, // Team 1
-	{1260.6339, -66.3295, 1002.4949, 318.4712} // Team 2
+    //   X         Y        Z          R
+    {1303.8156, 1.8952, 1001.0244, 146.4729}, // Team 1
+    {1260.6339, -66.3295, 1002.4949, 318.4712} // Team 2
 };
 new const Float:paintballDSpawns[][] =
 { // Deagle Arena
     //   X         Y        Z          R
     {1299.0728, 2103.4670, 11.0234, 10.4824},
-	{1298.5331, 2196.3188, 11.0234, 2.9623},
-	{1397.0685, 2101.0967, 11.0234, 260.1884},
-	{1315.7385, 2206.4363, 16.8045, 205.3078},
-	{1388.1871, 2206.5242, 16.7969, 267.3483},
-	{1407.4728, 2140.1846, 17.6797, 195.9077},
-	{1411.0127, 2107.6167, 12.0156, 172.0940},
-	{1399.2078, 2206.6550, 12.0156, 213.8402},
-	{1301.0807, 2212.7083, 12.0156, 92.1932}
+    {1298.5331, 2196.3188, 11.0234, 2.9623},
+    {1397.0685, 2101.0967, 11.0234, 260.1884},
+    {1315.7385, 2206.4363, 16.8045, 205.3078},
+    {1388.1871, 2206.5242, 16.7969, 267.3483},
+    {1407.4728, 2140.1846, 17.6797, 195.9077},
+    {1411.0127, 2107.6167, 12.0156, 172.0940},
+    {1399.2078, 2206.6550, 12.0156, 213.8402},
+    {1301.0807, 2212.7083, 12.0156, 92.1932}
 };
 new const Float:paintballSSpawns[][] =
 { // Sniper Arena
     //   X         Y        Z          R
     {-2233.8169, -1743.4373, 480.8561, 37.9961},
-	//{-2386.9824, -1841.8787, 441.4585, 356.9490},
-	{-2351.9800, -1714.6760, 479.6617, 27.9689},
-	{-2344.3889, -1703.7188, 483.6255, 326.3146},
-	{-2425.2998, -1623.8129, 524.8774, 212.5245}
+    //{-2386.9824, -1841.8787, 441.4585, 356.9490},
+    {-2351.9800, -1714.6760, 479.6617, 27.9689},
+    {-2344.3889, -1703.7188, 483.6255, 326.3146},
+    {-2425.2998, -1623.8129, 524.8774, 212.5245}
 };
 new const Float:paintballFSpawns[][] =
 {// FFA Arena
     //   X         Y        Z          R
-	{1291.2968, -0.1334, 1001.0228, 180.0000},
-	{1304.6259, -28.7442, 1001.0326, 90.0000},
-	{1260.6687, -0.6802, 1001.0234, 180.0000},
-	{1251.9862, -26.3548, 1001.0340, 270.0000},
-	{1278.8584, -44.1545, 1001.0236, 0.0000},
-	{1256.5944, -61.9047, 1002.4999, 0.0000},
-	{1297.3204, -61.4144, 1002.4980, 0.0000}
+    {1291.2968, -0.1334, 1001.0228, 180.0000},
+    {1304.6259, -28.7442, 1001.0326, 90.0000},
+    {1260.6687, -0.6802, 1001.0234, 180.0000},
+    {1251.9862, -26.3548, 1001.0340, 270.0000},
+    {1278.8584, -44.1545, 1001.0236, 0.0000},
+    {1256.5944, -61.9047, 1002.4999, 0.0000},
+    {1297.3204, -61.4144, 1002.4980, 0.0000}
+};
+new const Float:paintballLVPD[][] =
+{// LVPD Paintball
+    // X        Y       Z       R
+    {288.8384, 170.8850, 1007.1794, 357.9209},
+    {238.8748, 141.8436, 1003.0234, 0.1136},
+    {209.6191, 142.1594, 1003.0234, 271.4633},
+    {202.5294, 159.5241, 1003.0234, 0.1370},
+    {226.6185, 180.8132, 1003.0312, 180.5951}
 };
 
 new const Float:drivingTestCPs[][] =
@@ -1754,7 +1772,7 @@ new const Float:AdminPrisonFloat[18][3] = {
 new const Float:arrestPoints[][] =
 {
     { 1229.3544, -1311.8627, 796.7859}, // PD interior
-	{ 1745.8483, -978.1483, 1152.5780}, // PD Wanted
+	{ 1746.078857, -979.039184, 1152.578735}, // PD garage
 	{ 1564.6931, -1662.1338,  28.3956}, // PD roof
 	{  310.3752, -1515.3691,  24.9219}, // FBI garage
 	{ 1382.0898, -1393.6364, -33.7034}, // army garage
@@ -3654,20 +3672,16 @@ DoorCheck(playerid)
 
 EnterCheck(playerid)
 {
-    new id, string[40];
+	new id, string[40];
 
-    if ((gettime() - PlayerData[playerid][pLastEnter]) < 3 && PlayerData[playerid][pAdminDuty] == 0)
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "Please wait a moment before entering or exiting again.");
-    }
-    new closestcar = GetClosestVehicle(playerid, INVALID_VEHICLE_ID, 6.0);
-    new Float:vehicleHp;
-    GetVehicleHealth(closestcar, vehicleHp);//TODO: GetVehicleHealthEx
-    if (vehicleHp >= 250.0 && GetPlayerInterior(playerid) == 0)
-    {//TODO: save player pos outside vehicle
-     //TODO: what happen when vehicle destroyed
-        new bool:hasInterior = true;
-        switch (GetVehicleModel(closestcar))
+	if((gettime() - PlayerData[playerid][pLastEnter]) < 3 && PlayerData[playerid][pAdminDuty] == 0)
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "Please wait a moment before entering or exiting again.");
+	}
+	new vehicleid = GetPlayerVehicleID(playerid);
+	new closestcar = GetClosestVehicle(playerid, vehicleid);
+    new bool:hasInterior = true;
+    switch (GetVehicleModel(closestcar))
         {
             case 519: // Shamal
             {
@@ -3706,18 +3720,17 @@ EnterCheck(playerid)
                 hasInterior = false;
             }
         }
-        if (hasInterior)
+    if (hasInterior)
         {
-            SetCameraBehindPlayer(playerid);
-            PlayerData[playerid][pWorld] = closestcar;
-            SetPlayerVirtualWorld(playerid, closestcar);
-            PlayerData[playerid][pInterior] = 1;
-            SetPlayerInterior(playerid, 1);
-            InsideShamal[playerid] = closestcar;
-            SendClientMessage(playerid, COLOR_WHITE, "Type /exit near the door to exit the vehicle, or /window to look outside.");
-            ShowActionBubble(playerid, "* %s enters the %s as a passenger.", GetRPName(playerid), GetVehicleName(closestcar));
-        }
-    }
+        SetCameraBehindPlayer(playerid);
+		PlayerData[playerid][pWorld] = closestcar;
+		SetPlayerVirtualWorld(playerid, closestcar);
+		PlayerData[playerid][pInterior] = 1;
+        SetPlayerInterior(playerid, 1);
+		InsideShamal[playerid] = closestcar;
+		SendClientMessage(playerid, COLOR_WHITE, "Type /exit near the door to exit the vehicle, or /window to look outside.");
+
+	}
     if((id = GetNearbyHouse(playerid)) >= 0)
 	{
 	    if(HouseInfo[id][hLocked])
@@ -4031,18 +4044,13 @@ ExitCheck(playerid)
 	}
     if(InsideShamal[playerid] != INVALID_VEHICLE_ID && IsPlayerInRangeOfPoint(playerid,3,2.509036, 23.118730, 1199.593750))
 	{
-        ShowActionBubble(playerid, "* %s exits the Shamal airplane.", GetRPName(playerid));
+    if (InsideShamal[playerid] != INVALID_VEHICLE_ID && GetPlayerInterior(playerid) > 0)
+    {
+        ShowActionBubble(playerid, "* %s exits the %s.", GetRPName(playerid), GetVehicleName(InsideShamal[playerid]));
 
-
-        if(InsideShamal[playerid] == INVALID_VEHICLE_ID || GetVehicleModel(InsideShamal[playerid]) != 519) {
-            SetPlayerPos(playerid, 0.000000, 0.000000, 420.000000);
-        }
-        else {
-            new Float:X, Float:Y, Float:Z;
-            GetVehiclePos(InsideShamal[playerid], X, Y, Z);
-            SetPlayerPos(playerid, X-4, Y-2.3, Z);
-
-        }
+        new Float:X, Float:Y, Float:Z;
+        GetVehiclePos(InsideShamal[playerid], X, Y, Z);
+        SetPlayerPos(playerid, X-4, Y-2.3, Z);
 
         PlayerData[playerid][pWorld] = 0;
         SetPlayerVirtualWorld(playerid, 0);
@@ -4176,7 +4184,7 @@ ExitCheck(playerid)
 			}
 		}
 	}
-
+}
 	return 0;
 }
 
@@ -6214,15 +6222,16 @@ ShowDialogToPlayer(playerid, dialogid)
 			format(string, sizeof(string), "Object %i selected\n{FFFFFF}Would you really like to {FF0000}delete{FFFFFF} it?", PlayerData[playerid][pSelected]);
   			Dialog_Show(playerid, DIALOG_DELETEOBJECT, DIALOG_STYLE_MSGBOX, "Delete Mode - Dynamic Object Selected", string, "Yes", "No");
 		}
-		case DIALOG_PAINTBALL:
-		{
-		    string =  "Name\tType\tCurrent Players\n";
-		    format(string, sizeof(string), "%sDeathmatch Arena\tFFA\t%i\n", string, GetArenaPlayers(1));
-		    format(string, sizeof(string), "%sTeam Deathmatch Arena\tTDM\t%i\n", string, GetArenaPlayers(2));
-		    format(string, sizeof(string), "%sDeagle Arena\t1Shot\t%i\n", string, GetArenaPlayers(3));
-		    format(string, sizeof(string), "%sSniper Arena\t1Shot\t%i\n", string, GetArenaPlayers(4));
-		    Dialog_Show(playerid, DIALOG_PAINTBALL, DIALOG_STYLE_TABLIST_HEADERS, "Paintball", string, "Select", "Cancel");
-		}
+        case DIALOG_PAINTBALL:
+        {
+            string =  "Name\tType\tCurrent Players\n";
+            format(string, sizeof(string), "%sDeathmatch Arena\tFFA\t%i\n", string, GetArenaPlayers(1));
+            format(string, sizeof(string), "%sLVPD Arena\tDM\t%i\n", string, GetArenaPlayers(2));
+            format(string, sizeof(string), "%sTeam Deathmatch Arena\tTDM\t%i\n", string, GetArenaPlayers(3));
+            format(string, sizeof(string), "%sDeagle Arena\t1Shot\t%i\n", string, GetArenaPlayers(4));
+            format(string, sizeof(string), "%sSniper Arena\t1Shot\t%i\n", string, GetArenaPlayers(5));
+            Dialog_Show(playerid, DIALOG_PAINTBALL, DIALOG_STYLE_TABLIST_HEADERS, "Paintball", string, "Select", "Cancel");
+        }
 		
 	}
 
@@ -6859,11 +6868,34 @@ LoadPickupsAndText()
     CreateDynamic3DTextLabel("Craft table\ntype /gsellgun to sell a weapon.", COLOR_YELLOW, 1332.7495, 1568.4010, 1030.9145, 10.0);
 
 	// ChangeName
-	CreateDynamic3DTextLabel("Name changes\nCost: $7500/level\n/changename to request one.", COLOR_YELLOW, 360.7130,176.3916,1008.3828, 10.0);
-	CreateDynamicPickup(1239, 1, 360.7130,176.3916,1008.3828);
+	CreateDynamic3DTextLabel("Name changes\nCost: $7500/level\n/changename to request one\n/join to join any job.", COLOR_YELLOW, 1396.207641,-4.224958,1000.853515, 10.0);
+	CreateDynamicPickup(1239, 1, 1396.207641,-4.224958,1000.853515);
+	CreateActor(17, 1394.506713, -4.594165, 1000.853515, 269.22);
+
+	// Milker
+	CreateDynamic3DTextLabel("Milker Job\ntype /buybocket to buy a bocket.", COLOR_YELLOW, 1034.360595, -281.772613, 73.998100, 10.0);
+	CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1067.486083, -304.230407, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1066.052612, -299.234252, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1063.673095, -295.457275, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1071.917480, -295.437622, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1075.167724, -302.154174, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1079.390014, -309.615386, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1081.445556, -304.313812, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1071.877929, -308.532379, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1068.574829, -313.870330, 74.008110, 3.0);
+    CreateDynamic3DTextLabel("Milker Job\ntype /milk to start the milking.", COLOR_YELLOW, 1062.901489, -308.476959, 74.008110, 3.0);
+	CreateDynamic3DTextLabel("Milkman\ntype /sellmilk to sell your milk.",   COLOR_YELLOW, 1082.199340, -365.259033, 74.074180, 10.0);
 
 	CreateDynamic3DTextLabel("Ticket Pay\n/paytickets to pay your vehicle tickets.", COLOR_YELLOW, 1186.8889,-1795.3860,13.5703, 10.0);
 	CreateDynamicPickup(1239, 1, 1186.8889,-1795.3860,13.5703);
+
+	// Recycle
+	CreateDynamic3DTextLabel("Recycle Job\ntype /recycle to start the recycling.", COLOR_YELLOW, 1085.245849, -1679.167358, 14.371733, 3.0);
+	CreateDynamic3DTextLabel("Recycle Job\ntype /recycle to start the recycling.", COLOR_YELLOW, 1103.737426, -1679.169555, 14.371709, 3.0);
+	CreateDynamic3DTextLabel("Recycle Job\ntype /recycle to start the recycling.", COLOR_YELLOW, 1101.022216, -1665.741699, 14.582563, 3.0);
+	CreateDynamic3DTextLabel("Recycle Job\ntype /recycle to start the recycling.", COLOR_YELLOW, 1082.896606, -1665.740356, 14.582584, 3.0);
+	CreateDynamic3DTextLabel("Recycle Job\ntype /recycle to start the recycling.", COLOR_YELLOW, 1103.897094, -1672.897460, 14.470188, 3.0);
+	CreateDynamic3DTextLabel("Recycle Job\ntype /recycle to start the recycling.", COLOR_YELLOW, 1090.654052, -1672.906982, 14.470069, 3.0);
 
 	CreateDynamic3DTextLabel("Drug smuggling\nCost: $100\n/getcrate to begin smuggling.", COLOR_YELLOW, 2205.9263,1581.7888,999.9827, 10.0);
 	CreateDynamicPickup(1279, 1, 2205.9263,1581.7888,999.9827);
@@ -7365,95 +7397,115 @@ SetPlayerClothing(playerid)
 
 SetPlayerInPaintball(playerid, type)
 {
-    if(PlayerData[playerid][pPaintball] == 0)
-	{
-		SavePlayerVariables(playerid);
-		ResetPlayerWeapons(playerid);
-	}
-	if(type == 1)
-	{
-		new rand = random(sizeof(paintballFSpawns));
-		SetPlayerPos(playerid, paintballFSpawns[rand][0], paintballFSpawns[rand][1], paintballFSpawns[rand][2]);
-		SetPlayerFacingAngle(playerid, paintballFSpawns[rand][3]);
-		SetPlayerInterior(playerid, 18);
-		SetPlayerVirtualWorld(playerid, 1000);
-		SetCameraBehindPlayer(playerid);
+    if (PlayerData[playerid][pPaintball] == 0)
+    {
+        SavePlayerVariables(playerid);
+        ResetPlayerWeapons(playerid);
+    }
+    if (type == 1)
+    {
+        new rand = random(sizeof(paintballFSpawns));
+        SetPlayerPos(playerid, paintballFSpawns[rand][0], paintballFSpawns[rand][1], paintballFSpawns[rand][2]);
+        SetPlayerFacingAngle(playerid, paintballFSpawns[rand][3]);
+        SetPlayerInterior(playerid, 18);
+        SetPlayerVirtualWorld(playerid, 1000);
+        SetCameraBehindPlayer(playerid);
 
-		SetPlayerHealth(playerid, 100.0);
-		SetPlayerArmour(playerid, 100.0);
+        SetPlayerHealth(playerid, 100.0);
+        SetPlayerArmour(playerid, 100.0);
 
-		GivePlayerWeaponEx(playerid, 24, true);
-		GivePlayerWeaponEx(playerid, 27, true);
-		GivePlayerWeaponEx(playerid, 29, true);
-		GivePlayerWeaponEx(playerid, 31, true);
-		GivePlayerWeaponEx(playerid, 34, true);
+        GivePlayerWeaponEx(playerid, 24, true);
+        GivePlayerWeaponEx(playerid, 27, true);
+        GivePlayerWeaponEx(playerid, 29, true);
+        GivePlayerWeaponEx(playerid, 31, true);
+        GivePlayerWeaponEx(playerid, 34, true);
 
-		PlayerData[playerid][pPaintball] = 1;
-	}
-	else if(type == 2)
-	{
-		SetPlayerPos(playerid, paintballTSpawns[pbNext][0], paintballTSpawns[pbNext][1], paintballTSpawns[pbNext][2]);
-		SetPlayerFacingAngle(playerid, paintballTSpawns[pbNext][3]);
-		SetPlayerInterior(playerid, 18);
-		SetPlayerVirtualWorld(playerid, 1001);
-		SetCameraBehindPlayer(playerid);
+        PlayerData[playerid][pPaintball] = 1;
+    }
+    if (type == 2)
+    {
+        new rand = random(sizeof(paintballLVPD));
+        SetPlayerPos(playerid, paintballLVPD[rand][0], paintballLVPD[rand][1], paintballLVPD[rand][2]);
+        SetPlayerFacingAngle(playerid, paintballLVPD[rand][3]);
+        SetPlayerInterior(playerid, 3);
+        SetPlayerVirtualWorld(playerid, 1000);
+        SetCameraBehindPlayer(playerid);
 
-	    SetPlayerHealth(playerid, 100.0);
-		SetPlayerArmour(playerid, 100.0);
+        SetPlayerHealth(playerid, 100.0);
+        SetPlayerArmour(playerid, 100.0);
 
-		GivePlayerWeaponEx(playerid, 24, true);
-		GivePlayerWeaponEx(playerid, 27, true);
-		GivePlayerWeaponEx(playerid, 29, true);
-		GivePlayerWeaponEx(playerid, 31, true);
-		GivePlayerWeaponEx(playerid, 34, true);
+        GivePlayerWeaponEx(playerid, 24, true);
+        GivePlayerWeaponEx(playerid, 27, true);
+        GivePlayerWeaponEx(playerid, 29, true);
+        GivePlayerWeaponEx(playerid, 31, true);
+        GivePlayerWeaponEx(playerid, 34, true);
 
-		PlayerData[playerid][pPaintball] = 2;
-		PlayerData[playerid][pPaintballTeam] = pbNext;
-		if(!pbNext)
-		{
-		    pbNext = 1;
-		}
-		else
-		{
-		    pbNext = 0;
-		}
-	}
-	else if(type == 3)
-	{
-	    new rand = random(sizeof(paintballDSpawns));
-		SetPlayerPos(playerid, paintballDSpawns[rand][0], paintballDSpawns[rand][1], paintballDSpawns[rand][2]);
-		SetPlayerFacingAngle(playerid, paintballDSpawns[rand][3]);
-		SetPlayerInterior(playerid, 0);
-		SetPlayerVirtualWorld(playerid, 1000);
-		SetCameraBehindPlayer(playerid);
+        PlayerData[playerid][pPaintball] = 2;
+    }
+    else if (type == 3)
+    {
+        SetPlayerPos(playerid, paintballTSpawns[pbNext][0], paintballTSpawns[pbNext][1], paintballTSpawns[pbNext][2]);
+        SetPlayerFacingAngle(playerid, paintballTSpawns[pbNext][3]);
+        SetPlayerInterior(playerid, 18);
+        SetPlayerVirtualWorld(playerid, 1001);
+        SetCameraBehindPlayer(playerid);
 
-		GangZoneShowForPlayer(playerid, zone_paintball[0], 0xFFFF0096);
+        SetPlayerHealth(playerid, 100.0);
+        SetPlayerArmour(playerid, 100.0);
 
-	    SetPlayerHealth(playerid, 25.0);
-		SetPlayerArmour(playerid, 0.0);
+        GivePlayerWeaponEx(playerid, 24, true);
+        GivePlayerWeaponEx(playerid, 27, true);
+        GivePlayerWeaponEx(playerid, 29, true);
+        GivePlayerWeaponEx(playerid, 31, true);
+        GivePlayerWeaponEx(playerid, 34, true);
 
-		GivePlayerWeaponEx(playerid, 24, true);
+        PlayerData[playerid][pPaintball] = 3;
+        PlayerData[playerid][pPaintballTeam] = pbNext;
+        if (!pbNext)
+        {
+            pbNext = 1;
+        }
+        else
+        {
+            pbNext = 0;
+        }
+    }
+    else if (type == 4)
+    {
+        new rand = random(sizeof(paintballDSpawns));
+        SetPlayerPos(playerid, paintballDSpawns[rand][0], paintballDSpawns[rand][1], paintballDSpawns[rand][2]);
+        SetPlayerFacingAngle(playerid, paintballDSpawns[rand][3]);
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 1000);
+        SetCameraBehindPlayer(playerid);
 
-		PlayerData[playerid][pPaintball] = 3;
-	}
-	else if(type == 4)
-	{
-		new rand = random(sizeof(paintballSSpawns));
-		SetPlayerPos(playerid, paintballSSpawns[rand][0], paintballSSpawns[rand][1], paintballSSpawns[rand][2]);
-		SetPlayerFacingAngle(playerid, paintballSSpawns[rand][3]);
-		SetPlayerInterior(playerid, 0);
-		SetPlayerVirtualWorld(playerid, 1001);
-		SetCameraBehindPlayer(playerid);
+        GangZoneShowForPlayer(playerid, zone_paintball[0], 0xFFFF0096);
 
-		GangZoneShowForPlayer(playerid, zone_paintball[1], 0xFFFF0096);
+        SetPlayerHealth(playerid, 25.0);
+        SetPlayerArmour(playerid, 0.0);
 
-	    SetPlayerHealth(playerid, 38.0);
-		SetPlayerArmour(playerid, 0.0);
+        GivePlayerWeaponEx(playerid, 24, true);
 
-		GivePlayerWeaponEx(playerid, 34, true);
+        PlayerData[playerid][pPaintball] = 4;
+    }
+    else if (type == 5)
+    {
+        new rand = random(sizeof(paintballSSpawns));
+        SetPlayerPos(playerid, paintballSSpawns[rand][0], paintballSSpawns[rand][1], paintballSSpawns[rand][2]);
+        SetPlayerFacingAngle(playerid, paintballSSpawns[rand][3]);
+        SetPlayerInterior(playerid, 0);
+        SetPlayerVirtualWorld(playerid, 1001);
+        SetCameraBehindPlayer(playerid);
 
-		PlayerData[playerid][pPaintball] = 4;
-	}
+        GangZoneShowForPlayer(playerid, zone_paintball[1], 0xFFFF0096);
+
+        SetPlayerHealth(playerid, 38.0);
+        SetPlayerArmour(playerid, 0.0);
+
+        GivePlayerWeaponEx(playerid, 34, true);
+
+        PlayerData[playerid][pPaintball] = 5;
+    }
 }
 
 
@@ -7487,6 +7539,7 @@ SetPlayerInJail(playerid)
 		SetPlayerInterior(playerid, 69);
 		SetPlayerVirtualWorld(playerid, 99999);
 		SetCameraBehindPlayer(playerid);
+		SetPlayerSkin(playerid, 50);
 	}
 	else if(PlayerData[playerid][pJailType] == 2) // OOC prison
 	{
@@ -7506,6 +7559,7 @@ SetPlayerInJail(playerid)
 		SetPlayerInterior(playerid, 2);
 		SetPlayerVirtualWorld(playerid, GetStaticEntranceWorld("Police department"));
 		SetCameraBehindPlayer(playerid);
+		SetPlayerSkin(playerid, 50);
 	}
 }
 
@@ -8554,8 +8608,18 @@ GetGangMemberLimit(gangid)
 	switch(GangInfo[gangid][gLevel])
 	{
 	    case 1: return 30;
-	    case 2: return 60;
-	    case 3: return 80;
+	    //case 2: return 60;
+	    //case 3: return 80;
+	}
+
+	return 0;
+}
+
+GetFactionMemberLimit(factionid)
+{
+	switch(FactionInfo[factionid][fType])
+	{
+	    case 1: return 30;
 	}
 
 	return 0;
@@ -11753,6 +11817,24 @@ public OnPlayerAttemptInviteGang(playerid, targetid)
 		SendClientMessageEx(targetid, COLOR_AQUA, "%s has invited you to join {00AA00}%s{33CCFF} (/accept gang).", GetRPName(playerid), GangInfo[PlayerData[playerid][pGang]][gName]);
 		SendClientMessageEx(playerid, COLOR_AQUA, "You have invited %s to join your gang.", GetRPName(targetid));
 	}
+}
+
+forward OnPlayerAttemptInviteFaction(playerid, targetid);
+
+public OnPlayerAttemptInviteFaction(playerid, targetid)
+{
+    if (cache_get_row_int(0, 0) >= GetFactionMemberLimit(PlayerData[playerid][pFaction]))
+    {
+        SendClientMessageEx(playerid, COLOR_GREY, "Your faction can't have more than %i members at its level.", GetFactionMemberLimit(PlayerData[playerid][pFaction]));
+    }
+    else
+    {
+        PlayerData[targetid][pFactionOffer] = playerid;
+        PlayerData[targetid][pFactionOffered] = PlayerData[playerid][pFaction];
+
+        SendClientMessageEx(targetid, COLOR_AQUA, "%s has invited you to join {00AA00}%s{33CCFF} (/accept faction).", GetRPName(playerid), FactionInfo[PlayerData[playerid][pFaction]][fName]);
+        SendClientMessageEx(playerid, COLOR_AQUA, "You have invited %s to join your faction.", GetRPName(targetid));
+    }
 }
 
 forward OnPlayerAttemptBuyVehicleEx(playerid, offeredby, vehicleid, price);
@@ -15489,6 +15571,25 @@ hook OnRemoveBuildings(playerid)
     RemoveBuildingForPlayer(playerid, 5967, 1259.4375, -1246.8125, 17.1094, 0.25);
 	RemoveBuildingForPlayer(playerid, 5857, 1259.4375, -1246.8125, 17.1094, 0.25);
 
+	// Miner Exterior
+	RemoveBuildingForPlayer(playerid, 16084, 526.523, 885.421, -44.359, 0.250);
+    RemoveBuildingForPlayer(playerid, 16446, 537.734, 839.398, -37.984, 0.250);
+    RemoveBuildingForPlayer(playerid, 16085, 627.867, 850.273, -42.772, 0.250);
+    RemoveBuildingForPlayer(playerid, 16071, 674.773, 854.515, -39.367, 0.250);
+    RemoveBuildingForPlayer(playerid, 3214, 687.625, 847.109, -35.381, 0.250);
+    RemoveBuildingForPlayer(playerid, 16075, 568.523, 916.343, -35.334, 0.250);
+    RemoveBuildingForPlayer(playerid, 16309, 566.648, 874.484, -39.530, 0.250);
+    RemoveBuildingForPlayer(playerid, 3398, 576.156, 934.921, -30.093, 0.250);
+    RemoveBuildingForPlayer(playerid, 16310, 581.375, 875.609, -43.959, 0.250);
+    RemoveBuildingForPlayer(playerid, 16311, 585.843, 869.632, -39.367, 0.250);
+    RemoveBuildingForPlayer(playerid, 16325, 590.296, 870.273, -44.264, 0.250);
+    RemoveBuildingForPlayer(playerid, 16073, 610.164, 908.476, -39.367, 0.250);
+    RemoveBuildingForPlayer(playerid, 16074, 605.085, 902.156, -39.367, 0.250);
+    RemoveBuildingForPlayer(playerid, 16077, 594.929, 926.414, -41.194, 0.250);
+    RemoveBuildingForPlayer(playerid, 16076, 623.304, 893.773, -39.764, 0.250);
+    RemoveBuildingForPlayer(playerid, 3398, 620.835, 884.242, -29.514, 0.250);
+    RemoveBuildingForPlayer(playerid, 16072, 640.312, 874.789, -35.334, 0.250);
+
     return 1;
 }
 
@@ -17230,7 +17331,7 @@ public OnPlayerEnterCheckpoint(playerid)
 					PlayerData[playerid][pGarbage] = 0;
 					DisablePlayerCheckpoint(playerid);
 
-					new amount = 8000 + random(3000);
+					new amount = 800 + random(300);
 					PlayerData[playerid][pCash] = PlayerData[playerid][pCash] + amount;
 					SendClientMessageEx(playerid, COLOR_AQUA, "Paycheck: You've earned $%i for your time working as a garbage man.", amount);
 
@@ -17274,8 +17375,8 @@ public OnPlayerEnterCheckpoint(playerid)
 				}				
 				new vehicleid = GetPlayerVehicleID(playerid);
 				new money = Random(GetJobLevel(playerid, JOB_TRUCKER) * 500, 1500 + GetJobLevel(playerid, JOB_TRUCKER) * 500);
-				if(GetVehicleModel(vehicleid) != 515 && money > 14000)
-					money = 14000;
+				if(GetVehicleModel(vehicleid) != 515 && money > 2000)
+					money = 2000;
 				SendClientMessageEx(playerid, COLOR_AQUA, "TRUCKER: You Delivered goods and you got $%d.",money);
 				GivePlayerCash(playerid,money);
 				PlayerPlaySound(playerid, 1058, 0.0, 0.0, 0.0);				
@@ -17439,126 +17540,144 @@ public OnPlayerPickUpDynamicPickup(playerid, pickupid)
 
 public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 {
-	if((22 <= weaponid <= 36) && damagedid != INVALID_PLAYER_ID && !PlayerHasWeapon(playerid, weaponid, true) && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked])
-	{
-		SendAdminWarning(2, "%s[%i] has a desynced %s (trying weapon sync).", GetRPName(playerid), playerid, GetWeaponNameEx(weaponid));
-    	ResetPlayerWeapons(playerid);
-   		SetPlayerWeapons(playerid);
-	    return 0;
-	}
+    if (weaponid < 0 || weaponid > 46) return 0;
 
-    if(GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
+    if (damagedid != INVALID_PLAYER_ID && weaponid >= 22 && weaponid <= 36) 
     {
-        if(IsPlayerConnected(damagedid))
+        if (!PlayerHasWeapon(playerid, weaponid, true) && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN)
         {
-            SendAdminWarning(2, "%s[%i] is giving damage to %s[%i] while in spectate mod", GetRPName(playerid), playerid, GetRPName(damagedid), damagedid);
+            SendAdminWarning(2, "%s[%i] has a desynced %s (weapon sync attempted).", GetRPName(playerid), playerid, GetWeaponNameEx(weaponid));
+            ResetPlayerWeapons(playerid);
+            SetPlayerWeapons(playerid);
+            return 0;
+        }
+    }
+
+    if (GetPlayerState(playerid) == PLAYER_STATE_SPECTATING && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN)
+    {
+        if (IsPlayerConnected(damagedid))
+        {
+            SendAdminWarning(2, "%s[%i] is giving damage to %s[%i] while spectating.", GetRPName(playerid), playerid, GetRPName(damagedid), damagedid);
         }
         else
         {
-            SendAdminWarning(2, "%s[%i] is giving damage to INVALID_PLAYER_ID while in spectate mod", GetRPName(playerid), playerid);
+            SendAdminWarning(2, "%s[%i] is giving damage to an INVALID_PLAYER_ID while spectating.", GetRPName(playerid), playerid);
         }
-    	return 0;
+        return 0;
     }
 
-	if((damagedid != INVALID_PLAYER_ID && weaponid == 23) && ((IsLawEnforcement(playerid) || GetPlayerFaction(playerid) == FACTION_GOVERNMENT) && PlayerData[playerid][pTazer] && GetPlayerState(playerid) == PLAYER_STATE_ONFOOT) && amount > 5.0)
-	{
-		if(PlayerData[damagedid][pAdminDuty])
-		{
-		    SendClientMessage(playerid, COLOR_GREY, "You can't taze an administrator currently on duty.");
-			return 0;
-		}
-		if(PlayerData[damagedid][pAcceptedHelp])
-		{
-			SendClientMessage(playerid, COLOR_GREY, "You can't taze a helper on duty.");
-			return 0;
-		}
-		if(PlayerData[damagedid][pTazedTime])
-		{
-		    return SendClientMessage(playerid, COLOR_GREY, "This player has already been tazed.");
-		}
-		if(!IsPlayerNearPlayer(playerid, damagedid, 10.0))
-		{
-		    return SendClientMessage(playerid, COLOR_GREY, "You can't taze that player. They are too far from you.");
-		}
-		if((22 <= GetPlayerWeapon(damagedid) <= 38) && IsPlayerAiming(damagedid))
-		{
-		    return SendClientMessage(playerid, COLOR_GREY, "Rush-tazing is forbidden. This means tazing a player who is aiming a gun at you.");
-		}
-		if(IsPlayerInAnyVehicle(damagedid))
-		{
-		    return SendClientMessage(playerid, COLOR_GREY, "You can't taze a player who is in a vehicle.");
-		}
-		new turfid = GetNearbyTurf(damagedid);
-		if(turfid != -1 && IsActiveTurf(turfid))
-		{
-			return SendClientMessageEx(playerid, COLOR_GREY, "You can't taze a player in active turf.");
-		}
+    if (damagedid != INVALID_PLAYER_ID && weaponid == 23 && amount > 5.0)
+    {
+        if (IsLawEnforcement(playerid) || GetPlayerFaction(playerid) == FACTION_GOVERNMENT || GetPlayerFaction(playerid) == FACTION_TERRORIST)
+        {
+            if (PlayerData[playerid][pTazer] && GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
+            {
+                if (PlayerData[damagedid][pAdminDuty])
+                {
+                    SendClientMessage(playerid, COLOR_GREY, "You can't taze an admin on duty.");
+                    return 0;
+                }
+                if (PlayerData[damagedid][pAcceptedHelp])
+                {
+                    SendClientMessage(playerid, COLOR_GREY, "You can't taze a helper on duty.");
+                    return 0;
+                }
+                if (PlayerData[damagedid][pTazedTime])
+                {
+                    return SendClientMessage(playerid, COLOR_GREY, "This player is already tazed.");
+                }
+                if (!IsPlayerNearPlayer(playerid, damagedid, 10.0))
+                {
+                    return SendClientMessage(playerid, COLOR_GREY, "This player is too far to be tazed.");
+                }
+                if (IsPlayerAiming(damagedid) && GetPlayerWeapon(damagedid) >= 22 && GetPlayerWeapon(damagedid) <= 38)
+                {
+                    return SendClientMessage(playerid, COLOR_GREY, "You can't taze someone aiming at you.");
+                }
+                if (IsPlayerInAnyVehicle(damagedid))
+                {
+                    return SendClientMessage(playerid, COLOR_GREY, "You can't taze a player in a vehicle.");
+                }
+                new turfid = GetNearbyTurf(damagedid);
+                if (turfid != -1 && IsActiveTurf(turfid))
+                {
+                    return SendClientMessage(playerid, COLOR_GREY, "You can't taze a player in an active turf.");
+                }
 
-		PlayerData[damagedid][pTazedTime] = 10;
-		TogglePlayerControllableEx(damagedid, 0);
+                PlayerData[damagedid][pTazedTime] = 10;
+                TogglePlayerControllableEx(damagedid, 0);
+                ApplyAnimation(damagedid, "PED", "KO_skid_front", 4.1, 0, 0, 0, 1, 0);
+                GameTextForPlayer(damagedid, "~r~Tazed", 5000, 3);
 
-		ApplyAnimation(damagedid, "PED", "KO_skid_front", 4.1, 0, 0, 0, 1, 0);
-		GameTextForPlayer(damagedid, "~r~Tazed", 5000, 3);
+                ShowActionBubble(playerid, "* %s aims their tazer at %s and stuns them.", GetRPName(playerid), GetRPName(damagedid));
+                SendClientMessageEx(damagedid, COLOR_AQUA, "You've been stunned by %s's taser.", GetRPName(playerid));
+                SendClientMessageEx(playerid, COLOR_AQUA, "You have stunned %s with a taser.", GetRPName(damagedid));
+                return 0;
+            }
+        }
+    }
 
-		ShowActionBubble(playerid, "* %s aims their tazer full of electricity at %s and stuns them.", GetRPName(playerid), GetRPName(damagedid));
-		SendClientMessageEx(damagedid, COLOR_AQUA, "You've been {FF6347}stunned{33CCFF} with electricity by %s's tazer.", GetRPName(playerid));
-		SendClientMessageEx(playerid, COLOR_AQUA, "You have stunned %s with electricity. They are disabled for 10 seconds.", GetRPName(damagedid));
-		return 0;
-	}
+    if (PlayerData[playerid][pToggleHUD] && IsPlayerConnected(playerid))
+    {
+        new string[50];
+        format(string, sizeof(string), "~g~%.0f damage.", amount);
+        TextDrawSetString(Damage[playerid], string);
+        TextDrawShowForPlayer(playerid, Damage[playerid]);
+        PlayerPlaySound(playerid, 17802, 0.0, 0.0, 15.0);
+        KillTimer(PlayerData[playerid][pDamageTimer]);
+        PlayerData[playerid][pDamageTimer] = SetTimerEx("DestroyDamageTD", 1500, false, "i", playerid);
+    }
 
-	if(PlayerData[playerid][pToggleHUD] && IsPlayerConnected(playerid))
-	{
-		new string[50];
-		format(string, sizeof(string), "~g~%.0f damage.", amount);
-		TextDrawSetString(Damage[playerid], string);
-		TextDrawShowForPlayer(playerid, Damage[playerid]);
-		PlayerPlaySound(playerid, 17802, 0.0, 0.0, 15.0);
-		KillTimer(PlayerData[playerid][pDamageTimer]);
-		PlayerData[playerid][pDamageTimer] = SetTimerEx("DestroyDamageTD", 1500, false, "i", playerid);
-	}
-
-	if(damagedid != INVALID_PLAYER_ID && IsPlayerConnected(damagedid) && weaponid != -1)
-	{
+    if (damagedid != INVALID_PLAYER_ID && IsPlayerConnected(damagedid) && weaponid != -1)
+    {
         AddDamages(playerid, damagedid, weaponid, bodypart, amount);
-		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO shots VALUES(null, %i, %i, %i, %i, '%s', '0.0', '0.0', '0.0', %i)", playerid, weaponid, BULLET_HIT_TYPE_PLAYER, damagedid, GetPlayerNameEx(damagedid), gettime());
-		mysql_tquery(connectionID, queryBuffer);
-	}
+        
+        new name[MAX_PLAYER_NAME];
+        GetPlayerName(damagedid, name, sizeof(name));
 
-	if (!PlayerData[playerid][pNoKnife] && bodypart == 9 && GetPlayerState(playerid) != PLAYER_STATE_WASTED && GetPlayerFaction(playerid) == FACTION_HITMAN && IsPlayerIdle(playerid))
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer),
+            "INSERT INTO shots VALUES(null, %i, %i, %i, %i, '%s', '0.0', '0.0', '0.0', %i)", 
+            playerid, weaponid, BULLET_HIT_TYPE_PLAYER, damagedid, name, gettime());
+        mysql_tquery(connectionID, queryBuffer);
+    }
+
+    if (!PlayerData[playerid][pNoKnife] && bodypart == 9 && GetPlayerState(playerid) != PLAYER_STATE_WASTED && GetPlayerFaction(playerid) == FACTION_HITMAN && IsPlayerIdle(playerid))
     {
         SetPlayerHealth(damagedid, 0);
         ShowPlayerFooter(playerid, "Headshot", 2000);
         ShowPlayerFooter(damagedid, "Headshot", 2000);
     }
-	return 1;
+
+    printf("DEBUG: OnPlayerGiveDamage -> playerid: %d, damagedid: %d, weaponid: %d, bodypart: %d, amount: %.2f",
+        playerid, damagedid, weaponid, bodypart, amount);
+
+    return 1;
 }
 
 public OnPlayerTakeDamage(playerid, issuerid, Float: amount, weaponid, bodypart)
 {
-	new string[50];
-	if(IsPlayerPaused(playerid) && !PlayerData[playerid][pHurt])
-	{
-        if(IsInSameActiveTurf(playerid, issuerid))
+	new string[100];
+    if (IsPlayerPaused(playerid) && !PlayerData[playerid][pHurt])
+    {
+        if (IsInSameActiveTurf(playerid, issuerid))
         {
             return 1;
         }
-		//TODO: Message Displayed when someone using knife try to kill someone and that one press escape
-	    GameTextForPlayer(issuerid, "That player is AFK!", 5000, 3);
-	    return 0;
-	}
-	if(PlayerData[playerid][pNoDamage])
-	{
-		return 0;
-	}
+        GameTextForPlayer(issuerid, "That player is AFK!", 5000, 3);
+        return 0;
+    }
+	if(amount <= 0.1)
+    {
+        SetPlayerHealth(playerid, 99.0);
+    }
 	if(IsPlayerConnected(issuerid))
 	{
-	    if(weaponid == 4 && PlayerHasWeapon(issuerid, 4) && IsPlayerNearPlayer(playerid, issuerid, 20.0) && amount > 100.0)
+	    if(weaponid == 4 && PlayerHasWeapon(issuerid, 4) && IsPlayerInRangeOfPlayer(playerid, issuerid, 20.0) && amount > 100.0)
 	    {
 	        SetPlayerHealth(playerid, 0.0);
 	        HandleContract(playerid, issuerid);
 	    }
-
-    	if(PlayerData[playerid][pToggleHUD] == 0)
+		if(PlayerData[playerid][pToggleHUD] == 0)
 		{
 			format(string, sizeof(string), "~r~Damage: %s hit you for %.0f damage.", GetRPName(issuerid), amount);
 			TextDrawSetString(Damage[playerid], string);
@@ -17567,12 +17686,12 @@ public OnPlayerTakeDamage(playerid, issuerid, Float: amount, weaponid, bodypart)
 			KillTimer(PlayerData[playerid][pDamageTimer]);
 			PlayerData[playerid][pDamageTimer] = SetTimerEx("DestroyDamageTD", 1500, false, "i", playerid);
 		}
-		if (IsValidDamageWeapon(weaponid) && WeaponDamages[weaponid] != 0.0 && PlayerData[issuerid][pTazer] == 0) {
-		    ProcessDamage(playerid, weaponid);
-		}
+	    if (IsValidDamageWeapon(weaponid) && WeaponDamages[weaponid] != 0.0 && PlayerData[issuerid][pTazer] == 0)
+        {
+            ProcessDamage(playerid, weaponid);
+        }
 
 	}
-	PlayerData[playerid][pHurt] = 20;
 	return 1;
 }
 forward OnLoadGunDamages();
@@ -17691,9 +17810,6 @@ public OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY
 	if (weaponid == 23 && PlayerData[playerid][pTazer] && GetPlayerFaction(playerid) == FACTION_POLICE) 
 	{
 	    PlayerPlaySoundEx(playerid, 6003);
-	    TogglePlayerControllableEx(playerid, 0);
-		SetTimerEx("RechargeTazer", 2000, false, "i", playerid);
-		ShowPlayerFooter(playerid, "Recharging tazer, please wait...", 2000);
 	}
 	
     if(!CanPlayerShootWithWeapon(playerid, weaponid, hittype, hitid))
@@ -17925,7 +18041,7 @@ public OnPlayerUpdate(playerid)
 
 	    if((!IsABoat(vehicleid) && GetVehicleModel(vehicleid) != 539) && PlayerData[playerid][pVehicleCount] >= 4 && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked])
 	    {
-	        KickPlayer(playerid, "Car warping");
+	        BanPlayer(playerid, "Car warping");
 	        return 0;
 		}
 	}
@@ -18666,7 +18782,7 @@ public OnPlayerText(playerid, text[])
 						isAbreviation=true;
 					}
 				}
-                if(IsAdmin(playerid) && IsAdminOnDuty(playerid, false))
+                if ((IsAdmin(playerid) && IsAdminOnDuty(playerid, false)) || (PlayerData[playerid][pHelper] && PlayerData[playerid][pAcceptedHelp]))
                 {
                     callcmd::b(playerid, text);
                 }
@@ -20431,7 +20547,7 @@ Dialog:DIALOG_BLACKMARKET2(playerid, response, listitem, inputtext[])
         }
         else if(listitem == 3)
         {
-            GivePlayerWeaponEx(playerid, 33);
+            GivePlayerWeaponEx(playerid, 34);
         }
         else if(listitem == 4)
         {
@@ -25824,7 +25940,6 @@ CMD:whoami(playerid,params[])
 #include "modules/RentSystem.pwn"
 #include "modules/ServerLogo.pwn"
 #include "modules/GreenZone.pwn"
-#include "modules/GtaWasted.pwn"
 #include "modules/FuelSystem.pwn"
 #include "modules/MainParking.pwn"
 #include "modules/MiniMapRadar.pwn"
@@ -25842,24 +25957,31 @@ CMD:whoami(playerid,params[])
 #include "modules/LawEnforcementRadar.pwn"
 #include "modules/LoginSignup.pwn"
 #include "modules/SFWhitelist.pwn"
-#include "modules/SurveillanceCamera.pwn"
 #include "modules/Cookies.pwn"
 #include "modules/Gym.pwn"
+#include "modules/GTAWasted.pwn"
 #include "modules/CarTuning.pwn"
 #include "modules/AdSystem.pwn"
-//#include "modules/DiscordBot.pwn"
-#include "modules/TollGuard.pwn"
 #include "modules/StorageSystem.pwn"
 #include "modules/AdminReportIndicator.pwn"
 #include "modules/ServerStats.pwn"
 #include "modules/ServerState.pwn"
 #include "modules/PlayerRespawn.pwn"
 #include "modules/Gates.pwn"
-#include "modules/GangTags.pwn"
 #include "modules/Meter.pwn"
 #include "modules/AutoGift.pwn"
 #include "modules/FightClub.pwn"
 #include "modules/CCTV.pwn"
+#include "modules/EmergencyLights.pwn"
+#include "modules/HitmanSms.pwn"
+#include "modules/RobCasino.pwn"
+#include "modules/RobShop.pwn"
+#include "modules/GangTags.pwn"
+#include "modules/RolePlay.pwn"
+#include "modules/Carry.pwn"
+#include "modules/TollGuard.pwn"
+#include "modules/drugfactory.pwn"
+#include "modules/mafia.pwn"
 #include "modules/AutoRestart.pwn"
 #include "modules/VIP.pwn"
 #include "modules/Mask.pwn"
@@ -25867,8 +25989,6 @@ CMD:whoami(playerid,params[])
 #include "modules/CustomWantedLevel.pwn"
 #include "modules/ImpoundSystem.pwn"
 #include "modules/IsMobile.pwn"
-#include "modules/HelpCounter.pwn"
-
 #include "rex/Anti-Lag.pwn"
 #include "rex/Anti-UnFreeze.pwn"
 #include "rex/Anti-Proxy.pwn"
@@ -25889,18 +26009,3 @@ CMD:whoami(playerid,params[])
 //#include "dev\WishSystem.pwn"
 #include "dev/StaffLogs.pwn"
 #include "dev/Sprunk.pwn"
-
-CMD:credits(playerid, params[])
-{
-    SendClientMessageEx(playerid, COLOR_AQUA, "Arabica RolePlay is using %s game mode %s", SERVER_SHORT_NAME, SERVER_REVISION);
-
-    SendClientMessageEx(playerid, COLOR_WHITE, " - Khalil Zoldyck       : {ED6A28}Server Devlopper");
-	SendClientMessageEx(playerid, COLOR_WHITE, " - Ali Eltrabelsi		: {8000FF}Server Mapper");
-    SendClientMessageEx(playerid, COLOR_WHITE, " - Troy		   			: {FF0000}Scripting");
-	SendClientMessageEx(playerid, COLOR_WHITE, " - Pirlo Castellano		: {FF0000}Mapping");
-	SendClientMessageEx(playerid, COLOR_WHITE, " - Kelsy Moger		   	: {FF0000}Mapping");
-	SendClientMessageEx(playerid, COLOR_WHITE, " - Houssem Zoldyck		: {FF0000}Mapping");
-	SendClientMessageEx(playerid, COLOR_WHITE, " - Cristiano Zoldyck	: {FF0000}Mapping");
-
-    return 1;
-}

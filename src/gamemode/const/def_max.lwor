@@ -24,6 +24,7 @@
 #define MAX_GANG_CREWS              5
 #define MAX_GANG_SKINS              10
 #define MAX_TURFS                   40
+#define MAX_POINTS                   40
 #define MAX_TURFS_PER_PAGE          15
 #define	MAX_WEP						43
 #define MAX_BOOTHS 					8

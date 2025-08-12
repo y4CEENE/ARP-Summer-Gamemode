@@ -1720,6 +1720,10 @@ CMD:event(playerid, params[])
     {
         return SendClientErrorUnauthorizedCmd(playerid);
     }
+    if(!IsAdminOnDuty(playerid))
+    {
+        return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
     
     switch(Event[Event_State])
     {

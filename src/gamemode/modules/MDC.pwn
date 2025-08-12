@@ -90,11 +90,6 @@ static Float:mdc_coordinates[][] = {
 	{-506.1294,316.9367,2004.5859}
 };
 
-hook OnScriptInit()
-{
-    Iter_Init(RecordIterator);
-}
-
 hook OnPlayerInit(playerid)
 {
     mdc_LoadPlayerTextdraws(playerid);

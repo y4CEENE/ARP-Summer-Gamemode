@@ -22,6 +22,7 @@ enum gateData {
 	Float:gateMove[6],
 	gateLinkID,
 	gateFaction,
+	gateGang,
 	gatePass[32],
 	gateTimer,
 	gateObject
@@ -464,7 +465,7 @@ CMD:editgate(playerid, params[])
 	if (sscanf(params, "ds[24]S()[128]", id, type, string))
  	{
 	 	SendClientMessageEx(playerid, COLOR_WHITE, "Usage: /editgate [id] [name]");
-	    SendClientMessage(playerid, COLOR_ORANGE, "Names:{FFFFFF} location, speed, radius, time, model, pos, move, pass, linkid, faction");
+	    SendClientMessage(playerid, COLOR_ORANGE, "Names:{FFFFFF} location, speed, radius, time, model, pos, move, pass, linkid, faction, gang");
 		return 1;
 	}
 
@@ -642,6 +643,35 @@ CMD:editgate(playerid, params[])
 		{
 			return SendClientMessageEx(playerid, COLOR_SYNTAX, "Invalid faction.");
 		}
+	    else if (!strcmp(type, "gang", true))
+    {
+        new gangid = 0;
+
+        if (sscanf(string, "d", gangid))
+        {
+            return SendClientMessageEx(playerid, COLOR_WHITE, "Usage: /editgate [id] gang [gangid] (-1 for none)");
+        }
+
+        if (!(-1 <= gangid < MAX_GANGS) || (gangid >= 0 && !GangInfo[gangid][gSetup]))
+        {
+            return SendClientMessage(playerid, COLOR_SYNTAX, "Invalid gang.");
+        }
+
+
+        GateData[id][gateGang] = gangid;
+        Gate_Save(id);
+
+        if (gangid == -1)
+        {
+            SendAdminMessage(COLOR_LIGHTRED, "ACmd: %s has adjusted the gang of gate ID: %d to no gang.", GetRPName(playerid), id);
+        }
+        else
+        {
+            SendAdminMessage(COLOR_LIGHTRED, "ACmd: %s has adjusted the gang of gate ID: %d to \"%s\".", GetRPName(playerid), id, GangInfo[gangid][gName]);
+        }
+
+        return 1;
+    }
 
 
         GateData[id][gateFaction] = factionid;

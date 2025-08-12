@@ -416,39 +416,46 @@ CMD:cr(playerid, params[])
 
 CMD:report(playerid, params[])
 {
-	if(PlayerData[playerid][pAdmin] > 0)
+    if(isnull(params))
 	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You cannot report as you are an administrator, use /a moron.");
+	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /report [reason]");
 	}
-	if(!enabledReports)
+    if (IsAdmin(playerid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You cannot report as you are an administrator, use /a moron.");
+    }
+    if (!enabledReports)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The report channel is disabled at the moment.");
+    }
+	if(PlayerData[playerid][pReportMuted] > 0)
 	{
-	    return SendClientMessage(playerid, COLOR_GREY, "The report channel is disabled at the moment.");
+	    if(PlayerData[playerid][pReportMuted] > 1000)
+	        return SendClientMessageEx(playerid, COLOR_GREY, "You are indefinitely muted from submitting reports. /unmute to unmute yourself.");
+	    else
+	        return SendClientMessageEx(playerid, COLOR_GREY, "You are muted from submitting reports. Your mute is lifted in %i hours.", PlayerData[playerid][pReportMuted]);
 	}
-	if(PlayerData[playerid][pReportMuted])
-	{
-	    if(PlayerData[playerid][pReportMuted] > 1000) {
-     		return SendClientMessageEx(playerid, COLOR_GREY, "You are indefinitely muted from submitting reports. /unmute to unmute yourself.");
-		} else {
-			return SendClientMessageEx(playerid, COLOR_GREY, "You are muted from submitting reports. Your mute is lifted in %i hours.", PlayerData[playerid][pReportMuted]);
-		}
-	}
-	if(gettime() - PlayerData[playerid][pLastReport] < 120)
-	{
-	    return SendClientMessageEx(playerid, COLOR_GREY, "You can only submit one report every 120 seconds. Please wait %i more seconds.", 120 - (gettime() - PlayerData[playerid][pLastReport]));
-	}
-	if(PlayerData[playerid][pActiveReport] >= 0)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You have an active report which needs to be closed first. Use /cr to close it.");
-	}
-	
-	Dialog_Show(playerid, DlgReportType, DIALOG_STYLE_LIST, "Report", "Break rule\nHack\nBug\nGang related issue\nFaction related issue\nAdmin related issue", "Select", "Cancel");
+    if (gettime() - PlayerData[playerid][pLastReport] < 120)
+    {
+        return SendClientMessageEx(playerid, COLOR_GREY, "You can only submit one report every 120 seconds. Please wait %i more seconds.", 120 - (gettime() - PlayerData[playerid][pLastReport]));
+    }
+    if (PlayerData[playerid][pActiveReport] >= 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You have an active report which needs to be closed first. Use /cr to close it.");
+    }
+    if (!AddReportToQueue(playerid, params))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "The report queue is currently full. Please try again later.");
+    }
 
-	return 1;
+    SendClientMessage(playerid, COLOR_GREY, "Thank you for reporting, an admin will view it shortly, please be patient.");
+    return 1;
 }
 
-static PlayerReportType[MAX_PLAYERS][24];
-static PlayerReportSubject[MAX_PLAYERS][24];
+//static PlayerReportType[MAX_PLAYERS][24];
+//static PlayerReportSubject[MAX_PLAYERS][24];
 
+/*
 Dialog:DlgReportType(playerid, response, listitem, inputtext[])
 {
 
@@ -505,4 +512,4 @@ Dialog:DlgReportDetails(playerid, response, listitem, inputtext[])
 		}
 	}
 	return 1;
-}
+}*/

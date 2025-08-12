@@ -1,3 +1,53 @@
+#include <YSI\y_hooks>
+
+#define DIALOG_CHARGES 1000
+
+static ChargeReasons[][] = {
+    "Failure to Comply",
+    "Aiding and Abetting",
+    "Assault",
+    "Attempted Murder",
+    "Murder",
+    "Bribery",
+    "Grand Theft Auto",
+    "Discharge of a fireams in public",
+    "Distribution of illegal narcotics",
+    "Distribution of illegal fireams",
+    "Driving without a license",
+    "Evading Arrest",
+    "Fcc Violation",
+    "Misuse of 911 hotline",
+    "Impersonating a LEO",
+    "Kidnapping",
+    "Possession of illegal fireams",
+    "Possession of illegal narcotics",
+    "Reckless Driving",
+    "Robbery",
+    "Speeding",
+    "Transporting of illegal goods",
+    "Trepassing",
+    "Vehicular Assault",
+    "Brandishing a fireams in public",
+    "Illegal shortcut",
+    "Manufacture of illegal fireams",
+    "Manufacture of illegal narcotics",
+    "Destruction of public property",
+    "Public endangerment",
+    "Obstruction of justice",
+    "Unlawful street racing",
+    "Drawing in public"   
+};
+
+GetChargeList()
+{
+    new list[4096];
+    for(new i = 0; i < sizeof(ChargeReasons); i++)
+    {
+        strcat(list, ChargeReasons[i]);
+        strcat(list, "\n");
+    }
+    return list;
+}
 
 CMD:arrest(playerid, params[])
 {
@@ -106,50 +156,57 @@ CMD:arrest(playerid, params[])
     return 1;
 }
 
+CMD:taser(playerid, params[])
+{
+    return callcmd::tazer(playerid, params);
+}
 
-CMD:taser(playerid, params[]) return callcmd::tazer(playerid, params);
 CMD:tazer(playerid, params[])
 {
-	if(!IsLawEnforcement(playerid) && GetPlayerFaction(playerid) != FACTION_GOVERNMENT)
+    if (!IsLawEnforcement(playerid) && GetPlayerFaction(playerid) != FACTION_GOVERNMENT)
     {
         return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you aren't apart of law enforcement.");
-	}
-	if(PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pHospital] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pTied] > 0 || PlayerData[playerid][pJailTime] > 0 || IsPlayerInEvent(playerid) > 0 || PlayerData[playerid][pPaintball] > 0 || IsPlayerInAnyVehicle(playerid))
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
-	}
-	if(PlayerData[playerid][pWeaponRestricted] > 0)
-	{
-		return SendClientMessage(playerid, COLOR_GREY, "You cannot use this command when you are weapon restricted.");
-	}
-    if(PlayerData[playerid][pHurt] && PlayerData[playerid][pTazer] == 0)
-	{
-	    return SendClientMessageEx(playerid, COLOR_GREY, "You're too hurt to pull out your tazer. Please wait %i seconds before trying again.", PlayerData[playerid][pHurt]);
-	}
-	if(!PlayerData[playerid][pTazer])
-	{
-	    PlayerData[playerid][pTazer] = 1;
-		ShowActionBubble(playerid, "* %s reaches for their tazer.", GetRPName(playerid));
+    }
+    if (PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pHospital] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pTied] > 0 || PlayerData[playerid][pJailTime] > 0 || IsPlayerInEvent(playerid) > 0 || PlayerData[playerid][pPaintball] > 0 || IsPlayerInAnyVehicle(playerid))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
+    }
+    if (PlayerData[playerid][pWeaponRestricted] > 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You cannot use this command when you are weapon restricted.");
+    }
+    if (!PlayerData[playerid][pDuty])
+    {
+        return SendClientMessage(playerid, COLOR_ADM, "ERROR:{FFFFFF} You must be on duty before using /tazer.");
+    }
+    if (PlayerData[playerid][pHurt])
+    {
+        return SendClientMessageEx(playerid, COLOR_GREY, "You're too hurt to pull out your tazer. Please wait %i seconds before trying again.", PlayerData[playerid][pHurt]);
+    }
+    if (!PlayerData[playerid][pTazer])
+    {
+        PlayerData[playerid][pTazer] = 1;
+        ShowActionBubble(playerid, "* %s reaches for their tazer.", GetRPName(playerid));
         SendClientMessageEx(playerid, COLOR_PURPLE, "* %s reaches for their tazer.", GetRPName(playerid));
         pTazerReplace{playerid} = PlayerData[playerid][pWeapons][2];
-		GivePlayerWeaponEx(playerid, 23);
-  		SetPlayerArmedWeapon(playerid, 23);
-	}
-	else
-	{
-	    PlayerData[playerid][pTazer] = 0;
-	    RemovePlayerWeapon(playerid, 23);
-		SetPlayerWeapons(playerid);
+        GivePlayerWeaponEx(playerid, 23);
+        SetPlayerArmedWeapon(playerid, 23);
+    }
+    else
+    {
+        PlayerData[playerid][pTazer] = 0;
+        RemovePlayerWeapon(playerid, 23);
+        SetPlayerWeapons(playerid);
         GivePlayerWeaponEx(playerid, pTazerReplace{playerid});
-		ShowActionBubble(playerid, "* %s puts their tazer back in their duty belt.", GetRPName(playerid));
+        ShowActionBubble(playerid, "* %s puts their tazer back in their duty belt.", GetRPName(playerid));
         SendClientMessageEx(playerid, COLOR_PURPLE, "* %s puts their tazer back in their duty belt.", GetRPName(playerid));
-		if(GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
-		{
-			SetPlayerArmedWeapon(playerid, PlayerData[playerid][pWeapons][2]);
-		}
-	}
+        if (GetPlayerState(playerid) == PLAYER_STATE_ONFOOT)
+        {
+            SetPlayerArmedWeapon(playerid, PlayerData[playerid][pWeapons][2]);
+        }
+    }
 
-	return 1;
+    return 1;
 }
 
 CMD:mir(playerid, params[])
@@ -366,16 +423,16 @@ CMD:detain(playerid, params[])
 
 CMD:charge(playerid, params[])
 {
-	new targetid, reason[128];
+	new targetid;
 
 	if(!IsLawEnforcement(playerid) && GetPlayerFaction(playerid) != FACTION_GOVERNMENT)
     {
         return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you aren't apart of law enforcement or goverment.");
 	}
-	if(sscanf(params, "us[128]", targetid, reason))
-	{
-	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /charge [playerid] [reason]");
-	}
+    if (sscanf(params, "u", targetid))
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /charge [playerid]");
+    }
 	if(!IsPlayerConnected(targetid))
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected.");
@@ -393,35 +450,49 @@ CMD:charge(playerid, params[])
 	    return SendClientMessage(playerid, COLOR_GREY, "That player is in a faction of higher authority and therefore can't be charged.");
 	}
 
-	PlayerData[targetid][pWantedLevel]++;
-	PlayerData[targetid][pCrimes]++;
+    ShowPlayerDialog(playerid, DIALOG_CHARGES, DIALOG_STYLE_LIST, "Select Charge Reason", GetChargeList(), "Charge", "Cancel");
+    SetPVarInt(playerid, "targetid", targetid);
 
-	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET wantedlevel = %i, crimes = %i WHERE uid = %i", PlayerData[targetid][pWantedLevel], PlayerData[targetid][pCrimes], PlayerData[targetid][pID]);
-	mysql_tquery(connectionID, queryBuffer);
+    return 1;
+}
 
-	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO charges VALUES(null, %i, '%s', NOW(), '%e')", PlayerData[targetid][pID], GetPlayerNameEx(playerid), reason);
-	mysql_tquery(connectionID, queryBuffer);
-	new year, month, day, hour, minute, second;
-	getdate(year, month, day);
-	gettime(hour,minute,second);
-	new datum[64], time[64];
-	format(time, sizeof(time), "%d:%d:%d", hour, minute, second);
-	format(datum, sizeof(datum), "%d-%d-%d", year, month, day);
-	mysql_real_escape_string(reason, reason);
-	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO criminals(`player`, `officer`, `date`, `time`, `crime`, `served`) VALUES ('%s','%s','%e','%s','%s', 0)",
-	GetPlayerNameEx(targetid), GetPlayerNameEx(playerid), datum, time, reason);
-	mysql_tquery(connectionID, queryBuffer);
-	foreach(new i : Player)
-	{
-	    if(IsLawEnforcement(i))
-	    {
-			SendClientMessageEx(i, COLOR_OLDSCHOOL, "* HQ: %s %s has charged %s with {FF6347}%s{9999FF}. *", FactionRanks[PlayerData[playerid][pFaction]][PlayerData[playerid][pFactionRank]], GetRPName(playerid), GetRPName(targetid), reason);
-		}
-	}
+hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+{
+    if(dialogid == DIALOG_CHARGES)
+    {
+        if(response)
+        {
+            new reason[128];
+            new targetid = GetPVarInt(playerid, "targetid");
+            format(reason, sizeof(reason), "%s", ChargeReasons[listitem]);
 
-	SendClientMessageEx(targetid, COLOR_LIGHTRED, "* Officer %s has charged you with %s.", GetRPName(playerid), reason);
-	Log_Write("log_faction", "%s (uid: %i) has charged %s (uid: %i) with %s", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], reason);
-	return 1;
+		    PlayerData[targetid][pWantedLevel]++;
+		    PlayerData[targetid][pCrimes]++;
+		
+			new query[256];
+			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET wantedlevel = %i WHERE uid = %i", PlayerData[playerid][pWantedLevel], PlayerData[playerid][pID]);
+	    	mysql_tquery(connectionID, queryBuffer);
+		    format(query, sizeof(query), "INSERT INTO charges VALUES(null, %i, '%e', NOW(), '%e')", PlayerData[targetid][pID], GetPlayerNameEx(playerid), reason);
+		    new year, month, day, hour, minute, second;
+		    getdate(year, month, day);
+		    gettime(hour,minute,second);
+		    new datum[64], time[64];
+		    format(time, sizeof(time), "%d:%d:%d", hour, minute, second);
+		    format(datum, sizeof(datum), "%d-%d-%d", year, month, day);
+			format(query, sizeof(query), "INSERT INTO tickets(`player`, `officer`, `time`, `date`, `amount`, `reason`) VALUES ('%s','%s','%s','%s',%d,'%s')",		        GetPlayerNameEx(targetid), GetPlayerNameEx(playerid), datum, time, reason);
+		
+		    foreach(new i : Player)
+		    {
+		        if (IsLawEnforcement(i))
+		        {
+		            SendClientMessageEx(i, COLOR_OLDSCHOOL, "* HQ: %s %s has charged %s with {FF6347}%s{9999FF}. *", FactionRanks[PlayerData[playerid][pFaction]][PlayerData[playerid][pFactionRank]], GetRPName(playerid), GetRPName(targetid), reason);
+		        }
+		    }
+
+		    SendClientMessageEx(targetid, COLOR_LIGHTRED, "* Officer %s has charged you with %s.", GetRPName(playerid), reason);
+		    Log_Write("log_faction", "%s (uid: %i) has charged %s (uid: %i) with %s", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], reason);
+        }
+    }
 }
 CMD:su(playerid, params[])
 {
@@ -430,22 +501,22 @@ CMD:su(playerid, params[])
 
 CMD:wanted(playerid, params[])
 {
-    if(!IsLawEnforcement(playerid) && !PlayerHasJob(playerid, JOB_LAWYER) && GetPlayerFaction(playerid) != FACTION_GOVERNMENT)
+    if (!IsLawEnforcement(playerid) && !PlayerHasJob(playerid, JOB_LAWYER) && GetPlayerFaction(playerid) != FACTION_GOVERNMENT)
     {
         return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you aren't apart of law enforcement or a lawyer.");
-	}
+    }
 
-	SendClientMessage(playerid, COLOR_NAVYBLUE, "_____ Wanted Players _____");
+    SendClientMessage(playerid, COLOR_NAVYBLUE, "_____ Wanted Players _____");
 
-	foreach(new i : Player)
-	{
-	    if(PlayerData[i][pWantedLevel] > 0)
-	    {
-	        SendClientMessageEx(playerid, COLOR_GREY2, "(ID: %i) %s - Wanted Level: %i", i, GetRPName(i), PlayerData[i][pWantedLevel]);
-		}
-	}
+    foreach(new i : Player)
+    {
+        if (PlayerData[i][pWantedLevel] > 0)
+        {
+            SendClientMessageEx(playerid, COLOR_GREY2, "(ID: %i) %s - Wanted Level: %i", i, GetRPName(i), PlayerData[i][pWantedLevel]);
+        }
+    }
 
-	return 1;
+    return 1;
 }
 
 CMD:find(playerid, params[])

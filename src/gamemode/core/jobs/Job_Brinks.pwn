@@ -424,7 +424,7 @@ hook OnPlayerEnterCheckpoint(playerid)
                 return 1;
             }
 
-            new randmoney = Random(25000, 30000);
+            new randmoney = Random(25000, 70000);
             
             if(BrinksDeliveryDestination[playerid] == 12)
             {

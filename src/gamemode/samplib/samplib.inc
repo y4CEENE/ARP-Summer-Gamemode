@@ -500,6 +500,23 @@ stock IsPlayerNearPlayer(playerid, targetid, Float:radius)
 	return (IsPlayerInRangeOfPoint(playerid, radius, x, y, z) && GetPlayerInterior(playerid) == GetPlayerInterior(targetid) && GetPlayerVirtualWorld(playerid) == GetPlayerVirtualWorld(targetid));
 }
 
+IsPlayerInRangeOfPlayer(playerid, targetid, Float:radius)
+{
+    new
+        Float:x,
+        Float:y,
+        Float:z;
+
+    GetPlayerPos(targetid, x, y, z);
+
+    if(IsPlayerInRangeOfPoint(playerid, radius, x, y, z) && GetPlayerInterior(playerid) == GetPlayerInterior(targetid) && GetPlayerVirtualWorld(playerid) == GetPlayerVirtualWorld(targetid))
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 stock GetClosestPlayer(playerid)
 {
 	new Float:range = 99999.99;

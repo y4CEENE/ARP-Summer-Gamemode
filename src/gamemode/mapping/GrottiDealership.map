@@ -1,132 +1,112 @@
+/// @file      GrottiDealership.map
+/// @author    BOURAOUI Al-Moez L.A
+/// @date      Created at 2021-03-29 12:23:11 +0100
+/// @copyright Copyright (c) 2022
+
 #include <YSI\y_hooks>
 
 hook OnGameModeInit()
 {
-    new drawdistance=150;
-    new g_Object[69];
-    g_Object[0] = CreateDynamicObjectEx(19376, 532.2614, -1294.2529, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[0], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[1] = CreateDynamicObjectEx(19366, 539.8272, -1294.3481, 27.2404, 0.0000, 0.0000, 90.6997, drawdistance); //wall014
-    SetDynamicObjectMaterial(g_Object[1], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[2] = CreateDynamicObjectEx(19376, 522.9791, -1294.2961, 20.2621, 0.0000, 0.0000, 90.6998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[2], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[3] = CreateDynamicObjectEx(19376, 541.8413, -1294.3199, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[3], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[4] = CreateDynamicObjectEx(19376, 551.4108, -1294.3861, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[4], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[5] = CreateDynamicObjectEx(19376, 560.1306, -1294.4077, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[5], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[6] = CreateDynamicObjectEx(19376, 561.6298, -1294.3790, 20.2621, 0.0000, 0.0000, 90.8000, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[6], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[7] = CreateDynamicObjectEx(8948, 524.2462, -1294.0705, 17.8782, 0.0000, 0.0000, -87.6997, drawdistance); //lckupgrgdoor_lvs
-    g_Object[8] = CreateDynamicObjectEx(1569, 543.1005, -1294.2215, 16.0683, 0.0000, 0.0000, 0.0000, drawdistance); //ADAM_V_DOOR
-    g_Object[9] = CreateDynamicObjectEx(1569, 543.1472, -1294.2215, 18.5825, 0.0000, -179.3999, 0.0000, drawdistance); //ADAM_V_DOOR
-    g_Object[10] = CreateDynamicObjectEx(19376, 532.2614, -1294.2529, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[10], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[11] = CreateDynamicObjectEx(19376, 522.9791, -1294.2961, 20.2621, 0.0000, 0.0000, 90.6997, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[11], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[12] = CreateDynamicObjectEx(19376, 541.8413, -1294.3199, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[12], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[13] = CreateDynamicObjectEx(19376, 551.4108, -1294.3861, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[13], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[14] = CreateDynamicObjectEx(19376, 560.1306, -1294.4077, 20.2621, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[14], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[15] = CreateDynamicObjectEx(19376, 561.6298, -1294.3790, 20.2621, 0.0000, 0.0000, 90.8000, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[15], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[16] = CreateDynamicObjectEx(8948, 524.2462, -1294.0705, 17.8782, 0.0000, 0.0000, -87.6996, drawdistance); //lckupgrgdoor_lvs
-    g_Object[17] = CreateDynamicObjectEx(1569, 543.1005, -1294.2215, 16.0683, 0.0000, 0.0000, 0.0000, drawdistance); //ADAM_V_DOOR
-    g_Object[18] = CreateDynamicObjectEx(1569, 543.1472, -1294.2215, 18.5825, 0.0000, -179.3999, 0.0000, drawdistance); //ADAM_V_DOOR
-    g_Object[19] = CreateDynamicObjectEx(19366, 541.8670, -1294.3132, 27.2404, 0.0000, 0.0000, 90.6997, drawdistance); //wall014
-    SetDynamicObjectMaterial(g_Object[19], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[20] = CreateDynamicObjectEx(19366, 544.7078, -1294.3288, 27.2404, 0.0000, 0.0000, 90.6997, drawdistance); //wall014
-    SetDynamicObjectMaterial(g_Object[20], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[21] = CreateDynamicObjectEx(19366, 543.9874, -1294.2972, 27.2404, 0.0000, 0.0000, 90.6997, drawdistance); //wall014
-    SetDynamicObjectMaterial(g_Object[21], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[22] = CreateDynamicObjectEx(19366, 542.9279, -1294.3503, 28.9904, 0.0000, 0.0000, 90.6997, drawdistance); //wall014
-    SetDynamicObjectMaterial(g_Object[22], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[23] = CreateDynamicObjectEx(19366, 539.7777, -1294.3387, 28.9904, 0.0000, 0.0000, 90.6997, drawdistance); //wall014
-    SetDynamicObjectMaterial(g_Object[23], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[24] = CreateDynamicObjectEx(19366, 544.7382, -1294.3485, 28.9904, 0.0000, 0.0000, 90.6997, drawdistance); //wall014
-    SetDynamicObjectMaterial(g_Object[24], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[25] = CreateDynamicObjectEx(640, 517.5216, -1301.0487, 16.9188, 0.0000, 0.0000, 0.0000, drawdistance); //kb_planter+bush2
-    SetDynamicObjectMaterial(g_Object[25], 0, -1, "none", "none", 0xFFFFF0F5);
-    g_Object[26] = CreateDynamicObjectEx(19376, 566.4238, -1299.0357, 20.2621, 0.0000, 0.0000, -0.1999, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[26], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[27] = CreateDynamicObjectEx(19376, 518.0286, -1299.0858, 20.2621, 0.0000, 0.0000, -0.9998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[27], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[28] = CreateDynamicObjectEx(2942, 563.9381, -1293.8614, 16.8631, 0.0000, 0.0000, -175.9998, drawdistance); //kmb_atm1
-    g_Object[29] = CreateDynamicObjectEx(13187, 556.5885, -1294.2890, 17.2446, 0.0000, 0.0000, -89.6998, drawdistance); //burbdoor
-    g_Object[30] = CreateDynamicObjectEx(19458, 566.4348, -1296.2517, 26.3773, -89.0998, 1.2999, -0.4000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[30], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[31] = CreateDynamicObjectEx(640, 550.4741, -1293.8839, 16.9687, 0.0000, 0.0000, -89.0999, drawdistance); //kb_planter+bush2
-    SetDynamicObjectMaterial(g_Object[31], 0, -1, "none", "none", 0xFFFFF0F5);
-    g_Object[32] = CreateDynamicObjectEx(640, 547.2349, -1293.9349, 16.9687, 0.0000, 0.0000, -89.0999, drawdistance); //kb_planter+bush2
-    SetDynamicObjectMaterial(g_Object[32], 0, -1, "none", "none", 0xFFFFF0F5);
-    g_Object[33] = CreateDynamicObjectEx(640, 538.9119, -1293.8149, 16.9687, 0.0000, 0.0000, -89.0999, drawdistance); //kb_planter+bush2
-    SetDynamicObjectMaterial(g_Object[33], 0, -1, "none", "none", 0xFFFFF0F5);
-    g_Object[34] = CreateDynamicObjectEx(640, 534.5313, -1293.8287, 16.9687, 0.0000, 0.0000, -90.8000, drawdistance); //kb_planter+bush2
-    SetDynamicObjectMaterial(g_Object[34], 0, -1, "none", "none", 0xFFFFF0F5);
-    g_Object[35] = CreateDynamicObjectEx(640, 530.5415, -1293.7967, 16.9587, -0.0998, 0.0000, -90.9000, drawdistance); //kb_planter+bush2
-    SetDynamicObjectMaterial(g_Object[35], 0, -1, "none", "none", 0xFFFFF0F5);
-    g_Object[36] = CreateDynamicObjectEx(640, 567.0070, -1301.0598, 17.0048, 0.0000, 0.0000, 1.3998, drawdistance); //kb_planter+bush2
-    g_Object[37] = CreateDynamicObjectEx(640, 566.9066, -1296.9509, 17.0048, 0.0000, 0.0000, 1.3998, drawdistance); //kb_planter+bush2
-    g_Object[38] = CreateDynamicObjectEx(638, 565.5645, -1293.8785, 16.9652, 2.0000, 0.0000, -89.1999, drawdistance); //kb_planter+bush
-    g_Object[39] = CreateDynamicObjectEx(640, 517.5518, -1296.9974, 16.9188, 0.0000, 0.0000, -0.8999, drawdistance); //kb_planter+bush2
-    SetDynamicObjectMaterial(g_Object[39], 0, -1, "none", "none", 0xFFFFF0F5);
-    g_Object[40] = CreateDynamicObjectEx(638, 519.2738, -1293.8924, 16.9288, 0.0000, 0.0000, -89.8000, drawdistance); //kb_planter+bush
-    g_Object[41] = CreateDynamicObjectEx(638, 562.2468, -1293.9248, 16.8493, 2.0000, 0.0000, -89.1999, drawdistance); //kb_planter+bush
-    g_Object[42] = CreateDynamicObjectEx(19376, 533.2229, -1294.2622, 25.9319, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[42], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[43] = CreateDynamicObjectEx(19376, 524.1027, -1294.1989, 25.9319, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[43], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[44] = CreateDynamicObjectEx(19376, 551.3405, -1294.3463, 26.0321, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[44], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[45] = CreateDynamicObjectEx(19376, 560.0297, -1294.4666, 26.0921, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[45], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[46] = CreateDynamicObjectEx(19376, 561.7495, -1294.4782, 26.0921, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[46], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[47] = CreateDynamicObjectEx(19376, 551.3806, -1301.5478, 26.0321, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[47], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[48] = CreateDynamicObjectEx(19376, 558.8809, -1301.6013, 26.0321, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[48], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[49] = CreateDynamicObjectEx(19376, 561.5214, -1301.6206, 26.0321, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[49], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[50] = CreateDynamicObjectEx(19458, 566.3311, -1299.7585, 26.3222, -89.0998, 1.2999, -0.4000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[50], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[51] = CreateDynamicObjectEx(19458, 518.3203, -1296.0626, 26.3743, -90.0998, 1.7000, -0.4000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[51], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[52] = CreateDynamicObjectEx(19376, 533.2111, -1301.4212, 26.0321, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[52], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[53] = CreateDynamicObjectEx(19376, 526.5618, -1301.3554, 26.0321, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[53], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[54] = CreateDynamicObjectEx(19376, 522.8920, -1301.3299, 26.0321, 0.0000, 0.0000, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[54], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[55] = CreateDynamicObjectEx(19376, 523.1010, -1294.5090, 26.0093, 0.0000, 4.0999, 89.5998, drawdistance); //wall024
-    SetDynamicObjectMaterial(g_Object[55], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[56] = CreateDynamicObjectEx(19458, 518.1948, -1299.4903, 26.3803, -90.0998, 1.7000, -0.4000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[56], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFF4682B4);
-    g_Object[57] = CreateDynamicObjectEx(19458, 534.4874, -1297.3248, 31.3626, 0.0000, 85.9000, 0.0000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[57], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFFD3D3D3);
-    g_Object[58] = CreateDynamicObjectEx(19458, 531.0786, -1297.3248, 31.3325, 0.0000, 93.6999, 0.0000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[58], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[59] = CreateDynamicObjectEx(19458, 527.5773, -1297.3248, 31.3791, 0.0000, 91.0000, -0.6000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[59], 0, 3979, "civic01_lan", "sl_laglasswall2", 0xFFD3D3D3);
-    g_Object[60] = CreateDynamicObjectEx(19458, 524.1082, -1297.2883, 31.4398, 0.0000, 91.0000, -0.6000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[60], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[61] = CreateDynamicObjectEx(19458, 520.6491, -1297.2513, 31.5002, 0.0000, 91.0000, -0.6000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[61], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[62] = CreateDynamicObjectEx(19458, 519.9691, -1297.2437, 31.5119, 0.0000, 91.0000, -0.6000, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[62], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[63] = CreateDynamicObjectEx(19458, 549.9871, -1297.3249, 31.3544, 0.0000, 94.3000, 0.0998, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[63], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[64] = CreateDynamicObjectEx(19458, 553.4578, -1297.3188, 31.2234, 0.0000, 90.1999, 0.0998, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[64], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[65] = CreateDynamicObjectEx(19458, 556.7982, -1297.3929, 31.3318, 0.0000, 90.1999, 0.0998, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[65], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[66] = CreateDynamicObjectEx(19458, 560.1182, -1297.3872, 31.3202, 0.0000, 90.1999, 0.0998, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[66], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[67] = CreateDynamicObjectEx(19458, 562.6580, -1297.3819, 31.3113, 0.0000, 90.1999, 0.0998, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[67], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
-    g_Object[68] = CreateDynamicObjectEx(19458, 565.0383, -1297.3780, 31.3031, 0.0000, 90.1999, 0.0998, drawdistance); //wall098
-    SetDynamicObjectMaterial(g_Object[68], 0, 3979, "civic01_lan", "sl_laglasswall2", 0x00000000);
+    new tmpobjid;
+    tmpobjid = CreateDynamicObject(6357, 505.054992, -1269.939941, 28.687500, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 5, 13625, "crowds", "ahstandside", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 567.032165, -1294.537841, 14.744620, 0.000000, -37.799983, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 18835, "mickytextures", "whiteforletters", 0x00000000);
+    SetDynamicObjectMaterial(tmpobjid, 5, 19800, "lsacarpark1", "dt_officewall2", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 551.570678, -1294.537841, 14.960134, 0.000000, -139.699981, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 547.125488, -1294.537841, 21.854469, 0.000000, 136.999923, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 537.698974, -1294.537841, 22.101654, 0.000000, -136.600051, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 532.466186, -1294.537841, 15.953048, 0.000000, -41.000007, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 518.313415, -1294.537841, 15.668961, 0.000000, 37.200016, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 518.609497, -1294.537841, 12.236881, 0.000000, 0.100029, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 538.349121, -1294.537841, 18.772451, 0.000000, 0.100029, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 546.199829, -1294.537841, 18.818761, 0.000000, 0.100029, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(18980, 565.988952, -1294.537841, 12.144217, 0.000000, 0.100029, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 0, 1714, "cj_office", "white32", 0x00000000);
+    tmpobjid = CreateDynamicObject(6337, 536.132995, -1291.680053, 23.468799, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    SetDynamicObjectMaterial(tmpobjid, 1, 18835, "mickytextures", "wood051", 0x00000000);
+    SetDynamicObjectMaterial(tmpobjid, 3, 18835, "mickytextures", "wood051", 0x00000000);
+    SetDynamicObjectMaterial(tmpobjid, 6, 18835, "mickytextures", "wood051", 0x00000000);
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    tmpobjid = CreateDynamicObject(1557, 540.780517, -1294.367675, 16.242187, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1557, 543.801757, -1294.374267, 16.242187, 0.000000, 0.000000, 179.600341, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(2754, 560.014770, -1293.893554, 17.148300, 0.000000, 0.000000, -89.799949, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1483, 547.492919, -1264.134399, 18.788286, 0.000000, 0.000000, -55.100002, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1483, 539.929260, -1269.651000, 18.788286, 0.000000, 0.000000, -51.300056, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(10281, 542.242980, -1293.518554, 22.548303, 0.000000, 0.000000, 179.699935, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1483, 532.370300, -1275.616943, 18.788286, 0.000000, 0.000000, -51.400054, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19130, 555.345092, -1259.030273, 16.197357, 0.000000, -89.499977, -91.000015, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19130, 559.164550, -1259.096191, 16.197357, 0.000000, -89.499977, 88.699966, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(12943, 511.597473, -1300.299682, 16.242237, 0.000000, 0.000000, 70.600013, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19817, 512.003784, -1299.034301, 15.013947, 0.000000, 0.000000, 158.799926, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19903, 508.297149, -1298.616333, 16.233560, 0.000000, 0.000000, -20.100013, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19899, 515.333984, -1300.170654, 16.043233, 0.000000, 0.000000, 159.499877, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19921, 514.954040, -1300.218994, 17.394800, 0.000000, 0.000000, -114.299942, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19917, 514.064147, -1302.565673, 17.056880, 0.000000, 0.000000, 164.599990, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19900, 514.710815, -1302.478393, 16.205530, 0.000000, 0.000000, -17.299978, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19900, 514.523803, -1303.079711, 16.205530, 0.000000, 0.000000, -17.299978, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19900, 513.913085, -1302.889526, 16.205530, 0.000000, 0.000000, -17.299978, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19900, 514.100219, -1302.288452, 16.205530, 0.000000, 0.000000, -17.299978, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1085, 517.523498, -1295.177978, 17.918724, 0.000000, 0.000000, 161.100021, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1080, 517.131469, -1296.208374, 17.890335, 0.000000, 0.000000, -19.800014, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1098, 516.796630, -1297.250976, 17.867912, 0.000000, 0.000000, -22.500000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1083, 516.423278, -1298.284179, 17.882490, 0.000000, 0.000000, -22.699977, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1676, 507.487945, -1301.427734, 17.564229, 0.000000, 0.000000, -109.899894, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1483, 524.140686, -1282.186645, 18.788286, 0.000000, 0.000000, -51.400054, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1223, 519.658569, -1283.989379, 15.632574, 0.000000, 0.000000, -53.099945, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1223, 527.431091, -1277.752319, 15.632574, 0.000000, 0.000000, -53.099945, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1223, 535.243652, -1271.535644, 15.632574, 0.000000, 0.000000, -53.099945, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1223, 542.761962, -1265.726806, 15.632574, -0.000000, 0.000000, -55.099956, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1223, 550.607482, -1260.229492, 15.632574, -0.000000, 0.000000, -55.099956, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(737, 546.158508, -1259.507324, 16.021131, 0.000000, 0.000000, 31.000005, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(737, 534.157165, -1267.958740, 15.731125, 0.000000, 0.000000, 39.299999, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(737, 522.467224, -1276.653808, 15.551121, 0.000000, 0.000000, 38.300018, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(737, 512.466369, -1284.756103, 15.301118, 0.000000, 0.000000, 35.800033, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19121, 516.350158, -1293.349121, 16.605958, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19121, 512.271057, -1291.913330, 16.605958, 0.000000, 0.000000, -13.300000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(2773, 543.923217, -1293.149536, 16.742015, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(2773, 540.603210, -1293.149536, 16.742015, 0.000000, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(3096, 514.159667, -1292.795654, 20.777011, 0.000000, 0.000000, -19.600025, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(11360, 506.254974, -1303.930053, 17.305025, 0.000000, 0.000000, -19.599988, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(948, 544.574401, -1293.905517, 16.157779, 0.000000, 0.000000, 0.499999, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(948, 539.993713, -1293.945556, 16.157779, 0.000000, 0.000000, 0.499999, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1232, 545.066711, -1296.675537, 20.053274, -101.499992, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1232, 539.368469, -1296.675537, 20.053274, -101.499992, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1232, 542.248596, -1296.547851, 31.143568, -90.700057, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(1232, 560.378234, -1296.686035, 19.824422, -90.700057, 0.000000, 0.000000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(2818, 541.880493, -1293.834228, 16.237396, 0.000000, 0.000000, 87.299934, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(2818, 542.809326, -1293.879028, 16.237396, 0.000000, 0.000000, 87.299934, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(2818, 543.719299, -1293.923461, 16.237396, 0.000000, 0.000000, 87.299934, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19445, 558.364501, -1278.588256, 14.503522, 0.000000, 0.000000, -28.999996, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19445, 558.364501, -1278.588256, 14.503522, 0.000000, 0.000000, 44.700000, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 550.323669, -1262.642211, 14.515134, 0.000000, 0.000000, 32.100025, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 547.544555, -1264.386840, 14.515134, 0.000000, 0.000000, 32.900016, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 544.990234, -1266.322509, 14.515134, 0.000000, 0.000000, 33.700004, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 542.650817, -1267.991455, 14.515134, 0.000000, 0.000000, 36.699970, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 540.072937, -1269.987548, 14.515134, 0.000000, 0.000000, 36.699970, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 537.648925, -1271.917846, 14.515134, 0.000000, 0.000000, 39.299942, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 535.216796, -1273.859497, 14.515134, 0.000000, 0.000000, 38.599952, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 532.663574, -1275.947753, 14.515134, 0.000000, 0.000000, 38.599952, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 530.124145, -1277.974975, 14.515134, 0.000000, 0.000000, 38.599952, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 526.983154, -1280.481567, 14.515134, 0.000000, 0.000000, 38.599952, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 524.420532, -1282.463378, 14.515134, 0.000000, 0.000000, 38.599952, -1, -1, -1, 300.00, 300.00); 
+    tmpobjid = CreateDynamicObject(19353, 521.910888, -1284.478271, 14.515134, 0.000000, 0.000000, 38.599952, -1, -1, -1, 300.00, 300.00); 
+}
+
+hook OnRemoveBuildings(playerid)
+{
+    RemoveBuildingForPlayer(playerid, 6357, 505.054, -1269.939, 28.687, 0.250);
+    RemoveBuildingForPlayer(playerid, 6337, 536.132, -1291.680, 23.468, 0.250);
+    RemoveBuildingForPlayer(playerid, 6482, 536.132, -1291.680, 23.468, 0.250);
+    RemoveBuildingForPlayer(playerid, 1211, 555.156, -1251.930, 16.640, 0.250);
 }

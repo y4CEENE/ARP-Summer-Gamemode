@@ -465,6 +465,44 @@ CMD:gangranks(playerid, params[])
     }
 }
 
+CMD:top(playerid, params[])
+{
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), 
+        "SELECT username, cash, bank FROM "#TABLE_USERS" ORDER BY (cash + bank) DESC LIMIT 10");
+    mysql_tquery(connectionID, queryBuffer, "OnGetTopRichestPlayers", "i", playerid);
+    return 1;
+}
+
+forward OnGetTopRichestPlayers(playerid);
+public OnGetTopRichestPlayers(playerid)
+{
+    new rows = cache_get_row_count();
+    if(rows == 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "No data found.");
+    }
+
+    new username[MAX_PLAYER_NAME], cash, bank, total;
+    new year, month, day;
+    getdate(year, month, day);
+
+    SendClientMessageEx(playerid, COLOR_GREEN, "----- Top 10 Richest Players (%d/%d/%d) -----", year, month, day);
+
+    for(new i = 0; i < rows; i++)
+    {
+        cache_get_field_content(i, "username", username, connectionID, sizeof(username));
+        cash = cache_get_field_content_int(i, "cash");
+        bank = cache_get_field_content_int(i, "bank");
+        total = cash + bank;
+
+        SendClientMessageEx(playerid, COLOR_WHITE, 
+            "{FF7F27}#%d{FFFFFF} %s {22B14C}Total Money:{FFFFFF} $%s", 
+            i + 1, username, FormatNumber(total));
+    }
+
+    return 1;
+}
+
 CMD:newseason(playerid, params[])
 {
     if(!IsGodAdmin(playerid))

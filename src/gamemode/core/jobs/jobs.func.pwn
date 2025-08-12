@@ -15,18 +15,20 @@
 #include "core\jobs\Job_Construction.pwn"
 #include "core\jobs\Job_Butcher.pwn"
 #include "core\jobs\Job_Brinks.pwn"
+#include "core\jobs\Job_Milker.pwn"
+#include "core\jobs\Job_Recycle.pwn"
 
 #include <YSI\y_hooks>
 
 hook OnLoadGameMode(timestamp)
 {
-	new string[320];
+	//new string[320];
 	for(new i = 0; i < sizeof(jobLocations); i ++)
 	{
-		format(string, sizeof string, "{33CCFF}Job Point ({FFFFFF}ID: %i{33CCFF})\n\nName: {FFFFFF}%s\n{33CCFF}Type {FFFFFF}/join {33CCFF}to obtain the job.", i, jobLocations[i][jobName]);
-	    CreateDynamic3DTextLabel(string, COLOR_YELLOW, jobLocations[i][jobX], jobLocations[i][jobY], jobLocations[i][jobZ], 10.0, .testlos = 1, .streamdistance = 10.0);
+		//format(string, sizeof string, "{33CCFF}Job Point ({FFFFFF}ID: %i{33CCFF})\n\nName: {FFFFFF}%s\n{33CCFF}Type {FFFFFF}/join {33CCFF}to obtain the job.", i, jobLocations[i][jobName]);
+	    //CreateDynamic3DTextLabel(string, COLOR_YELLOW, jobLocations[i][jobX], jobLocations[i][jobY], jobLocations[i][jobZ], 10.0, .testlos = 1, .streamdistance = 10.0);
 	    CreateDynamicMapIcon(jobLocations[i][jobX], jobLocations[i][jobY], jobLocations[i][jobZ], 56, 0, .style = MAPICON_GLOBAL);
-		CreateActor(jobLocations[i][jobActor], jobLocations[i][jobX], jobLocations[i][jobY], jobLocations[i][jobZ], jobLocations[i][actorangle]);
+		//CreateActor(jobLocations[i][jobActor], jobLocations[i][jobX], jobLocations[i][jobY], jobLocations[i][jobZ], jobLocations[i][actorangle]);
 	}
     return 1;
 }

@@ -35,6 +35,8 @@ enum
 	JOB_CONSTRUCTION,
 	JOB_BUTCHER,
 	JOB_BRINKS,
+	JOB_MILKER,
+	JOB_RECYCLE,
     JOB_SIZE
 };
 
@@ -75,10 +77,8 @@ new const jobLocations[][jobEnum] =
 	{"construction","Construction",   JOB_CONSTRUCTION,		-2061.0977, -109.87760,   35.3259, 224.0000,  16, "/makeciment"},
 	{"butcher",     "Butcher",        JOB_BUTCHER,			-2545.1672,  187.10340,   13.0391,  50.0000, 168, "/butcher"},
 	{"brinks",      "Brinks",         JOB_BRINKS,			-1495.6901,  841.2843,     7.1875, 162.2570,  30, "/loadcash"},
-	//entrance that can't be found on /locate must have empty shortname and placed under this line
-	{"",			"Drug Smuggler",  JOB_DRUGSMUGGLER,	 	 2355.1421, -1169.8289,   28.0375,  26.7895, 28, ""}
-	//	{"",	"Lumber Jack",      2359.1599,-650.2137,128.0523, 16, 276.390838}
-	//	{"",	"Forklift",        2424.3030,-2098.8564,13.7151}
+	{"recycle",     "Recycle",        JOB_RECYCLE,			-1495.6901,  841.2843,     7.1875, 162.2570,  30, ""},
+	{"milker",      "Milker",         JOB_MILKER,            1033.5572, -296.79769,   73.9921, 182.19,   161, "/buybocket, /milk, /sellmilk"}
 };
 
 

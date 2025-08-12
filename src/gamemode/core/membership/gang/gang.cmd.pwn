@@ -83,6 +83,10 @@ CMD:ganglocker(playerid, params[])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
+	if(!IsAdminOnDuty(playerid) && !IsAdmin(playerid, 7))
+    {
+    	return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
+    }
 	new gangid, option[32];
 	if(sscanf(params, "ds[32]", gangid, option)) return SendClientMessageEx(playerid, COLOR_GREY, "USAGE: /ganglocker [gangid] [remove/place/goto]");
 	if(!strcmp(option, "place", true))
@@ -1277,7 +1281,7 @@ CMD:removeganghq(playerid, params[])
 CMD:purgegang(playerid, params[])
 {
 	new gangid;
-	if(!IsGodAdmin(playerid) && !PlayerData[playerid][pGangMod])
+    if(!IsGodAdmin(playerid))
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
@@ -1539,11 +1543,6 @@ IsPlayerGangAlliance(playerid, targetid)
         return (PlayerData[playerid][pGang] == GangInfo[PlayerData[targetid][pGang]][gAlliance]);
     }
     return false;
-}
-
-CMD:capture(playerid, params[])
-{
-    return callcmd::claim(playerid, params);
 }
 
 

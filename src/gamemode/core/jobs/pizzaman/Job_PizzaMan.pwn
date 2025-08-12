@@ -41,7 +41,7 @@ hook OnPlayerEnterCheckpoint(playerid)
 	if(PlayerData[playerid][pCP] == CHECKPOINT_PIZZA)
     {
         new string[32];
-        new amount = (2500 + GetJobLevel(playerid, JOB_PIZZAMAN) * 300 + random(200)), tip = percent(amount, 10);
+        new amount = (100 + GetJobLevel(playerid, JOB_PIZZAMAN) * 100 + random(500)), tip = percent(amount, 10);
 
         if(gettime() - PlayerLastPizza[playerid] < 15 && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked])
         {

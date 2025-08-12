@@ -67,9 +67,10 @@ CMD:usecookies(playerid, params[])
 	strcat(string, "\nJail Time\tReduce your IC jailtime by 50 percent.\t{00AA00}5 cookies{FFFFFF}");
 	strcat(string, "\nRespect\tGives you 4 respect points.\t{F7A763}6 cookies{FFFFFF}");
 	strcat(string, "\nMaterials\tGives you 20000 materials.\t{F7A763}10 cookies{FFFFFF}");
-	//strcat(string, "\nWeapons\tGives you a full weapon set.\t{F7A763}10 cookies{FFFFFF}");
+	strcat(string, "\nWeapons\tGives you a full weapon set.\t{F7A763}10 cookies{FFFFFF}");
 	strcat(string, "\nGold VIP\t15 days Limited VIP subscription\t{F7A763}100 cookies{FFFFFF}");
 	strcat(string, "\nLegendary VIP\t15 days Limited VIP subscription\t{F7A763}250 cookies{FFFFFF}");
+    strcat(string, "\nRandom Vehicle\tGive You a Random Vehicle.\t{FF0000}250 cookies{FFFFFF}");
 
 //    strcat(string, "\nShoutout\tBroadcast your message of choice globally.\t{F7A763}3 cookies{FFFFFF}");
 //    strcat(string, "\nWeather\tOne time use: change weather globally.\t{F7A763}10 cookies{FFFFFF}");
@@ -84,6 +85,38 @@ CMD:usecookies(playerid, params[])
 	Dialog_Show(playerid, UseCookies, DIALOG_STYLE_TABLIST_HEADERS, title, string, "Redeem", "Cancel");
 
 	return 1;
+}
+
+
+#define MAX_RANDOM_VEHICLES 10
+
+new const RandomVehicles[MAX_RANDOM_VEHICLES] = {
+    411,  // Infernus
+    415,  // Cheetah
+    451,  // Turismo
+    521,  // FCR-900
+    560,  // Sultan
+    562,  // Elegy
+    489,  // Rancher
+    541,  // Bullet
+    534,  // Remington
+    510   // Mountain Bike
+};
+
+stock GivePlayerVehicle(playerid, modelid, color1=1, color2=1)
+{
+    new Float:x, Float:y, Float:z, Float:a, plate[32];
+
+    GetPlayerPos(playerid, x, y, z);
+    GetPlayerFacingAngle(playerid, a);
+    format(plate, 32, "%c%c%c %i", Random('A', 'Z'), Random('A', 'Z'), Random('A', 'Z'), Random(100, 999));
+
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO vehicles"\
+        " (ownerid, owner, modelid, pos_x, pos_y, pos_z, pos_a, plate, color1, color2, carImpounded)" \
+        "VALUES(%i, '%e', %i, '%f', '%f', '%f', '%f', '%e', %i, %i, '0')",
+        PlayerData[playerid][pID], GetPlayerNameEx(playerid), modelid,
+        x + 2.0 * floatsin(-a, degrees), y + 2.0 * floatcos(-a, degrees), z, a, plate, color1, color2);
+    mysql_tquery(connectionID, queryBuffer);
 }
 
 Dialog:UseCookies(playerid, response, listitem, inputtext[])
@@ -101,7 +134,7 @@ Dialog:UseCookies(playerid, response, listitem, inputtext[])
                 return SendClientMessage(playerid, COLOR_GREY, "You don't have enough cookies");
             }
             
-            PlayerData[playerid][pHealth] = 120;
+            PlayerData[playerid][pHealth] = 150;
             PlayerData[playerid][pArmor] = 150;
             SetPlayerHealth(playerid, PlayerData[playerid][pHealth]);
             SetPlayerArmour(playerid, PlayerData[playerid][pArmor]);
@@ -213,6 +246,19 @@ Dialog:UseCookies(playerid, response, listitem, inputtext[])
             GivePlayerCookies(playerid, -250);
             SendClientMessageEx(playerid, COLOR_AQUA, "You spent 500 cookies and received 15 days Limited VIP subscription.");
         }
+        case 7:
+		{
+			if (GetPlayerCookies(playerid) < 250)
+			{
+				return SendClientMessage(playerid, COLOR_GREY, "You don't have enough cookies");
+			}
+			new randomIndex = random(sizeof(RandomVehicles));
+			new Model = RandomVehicles[randomIndex];
+
+			GivePlayerVehicle(playerid, Model); // Pass a single vehicle model
+			GivePlayerCookies(playerid, -250);
+			SendClientMessageEx(playerid, COLOR_AQUA, "You spent 250 cookies and received a Random Vehicle.");
+		}
     }    
 
     return 1;
