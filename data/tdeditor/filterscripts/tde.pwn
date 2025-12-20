@@ -2096,7 +2096,7 @@ public OnPlayerClickTextDraw(playerid, Text:clickedid)
 	{
  		/*if((GetTickCount() - DoubleClickCount) <= 180)
  		{
- 		    ShowPlayerDialog(ProjectEditor, DIALOG_EDITTEXT, DIALOG_STYLE_INPUT, "TDEditor - Español", "Introduzca el texto aquí:", ">>", "X");
+ 		    ShowPlayerDialog(ProjectEditor, DIALOG_EDITTEXT, DIALOG_STYLE_INPUT, "TDEditor - Espaï¿½ol", "Introduzca el texto aquï¿½:", ">>", "X");
  		    TDE_TextDrawSetString(TD_Status, "EDITMODE_NONE");
  		    EditMode = EDITMODE_NONE;
  		    IsPSel = false;
@@ -4282,7 +4282,7 @@ stock KeyToString(key)
 				case VK_KEYB0: LETTER = "=";//30
 				case VK_KEYB1: LETTER = "!";//!
 				case VK_KEYB2: LETTER = "\"";//32
-				//case VK_KEYB3: LETTER = "·";//33
+				//case VK_KEYB3: LETTER = "ï¿½";//33
 				case VK_KEYB4: LETTER = "$";//34
 				case VK_KEYB5: LETTER = "%";//35
 				case VK_KEYB6: LETTER = "&";//36
@@ -4295,7 +4295,7 @@ stock KeyToString(key)
 				case VK_OEM_PERIOD: LETTER = ":";
 				case VK_OEM_2: LETTER = "?";
 				case VK_OEM_4: LETTER = "?";
-				//case VK_OEM_5: LETTER = "ª";
+				//case VK_OEM_5: LETTER = "ï¿½";
 				case VK_OEM_6: LETTER = "[";
 				case VK_OEM_102: LETTER = ">";
 				case VK_NUMPAD0: LETTER = "0";
@@ -4365,7 +4365,7 @@ stock KeyToString(key)
 				case VK_OEM_2: LETTER = "]";
 				case VK_OEM_4: LETTER = "'";
 				case VK_OEM_5: LETTER = "|";
-				case VK_OEM_6: LETTER = "¡";
+				case VK_OEM_6: LETTER = "ï¿½";
 				case VK_OEM_102: LETTER = "<";
 				case VK_NUMPAD0: LETTER = "0";
 				case VK_NUMPAD1: LETTER = "1";
@@ -4425,7 +4425,7 @@ stock KeyToString(key)
 				case VK_KEYB0: LETTER = "=";//30
 				case VK_KEYB1: LETTER = "!";//!
 				case VK_KEYB2: LETTER = "\"";//32
-				//case VK_KEYB3: LETTER = "·";//33
+				//case VK_KEYB3: LETTER = "ï¿½";//33
 				case VK_KEYB4: LETTER = "$";//34
 				case VK_KEYB5: LETTER = "%";//35
 				case VK_KEYB6: LETTER = "&";//36
@@ -4438,7 +4438,7 @@ stock KeyToString(key)
 				case VK_OEM_PERIOD: LETTER = ":";
 				case VK_OEM_2: LETTER = "?";
 				case VK_OEM_4: LETTER = "?";
-				//case VK_OEM_5: LETTER = "ª";
+				//case VK_OEM_5: LETTER = "ï¿½";
 				case VK_OEM_6: LETTER = "[";
 				case VK_OEM_102: LETTER = ">";
 				case VK_NUMPAD0: LETTER = "0";
@@ -4508,7 +4508,7 @@ stock KeyToString(key)
 				case VK_OEM_2: LETTER = "]";
 				case VK_OEM_4: LETTER = "'";
 				case VK_OEM_5: LETTER = "|";
-				case VK_OEM_6: LETTER = "¡";
+				case VK_OEM_6: LETTER = "ï¿½";
 				case VK_OEM_102: LETTER = "<";
 				case VK_NUMPAD0: LETTER = "0";
 				case VK_NUMPAD1: LETTER = "1";

@@ -1,0 +1,5 @@
+arp_next.pwn(19) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "GName"
+arp_next.pwn(4) : èäåíòèôèêàòîð íå èñïîëüçóåòñÿ: "ResetBackpack"
+arp_next.pwn(11) : èäåíòèôèêàòîðó ïðèñâîåíî çíà÷åíèå, íî îí íå èñïîëüçóåòñÿ: "ServerGuildID"
+Pawn compiler 3.2.3664	 	 	Copyright (c) 1997-2017, ITB CompuPhase
+

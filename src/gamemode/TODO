@@ -3,11 +3,5 @@
  - Destroy all objects OnGameModeExit
  - Turf limit cap per gang
  - add ls_elevator + ls_beachside elevator from filterscripts
- - Casino Random 3 objects
- - Casino Horse Game
- - Capture the flag Game
- - Race event in interrior
- - Race event add time, position, and nb of checkpoints text
- - any player can hijack race cars
- - create anim system to prevent stuck or collision
- - Fightclub. relog stuck in fight area
+ 
+ 

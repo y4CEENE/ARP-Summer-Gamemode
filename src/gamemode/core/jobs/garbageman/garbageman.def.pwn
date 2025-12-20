@@ -1,0 +1,3 @@
+
+
+new garbageVehicles[6];

@@ -1,8 +1,3 @@
-/// @file      VoteSystem.pwn
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2021-04-13 17:50:53 +0100
-/// @copyright Copyright (c) 2022
-
 #include <YSI\y_hooks>
 
 static VoteQuestion[128];
@@ -34,9 +29,9 @@ ShowCreateVoteDialog(playerid)
     new menu[512];
     format(menu, sizeof(menu), "Question: %s\nAdd Answer\nClear Answers\nPublish", VoteQuestion);
     new count = 0;
-    for (new i=0;i<5;i++)
+    for(new i=0;i<5;i++)
     {
-        if (!isnull(VoteAnswers[i]))
+        if(!isnull(VoteAnswers[i]))
         {
             count++;
             format(menu, sizeof(menu), "%s\n Answer %d: %s", menu, count, VoteAnswers[i]);
@@ -48,7 +43,7 @@ ShowCreateVoteDialog(playerid)
 
 CMD:createvote(playerid, params[])
 {
-    if (IsAdmin(playerid))
+    if(IsAdmin(playerid))
     {
         ShowCreateVoteDialog(playerid);
     }
@@ -56,19 +51,19 @@ CMD:createvote(playerid, params[])
 }
 CMD:endvote(playerid, params[])
 {
-    if (IsAdmin(playerid))
+    if(IsAdmin(playerid))
     {
         CanVote = false;
         foreach(new targetid: Player)
         {
-            if (PlayerData[targetid][pLogged])
+            if(PlayerData[targetid][pLogged])
             {
                 SendClientMessageEx(targetid, COLOR_AQUA, " *** Vote Ended ***");
                 SendClientMessageEx(targetid, COLOR_GREEN, "Question:{FFFFFF} %s", VoteQuestion);
-
-                for (new i=0, count=0;i<5;i++)
+                
+                for(new i=0, count=0;i<5;i++)
                 {
-                    if (!isnull(VoteAnswers[i]))
+                    if(!isnull(VoteAnswers[i]))
                     {
                         count++;
                         SendClientMessageEx(targetid, COLOR_GREEN, "Answer %d:{FFFFFF} %s (%d votes)", count, VoteAnswers[i], VoteAnswersCount[i]);
@@ -82,24 +77,24 @@ CMD:endvote(playerid, params[])
 
 CMD:vote(playerid, params[])
 {
-    if (!CanVote)
+    if(!CanVote)
     {
         return SendClientMessage(playerid, COLOR_GREY, "There is no vote for the moment.");
     }
-    if (PlayerVoted[playerid])
+    if(PlayerVoted[playerid])
     {
         return SendClientMessage(playerid, COLOR_GREY, "You already voted.");
     }
     new title[128],menu[512];
-
+    
     menu[0] = 0;
-
+    
     format(title, sizeof(title), "Question: %s", VoteQuestion);
 
     new count = 0;
-    for (new i=0;i<5;i++)
+    for(new i=0;i<5;i++)
     {
-        if (!isnull(VoteAnswers[i]))
+        if(!isnull(VoteAnswers[i]))
         {
             count++;
             format(menu, sizeof(menu), "%s\n Answer %d: %s", menu, count, VoteAnswers[i]);
@@ -112,9 +107,9 @@ CMD:vote(playerid, params[])
 
 Dialog:VoteSystemPlayerVote(playerid, response, listitem, inputtext[])
 {
-    if (response)
+    if(response)
     {
-        if (0 <= listitem <= 4)
+        if(0 <= listitem <= 4)
         {
             PlayerVoted[playerid] = true;
             VoteAnswersCount[listitem] ++;
@@ -125,7 +120,7 @@ Dialog:VoteSystemPlayerVote(playerid, response, listitem, inputtext[])
 }
 Dialog:VoteSystemEditQuestion(playerid, response, listitem, inputtext[])
 {
-    if (response)
+    if(response)
     {
         format(VoteQuestion, sizeof(VoteQuestion), inputtext);
     }
@@ -134,11 +129,11 @@ Dialog:VoteSystemEditQuestion(playerid, response, listitem, inputtext[])
 }
 Dialog:VoteSystemAddAnswer(playerid, response, listitem, inputtext[])
 {
-    if (response)
+    if(response)
     {
-        for (new i=0;i<5;i++)
+        for(new i=0;i<5;i++)
         {
-            if (isnull(VoteAnswers[i]))
+            if(isnull(VoteAnswers[i]))
             {
                 format(VoteAnswers[i], 128, inputtext);
                 break;
@@ -151,11 +146,11 @@ Dialog:VoteSystemAddAnswer(playerid, response, listitem, inputtext[])
 
 Dialog:VoteSystemMenu(playerid, response, listitem, inputtext[])
 {
-    if (!response)
+    if(!response)
     {
         return 1;
     }
-    switch (listitem)
+    switch(listitem)
     {
         case 0:
         {
@@ -165,15 +160,15 @@ Dialog:VoteSystemMenu(playerid, response, listitem, inputtext[])
         case 1:
         {
             new next = -1;
-            for (new i=0;i<5;i++)
+            for(new i=0;i<5;i++)
             {
-                if (isnull(VoteAnswers[i]))
+                if(isnull(VoteAnswers[i]))
                 {
                     next = i;
                     break;
                 }
             }
-            if (next == -1)
+            if(next == -1)
             {
                 SendClientMessage(playerid, COLOR_GREY, "You can't add more answers.");
                 ShowCreateVoteDialog(playerid);
@@ -196,14 +191,14 @@ Dialog:VoteSystemMenu(playerid, response, listitem, inputtext[])
         {
             // Publish
             new l = 0;
-            for (new i=0;i<5;i++)
+            for(new i=0;i<5;i++)
             {
-                if (!isnull(VoteAnswers[i]))
+                if(!isnull(VoteAnswers[i]))
                 {
                     l++;
                 }
             }
-            if (l<2)
+            if(l<2)
             {
                 SendClientMessageEx(playerid, COLOR_AQUA, "A vote must have at least 2 answers");
                 ShowCreateVoteDialog(playerid);
@@ -211,14 +206,14 @@ Dialog:VoteSystemMenu(playerid, response, listitem, inputtext[])
             }
             foreach(new targetid: Player)
             {
-                if (PlayerData[targetid][pLogged])
+                if(PlayerData[targetid][pLogged])
                 {
                     SendClientMessageEx(targetid, COLOR_AQUA, " *** Vote ***");
                     SendClientMessageEx(targetid, COLOR_GREEN, "Question:{FFFFFF} %s", VoteQuestion);
-
-                    for (new i=0, count=0;i<5;i++)
+                    
+                    for(new i=0, count=0;i<5;i++)
                     {
-                        if (!isnull(VoteAnswers[i]))
+                        if(!isnull(VoteAnswers[i]))
                         {
                             count++;
                             SendClientMessageEx(targetid, COLOR_GREEN, "Answer %d:{FFFFFF} %s", count, VoteAnswers[i]);
@@ -227,12 +222,12 @@ Dialog:VoteSystemMenu(playerid, response, listitem, inputtext[])
                     SendClientMessageEx(targetid, COLOR_AQUA, "Use /vote to vote");
                 }
             }
-
-            for (new idx=0;idx<5;idx++)
+    
+            for(new idx=0;idx<5;idx++)
             {
                 VoteAnswersCount[idx] = 0;
             }
-            for (new idx=0;idx<MAX_PLAYERS;idx++)
+            for(new idx=0;idx<MAX_PLAYERS;idx++)
             {
                 PlayerVoted[idx] = false;
             }
@@ -240,7 +235,7 @@ Dialog:VoteSystemMenu(playerid, response, listitem, inputtext[])
         }
         default:
         {
-            if ( 0 <= listitem - 4 < 4)
+            if( 0 <= listitem - 4 < 4)
             {
                 VoteAnswers[listitem - 4][0] = 0;
                 Dialog_Show(playerid, VoteSystemAddAnswer, DIALOG_STYLE_INPUT, "Create vote", "Enter vote answer", "Ok", "Cancel");

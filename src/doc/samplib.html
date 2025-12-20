@@ -10,7 +10,7 @@
 
 </head>
 <body>
-    <div class="container">
+    <div class="container"> 
         <h3>Timers</h3>
         <ol>
             <li> <input class="form-check-input" type="checkbox" disabled checked><b>OnServerBeacon</b>(timestamp)</li>
@@ -72,8 +72,8 @@
             <li>stock <b>GetVehicleColor</b>(vehicleid, &color1, &color2)</li>
             <li>stock <b>IsComponentidCompatible</b>( modelid, componentid )</li>
             <li>stock <b>ShowActionBubble</b>(playerid, text[], {Float, _}:...)</li>
-            <li>stock <b>SendClientSplitMessage</b>(playerid, color, const text[])</li>
-            <li>stock <b>SendClientSplitMessageEx</b>(playerid, color, const text[], {Float, _}:...)</li>
+            <li>stock <b>SendPlayerSplitMessage</b>(playerid, color, const text[])</li>
+            <li>stock <b>SendSplitMessage</b>(playerid, color, const text[], {Float, _}:...)</li>
             <li>stock <b>PlayerTextDrawFormatString</b>(playerid, PlayerText:playertextid, text[], {Float, _}:...)</li>
             <li>stock <b>SendDistanceMessage</b>(playerid, Float:distance, color, const text[], {Float, _}:...)</li>
             <li>stock <b>SendClientMessageEx</b>(playerid, color, const text[], {Float,_}:...)</li>
@@ -111,7 +111,7 @@
             <li>stock <b>strreplace2</b>(string[], const search[], const replacement[], bool:ignorecase = false, pos = 0, limit = -1, maxlength = sizeof(string))</li>
             <li>stock <b>mysql_escaped</b>(const string[])</li>
             <li>stock <b>CheckServerAd</b>(text[])</li>
-            <li>stock <b>IsAnIP</b>(ip[])</li>
+            <li>stock <b>IsAnIP</b>(ip[])</li>    
         </ul>
     </div>
 

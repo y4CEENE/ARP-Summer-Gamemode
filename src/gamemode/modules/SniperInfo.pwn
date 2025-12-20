@@ -1,27 +1,21 @@
-/// @file      SniperInfo.pwn
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2021-03-29 13:59:58 +0100
-/// @copyright Copyright (c) 2022
-
 #include <YSI\y_hooks>
 
 static PlayerText:SniperTextDraw[MAX_PLAYERS];
 static SniperAimingAt[MAX_PLAYERS];
 
-IsPlayerAimingAtPlayer(playerid, aimid)
+IsPlayerAimingAtPlayer(playerid, aimid) 
 {
     new Float:X1, Float:Y1, Float:Z1, Float:X2, Float:Y2, Float:Z2;
     GetPlayerPos(playerid, X1, Y1, Z1);
     GetPlayerPos(aimid, X2, Y2, Z2);
     new Float:Distance = floatsqroot(floatpower(floatabs(X1 - X2), 2) + floatpower(floatabs(Y1 - Y2), 2));
-    if (Distance < 100)
-    {
+    if(Distance < 100) {
         new Float:A;
         GetPlayerFacingAngle(playerid, A);
         X1 += (Distance * floatsin(-A, degrees));
         Y1 += (Distance * floatcos(-A, degrees));
         Distance = floatsqroot(floatpower(floatabs(X1 - X2), 2) + floatpower(floatabs(Y1 - Y2), 2));
-        if (Distance < 1.3)
+        if(Distance < 1.3) 
         {
             return true;
         }
@@ -30,32 +24,32 @@ IsPlayerAimingAtPlayer(playerid, aimid)
 }
 
 
-task SniperAimingCheck[750]()
+task SniperAimingCheck[750]() 
 {
     foreach(new playerid : Player)
     {
         foreach(new targetid : Player)
         {
-            if (playerid != targetid)
+            if(playerid != targetid)
             {
-                if (SniperAimingAt[playerid] == targetid && (!IsPlayerAimingAtPlayer(playerid, targetid) || GetPlayerWeapon(playerid) != 34))
+                if(SniperAimingAt[playerid] == targetid && (!IsPlayerAimingAtPlayer(playerid, targetid) || GetPlayerWeapon(playerid) != 34))
                 {
                     PlayerTextDrawHide(playerid, SniperTextDraw[playerid]);
                     SniperAimingAt[playerid] = INVALID_PLAYER_ID;
                 }
 
-                if (IsPlayerAimingAtPlayer(playerid, targetid) && GetPlayerWeapon(playerid) == 34)
+                if(IsPlayerAimingAtPlayer(playerid, targetid) && GetPlayerWeapon(playerid) == 34)
                 {
                     new Float:x,Float:y,Float:z;
                     new weaponname[256];
                     new string[128];
                     GetPlayerPos(targetid,x,y,z);
                     GetWeaponName(GetPlayerWeapon(targetid), weaponname, sizeof(weaponname));
-                    format(string, 128, "~g~%s dist: ~r~%d m.~n~~b~Ping: ~r~%dms~n~~g~AMSL: ~r~%d m.~n~~b~Weapon: ~r~%s~p~",
-                                    GetPlayerNameEx(targetid),
-                                    floatround(GetDistanceBetweenPlayers(targetid, playerid)),
-                                    GetPlayerPing(targetid),
-                                    floatround(z),
+                    format(string, 128, "~g~%s dist: ~r~%d m.~n~~b~Ping: ~r~%dms~n~~g~AMSL: ~r~%d m.~n~~b~Weapon: ~r~%s~p~", 
+                                    GetPlayerNameEx(targetid), 
+                                    floatround(GetDistanceBetweenPlayers(targetid, playerid)), 
+                                    GetPlayerPing(targetid), 
+                                    floatround(z), 
                                     weaponname);
                     PlayerTextDrawSetString(playerid, SniperTextDraw[playerid], string);
                     PlayerTextDrawShow(playerid, SniperTextDraw[playerid]);
@@ -67,7 +61,7 @@ task SniperAimingCheck[750]()
     return 1;
 }
 
-hook OnPlayerInit(playerid)
+hook OnPlayerInit(playerid) 
 {
     SniperTextDraw[playerid] = CreatePlayerTextDraw(playerid, 406, 307, "PREVED");
     PlayerTextDrawAlignment        (playerid, SniperTextDraw[playerid], 0);
@@ -82,16 +76,16 @@ hook OnPlayerInit(playerid)
     return 1;
 }
 
-hook OnPlayerDisconnect(playerid, reason)
+hook OnPlayerDisconnect(playerid, reason) 
 {
     PlayerTextDrawHide(playerid, SniperTextDraw[playerid]);
     PlayerTextDrawDestroy(playerid, SniperTextDraw[playerid]);
     return 1;
 }
 
-hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
+hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys) 
 {
-    if (oldkeys == 128)
+    if(oldkeys == 128) 
     {
         PlayerTextDrawHide(playerid, SniperTextDraw[playerid]);
         SniperAimingAt[playerid] = INVALID_PLAYER_ID;

@@ -4,9 +4,9 @@
 #include <sampvoice>
 #include <Pawn.CMD>
 
-#include "../gamemode/const/Max.def"
-
-#define CHAT_KEY     0x42 // Key B
+#define LOCAL_CHAT_KEY     0x42
+#define GLOBAL_CHAT_KEY    0x50
+#define CHANNEL_CHAT_KEY   0x4E
 #define MAX_CHANNELS      99999
 
 #pragma tabsize 0
@@ -15,342 +15,225 @@
 
 main() {}
 
-enum
-{
-    VoiceType_Local,
-    VoiceType_Radio,
-    VoiceType_Faction,
-    VoiceType_Gang,
-    VoiceType_Global
-};
-
-static SpeakerChatType[MAX_PLAYERS];
-static SpeakerChatId[MAX_PLAYERS];
+static GlobalVoiceStatus[MAX_PLAYERS];
+static PlayerChannelStatus[MAX_PLAYERS];
 static PlayerChannel[MAX_PLAYERS];
 static SV_GSTREAM:ChannelStreams[MAX_CHANNELS];
 
 static SV_GSTREAM:gstream;
 static SV_LSTREAM:lstream[MAX_PLAYERS] = { SV_NULL, ... };
 
-new SV_GSTREAM:factionstream[MAX_FACTIONS] = { SV_NULL, ... };
-new SV_GSTREAM:gangstream[MAX_GANGS] = { SV_NULL, ... };
-
 public SV_VOID:OnPlayerActivationKeyPress(SV_UINT:playerid, SV_UINT:keyid)
 {
-    if (keyid == CHAT_KEY)
-    {
-        switch (SpeakerChatType[playerid])
-        {
-            case VoiceType_Local:
-            {
-                if (lstream[playerid] && !SvHasSpeakerInStream(lstream[playerid], playerid))
-                    SvAttachSpeakerToStream(lstream[playerid], playerid);
-            }
-            case VoiceType_Radio:
-            {
-                if(SpeakerChatId[playerid] > 0 && SpeakerChatId[playerid] < sizeof(ChannelStreams) &&
-                   ChannelStreams[SpeakerChatId[playerid]]  && !SvHasSpeakerInStream(ChannelStreams[SpeakerChatId[playerid]], playerid))
-                {
-                   SvAttachSpeakerToStream(ChannelStreams[SpeakerChatId[playerid]], playerid);
-                }
-            }
-            case VoiceType_Faction:
-            {
-                if (SpeakerChatId[playerid] != -1 && SpeakerChatId[playerid] < sizeof(factionstream) &&
-                    factionstream[SpeakerChatId[playerid]] && !SvHasSpeakerInStream(factionstream[SpeakerChatId[playerid]], playerid))
-                {
-                        SvAttachSpeakerToStream(factionstream[SpeakerChatId[playerid]], playerid);
-                }
-            }
-            case VoiceType_Gang:
-            {
-                if (SpeakerChatId[playerid] != -1 && SpeakerChatId[playerid] < sizeof(gangstream) &&
-                    gangstream[SpeakerChatId[playerid]] && !SvHasSpeakerInStream(gangstream[SpeakerChatId[playerid]], playerid))
-                {
-                        SvAttachSpeakerToStream(gangstream[SpeakerChatId[playerid]], playerid);
-                }
-            }
-            case VoiceType_Global:
-            {
-                if (CallRemoteFunction("GetAdminLevel", "d",playerid) != 0 && gstream && !SvHasSpeakerInStream(gstream, playerid))
-                {
-                    SvAttachSpeakerToStream(gstream, playerid);
-                }
-            }
-        }
-    }
+	if (keyid == LOCAL_CHAT_KEY && lstream[playerid] && !SvHasSpeakerInStream(lstream[playerid], playerid))
+	{ 
+		SvAttachSpeakerToStream(lstream[playerid], playerid);
+	}
+	if (keyid == GLOBAL_CHAT_KEY && gstream) 
+	{
+		if(CallRemoteFunction("GetAdminLevel", "d",playerid) != 0 && !SvHasSpeakerInStream(gstream, playerid))
+		{
+			SvAttachSpeakerToStream(gstream, playerid);
+		}
+	}
+    
+	if(PlayerChannel[playerid] > 0)
+	{
+		if (keyid == CHANNEL_CHAT_KEY && ChannelStreams[PlayerChannel[playerid]]  && !SvHasSpeakerInStream(ChannelStreams[PlayerChannel[playerid]], playerid)) 
+		{
+			SvAttachSpeakerToStream(ChannelStreams[PlayerChannel[playerid]], playerid);
+            PlayerChannelStatus[playerid] = true;
+		}
+	}
 }
 
-public SV_VOID:OnPlayerActivationKeyRelease(SV_UINT:playerid, SV_UINT:keyid)
+public SV_VOID:OnPlayerActivationKeyRelease(SV_UINT:playerid, SV_UINT:keyid) 
 {
-    if (keyid == CHAT_KEY)
-    {
-        switch (SpeakerChatType[playerid])
-        {
-            case VoiceType_Local:
-            {
-                if (lstream[playerid])
-                    SvDetachSpeakerFromStream(lstream[playerid], playerid);
-            }
-            case VoiceType_Radio:
-            {
-                if (SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(ChannelStreams) &&
-                    ChannelStreams[SpeakerChatId[playerid]])
-                    SvDetachSpeakerFromStream(ChannelStreams[SpeakerChatId[playerid]], playerid);
+	if (keyid == LOCAL_CHAT_KEY && lstream[playerid]) 
+	{
+		SvDetachSpeakerFromStream(lstream[playerid], playerid);
+	}
 
-            }
-            case VoiceType_Faction:
-            {
-                if (SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(ChannelStreams) &&
-                    factionstream[SpeakerChatId[playerid]])
-                    SvDetachSpeakerFromStream(factionstream[SpeakerChatId[playerid]], playerid);
-            }
-            case VoiceType_Gang:
-            {
-                if (SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(ChannelStreams) &&
-                    gangstream[SpeakerChatId[playerid]])
-                    SvDetachSpeakerFromStream(gangstream[SpeakerChatId[playerid]], playerid);
-            }
-            case VoiceType_Global:
-            {
-                if (gstream)
-                    SvDetachSpeakerFromStream(gstream, playerid);
-            }
-        }
-    }
+	if (keyid == GLOBAL_CHAT_KEY && gstream) 
+	{
+		SvDetachSpeakerFromStream(gstream, playerid);
+	}
+	if(PlayerChannel[playerid] > 0)
+	{
+		if (keyid == CHANNEL_CHAT_KEY && ChannelStreams[PlayerChannel[playerid]]) 
+		{
+			SvDetachSpeakerFromStream(ChannelStreams[PlayerChannel[playerid]], playerid);
+            PlayerChannelStatus[playerid] = false;
+		}
+	}
 }
 
 public OnPlayerConnect(playerid)
 {
-    PlayerChannel[playerid] = 0;
-    lstream[playerid] = 0;
-    SpeakerChatType[playerid] = 0;
-    SpeakerChatId[playerid] = -1;
+	GlobalVoiceStatus[playerid] = false;
+    PlayerChannelStatus[playerid] = false;
+	PlayerChannel[playerid] = 0;
+	lstream[playerid] = 0;
 
-    if (!SvGetVersion(playerid))
+	if (!SvGetVersion(playerid)) 
     {
         return SendClientMessage(playerid, -1, "Cannot get VoiceChat Version");
     }
-
-    if (!SvHasMicro(playerid))
+	
+	if (!SvHasMicro(playerid)) 
     {
         return SendClientMessage(playerid, -1, "You don't have voice chat");
     }
 
-    lstream[playerid] = SvCreateDLStreamAtPlayer(25.0, SV_INFINITY, playerid, 0xff0000ff, "L");
-
-    if (lstream[playerid] != 0)
-    {
+	lstream[playerid] = SvCreateDLStreamAtPlayer(25.0, SV_INFINITY, playerid, 0xff0000ff, "L");
+	
+	if (lstream[playerid] != 0)
+    { 
         // red color
-        SendClientMessage(playerid, -1, "Voice chat is on");
-        if (gstream)
+		SendClientMessage(playerid, -1, "Voice chat is on");
+		if (gstream) 
         {
             SvAttachListenerToStream(gstream, playerid);
         }
-        SvAddKey(playerid, CHAT_KEY);
-    }
+		SvAddKey(playerid, LOCAL_CHAT_KEY);
+		SvAddKey(playerid, CHANNEL_CHAT_KEY);
+	}
 
-    return 1;
+	return 1;	
 }
-
-forward OnPlayerLoaded(playerid, row);
-public OnPlayerLoaded(playerid, row)
-{
-    FixChatId(playerid);
-}
-
 
 public OnPlayerDisconnect(playerid, reason)
 {
-    if (lstream[playerid])
-    {
-        SvDeleteStream(lstream[playerid]);
-        lstream[playerid] = SV_NULL;
-    }
+	if (lstream[playerid]) 
+	{
+		SvDeleteStream(lstream[playerid]);
+		lstream[playerid] = SV_NULL;
+	}
 
-    return 1;
+	return 1;
 }
 
 public OnGameModeInit()
 {
-    SvDebug(SV_FALSE);
-    gstream = SvCreateGStream(0xffff0000, "G"); // blue color
+	SvDebug(SV_FALSE);
+	gstream = SvCreateGStream(0xffff0000, "G"); // blue color
+	
+	new radioid[32];
 
-    new radioid[32];
-
-    for(new i=0;i<sizeof(ChannelStreams);i++)
-    {
-        format(radioid, sizeof(radioid), "R%d", i);
-        ChannelStreams[i] = SvCreateGStream(0xFF00FFFF, radioid);
-    }
-
-    for(new i=0;i<sizeof(gangstream);i++)
-    {
-        gangstream[i] = SvCreateGStream(0xffff0000, "Gang Radio");
-    }
-
-    for(new i=0;i<sizeof(factionstream);i++)
-    {
-        factionstream[i] = SvCreateGStream(0xffff0000, "Faction Radio");
-    }
-
-    return 1;
+	for(new i=0;i<sizeof(ChannelStreams);i++)
+	{
+		format(radioid, sizeof(radioid), "R%d", i);
+		ChannelStreams[i] = SvCreateGStream(0xFF00FFFF, radioid);
+	}
+	return 1;	
 }
 
 public OnGameModeExit()
 {
     SvDetachAllListenersFromStream(gstream);
-    SvDeleteStream(gstream);
-
-    for(new i=0;i<sizeof(ChannelStreams);i++)
-    {
+	SvDeleteStream(gstream);
+	
+	for(new i=0;i<sizeof(ChannelStreams);i++)
+	{
         SvDetachAllListenersFromStream(ChannelStreams[i]);
-        SvDeleteStream(ChannelStreams[i]);
-    }
-
-    for(new i=0;i<sizeof(gangstream);i++)
-    {
-        SvDetachAllListenersFromStream(gangstream[i]);
-        SvDeleteStream(gangstream[i]);
-    }
-
-    for(new i=0;i<sizeof(factionstream);i++)
-    {
-        SvDetachAllListenersFromStream(factionstream[i]);
-        SvDeleteStream(factionstream[i]);
-    }
-
+		SvDeleteStream(ChannelStreams[i]);
+	}
     for(new playerid=0;playerid<MAX_PLAYERS;playerid++)
     {
         SvRemoveAllKeys(playerid);
-
-        if (lstream[playerid])
+        
+        if (lstream[playerid]) 
         {
             SvDeleteStream(lstream[playerid]);
             lstream[playerid] = SV_NULL;
         }
     }
-
     return 1;
 }
 
-forward OnVoiceChatChanged(playerid, oldVoiceChat, newVoiceChat);
-public OnVoiceChatChanged(playerid, oldVoiceChat, newVoiceChat)
+CMD:prvoice(playerid, params[])
 {
-    switch (SpeakerChatType[playerid])
+    if(PlayerChannel[playerid] == 0)
     {
-        case VoiceType_Local:
-        {
-            if (lstream[playerid])
-                SvDetachSpeakerFromStream(lstream[playerid], playerid);
-        }
-        case VoiceType_Radio:
-        {
-            if (SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(ChannelStreams) &&
-                ChannelStreams[SpeakerChatId[playerid]])
-                SvDetachSpeakerFromStream(ChannelStreams[SpeakerChatId[playerid]], playerid);
-        }
-        case VoiceType_Faction:
-        {
-            if (SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(ChannelStreams) &&
-                factionstream[SpeakerChatId[playerid]])
-                SvDetachSpeakerFromStream(factionstream[SpeakerChatId[playerid]], playerid);
-        }
-        case VoiceType_Gang:
-        {
-            if (SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(ChannelStreams) &&
-                gangstream[SpeakerChatId[playerid]])
-                SvDetachSpeakerFromStream(gangstream[SpeakerChatId[playerid]], playerid);
-        }
-        case VoiceType_Global:
-        {
-            if (gstream)
-                SvDetachSpeakerFromStream(gstream, playerid);
-        }
+        return SendClientMessage(playerid, -1, "Radio is turned off");
     }
 
-    SpeakerChatType[playerid] = newVoiceChat;
-
-    switch (newVoiceChat)
+    if (!ChannelStreams[PlayerChannel[playerid]]) 
     {
-        case VoiceType_Radio:
-        {
-            SpeakerChatId[playerid] = CallRemoteFunction("GetRadioChannel", "d", playerid);
-        }
-        case VoiceType_Faction:
-        {
-            SpeakerChatId[playerid] = CallRemoteFunction("GetPlayerFactionId", "d", playerid);
-        }
-        case VoiceType_Gang:
-        {
-            SpeakerChatId[playerid] = CallRemoteFunction("GetPlayerGangId", "d", playerid);
-        }
+        return SendClientMessage(playerid, -1, "Internal error cannot connect to radio voice chat.");
     }
-}
-
-FixChatId(playerid)
-{
-    if(lstream[playerid] == 0)
+    if(PlayerChannelStatus[playerid])
     {
-        return 1; // MIC NOT AVAILABLE
+        SendClientMessage(playerid, -1, "* [Private Radio]: Mic off *");
+        SvDetachSpeakerFromStream(ChannelStreams[PlayerChannel[playerid]], playerid);
+        PlayerChannelStatus[playerid] = false;
     }
-
-    switch (SpeakerChatType[playerid])
+    else
     {
-        case VoiceType_Radio:
-        {
-            new newId = CallRemoteFunction("GetRadioChannel", "d", playerid);
-            if (SpeakerChatId[playerid] != newId && SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(ChannelStreams))
-            {
-                SvDetachSpeakerFromStream(ChannelStreams[SpeakerChatId[playerid]], playerid);
-                SvDetachListenerFromStream(ChannelStreams[SpeakerChatId[playerid]], playerid);
-            }
-
-            if (newId > 0 && newId < sizeof(ChannelStreams))
-            {
-                SvAttachListenerToStream(ChannelStreams[newId], playerid);
-            }
-
-            SpeakerChatId[playerid] = newId;
-        }
-        case VoiceType_Faction:
-        {
-            new newId = CallRemoteFunction("GetPlayerFactionId", "d", playerid);
-            if (SpeakerChatId[playerid] != newId && SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(factionstream))
-            {
-                SvDetachSpeakerFromStream(factionstream[SpeakerChatId[playerid]], playerid);
-                SvDetachListenerFromStream(factionstream[SpeakerChatId[playerid]], playerid);
-            }
-
-            if (newId >= 0 && newId < sizeof(factionstream))
-            {
-                SvAttachListenerToStream(factionstream[newId], playerid);
-            }
-
-            SpeakerChatId[playerid] = newId;
-        }
-        case VoiceType_Gang:
-        {
-            new newId = CallRemoteFunction("GetPlayerGangId", "d", playerid);
-            if (SpeakerChatId[playerid] != newId && SpeakerChatId[playerid] > 0 &&  SpeakerChatId[playerid] < sizeof(gangstream))
-            {
-                SvDetachSpeakerFromStream(gangstream[SpeakerChatId[playerid]], playerid);
-                SvDetachListenerFromStream(gangstream[SpeakerChatId[playerid]], playerid);
-            }
-
-            if (newId >= 0 && newId < sizeof(gangstream))
-            {
-                SvAttachListenerToStream(gangstream[newId], playerid);
-            }
-
-            SpeakerChatId[playerid] = newId;
-        }
+        SendClientMessage(playerid, -1, "* [Private Radio]: Mic on *");
+        SvAttachSpeakerToStream(ChannelStreams[PlayerChannel[playerid]], playerid);
+        PlayerChannelStatus[playerid] = true;
     }
     return 1;
 }
-
-forward OnPlayerHeartBeat(playerid);
-public OnPlayerHeartBeat(playerid)
+CMD:gvoice(playerid, params[])
 {
-    FixChatId(playerid);
+	if(CallRemoteFunction("GetAdminLevel", "d",playerid) == 0)
+	{
+	    return SendClientMessage(playerid, -1, "You are not authorized to use this command!");
+	}
+
+	if(GlobalVoiceStatus[playerid])
+	{
+		return SendClientMessage(playerid, -1, "You already registered to global voice chat.");	
+	}
+	
+	SendClientMessage(playerid, -1, "You can now use global voice chat.");
+	
+	GlobalVoiceStatus[playerid] = true;
+	
+	SvAddKey(playerid, GLOBAL_CHAT_KEY);
+
+	return 1;
+}
+
+forward OnRadioFrequencyChange(playerid, newchannel);
+public OnRadioFrequencyChange(playerid, newchannel)
+{
+	if(lstream[playerid] == 0)
+	{
+		return 1; // MIC NOT AVAILABLE
+	}
+	new oldchannel = PlayerChannel[playerid];
+
+	if(oldchannel != 0)
+	{
+        SvDetachSpeakerFromStream(ChannelStreams[PlayerChannel[playerid]], playerid);
+		SvDetachListenerFromStream(ChannelStreams[oldchannel], playerid);
+        PlayerChannelStatus[playerid] = false;
+	}
+	
+	new string[128];
+
+	if(newchannel > 0 && newchannel < MAX_CHANNELS)
+	{
+		if(ChannelStreams[newchannel])
+		{
+			PlayerChannel[playerid] = newchannel;
+        	SvAttachListenerToStream(ChannelStreams[newchannel], playerid);
+			format(string, sizeof(string), "Connected to voice channel %d KHz. Use N key or /prvoice to speak.", newchannel);
+			SendClientMessage(playerid, -1, string);
+		}
+		else
+		{
+			format(string, sizeof(string), "Could not connect to voice channel %d KHz.", newchannel);
+			SendClientMessage(playerid, -1, string);
+		}
+		
+		return 1;
+	}
+	PlayerChannel[playerid] = 0;
+	format(string, sizeof(string), "Failed to connect to channel (value must be in [1..%d]).", MAX_CHANNELS);
+	SendClientMessage(playerid, -1, string);
+	return 1;
 }

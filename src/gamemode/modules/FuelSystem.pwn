@@ -1,16 +1,10 @@
-/// @file      FuelSystem.pwn
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2021-03-31 13:58:35 +0100
-/// @copyright Copyright (c) 2022
+#include <YSI_Coding\y_hooks>
 
-#include <YSI\y_hooks>
 
-// 4500 => 5(lost) * 60(sec) * 15(min)
-// 1200 => 1(lost) * 60(sec) * 10(min)
-#define MAX_FUEL        1200
-#define REFUEL_COST     50
-#define REFUEL_VALUE    150
-#define GASCAN_MAX_FUEL 300
+// 5(lost) * 60(sec) * 15(min)
+#define MAX_FUEL 4500
+#define REFUEL_COST 50
+#define REFUEL_VALUE 150
 
 static VehicleFuel[MAX_VEHICLES];
 static Float: VehicleSpeed[MAX_VEHICLES];
@@ -29,13 +23,12 @@ static Float: RefuelPositions[][]={
     { 2113.7390,   920.1079, 10.5255}, { -1327.7218,  2678.8723, 50.0625}, //LV
     {  656.4265,  -559.8610, 16.5015}, {   656.3797,  -570.4138, 16.5015}, //Dillimore
     {-1679.9440,   122.8056,  2.0530}, { -1672.9373,   117.4142,  0.6511}, //SF Boat
-    {  735.2629, -1565.4543,  1.0000}, {   227.4937, -1936.9008,  1.0000}, //LS Boat
     {-1193.9413,    28.3232, 13.7137} //SF Airport
 };
 
 hook OnGameModeInit()
 {
-    for (new vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++)
+    for(new vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++)
     {
         VehicleFuel [vehicleid] = MAX_FUEL;
         VehicleSpeed[vehicleid] = 0.0;
@@ -43,7 +36,7 @@ hook OnGameModeInit()
         VehicleOldY [vehicleid] = 0.0;
         VehicleOldZ [vehicleid] = 0.0;
     }
-    for (new index = 0; index < sizeof(RefuelPositions); index++)
+    for(new index = 0; index < sizeof(RefuelPositions); index++)
     {
         CreateDynamicPickup(1650, 1, RefuelPositions[index][0], RefuelPositions[index][1], RefuelPositions[index][2]);
         CreateDynamic3DTextLabel("Refuel\nGaz Station", COLOR_YELLOW, RefuelPositions[index][0], RefuelPositions[index][1], RefuelPositions[index][2], 10.0);
@@ -62,36 +55,36 @@ hook OnVehicleDeath(vehicleid, killerid)
 
 task UpdateVehicleSpeed[1000]()
 {
-    for (new vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++)
+    for(new vehicleid = 0; vehicleid < MAX_VEHICLES; vehicleid++)
     {
         VehicleSpeed[vehicleid] = 0.0;
     }
     foreach(new playerid: Player)
-    {
+    {   
         new vehicleid = GetPlayerVehicleID(playerid);
-        if (vehicleid == 0)
+        if(vehicleid == 0)
         {
             continue;
         }
-        if (GetPlayerVehicleSeat(playerid) != 0 && GetPlayerState(playerid) != PLAYER_STATE_DRIVER)
+        if(GetPlayerVehicleSeat(playerid) != 0 && GetPlayerState(playerid) != PLAYER_STATE_DRIVER)
         {
             continue;
         }
 
-        if (IsBiciyle(playerid) || IsARentableCar(vehicleid) || IsJobCar(vehicleid) || (VehicleInfo[vehicleid][vFaction] > -1 && FactionInfo[VehicleInfo[vehicleid][vFaction]][fType] != FACTION_NONE))
+        if(IsBiciyle(playerid) || IsARentableCar(vehicleid) || IsJobCar(vehicleid) || (VehicleInfo[vehicleid][vFaction] > -1 && FactionInfo[VehicleInfo[vehicleid][vFaction]][fType] != FACTION_NONE))
         {
             continue;
         }
 
         new Float:pX,Float:pY,Float:pZ;
         GetVehiclePos(vehicleid,Float:pX,Float:pY,Float:pZ);
-        VehicleSpeed[vehicleid] = floatsqroot( floatpower(floatabs(floatsub(pX, VehicleOldX[vehicleid])),2) +
-                                               floatpower(floatabs(floatsub(pY, VehicleOldY[vehicleid])),2) +
+        VehicleSpeed[vehicleid] = floatsqroot( floatpower(floatabs(floatsub(pX, VehicleOldX[vehicleid])),2) + 
+                                               floatpower(floatabs(floatsub(pY, VehicleOldY[vehicleid])),2) + 
                                                floatpower(floatabs(floatsub(pZ, VehicleOldZ[vehicleid])),2));
 
         VehicleSpeed[vehicleid] = floatround(VehicleSpeed[vehicleid] * 5000 / 1600);
 
-        if (VehicleSpeed[vehicleid]<3 || VehicleSpeed[vehicleid]>300)
+        if(VehicleSpeed[vehicleid]<3 || VehicleSpeed[vehicleid]>300)
         {
             VehicleSpeed[vehicleid]=0;
         }
@@ -104,23 +97,23 @@ task UpdateVehicleSpeed[1000]()
         // UPDATE FUEL
         new VehicleLostFuel;
 
-        if (VehicleSpeed[vehicleid] < 10)
+        if(VehicleSpeed[vehicleid] < 10)
         {
             VehicleLostFuel = 0;
         }
-        else if (VehicleSpeed[vehicleid] < 35)
+        else if(VehicleSpeed[vehicleid] < 35)
         {
             VehicleLostFuel = 1;
         }
-        else if (VehicleSpeed[vehicleid] < 70)
+        else if(VehicleSpeed[vehicleid] < 70)
         {
             VehicleLostFuel = 2;
         }
-        else if (VehicleSpeed[vehicleid] < 140)
+        else if(VehicleSpeed[vehicleid] < 140)
         {
             VehicleLostFuel = 3;
         }
-        else if (VehicleSpeed[vehicleid] < 180)
+        else if(VehicleSpeed[vehicleid] < 180)
         {
             VehicleLostFuel = 4;
         }
@@ -128,15 +121,15 @@ task UpdateVehicleSpeed[1000]()
         {
             VehicleLostFuel = 5;
         }
-
-        if (IsAtGasStation(playerid))
+        
+        if(IsAtGasStation(playerid))
         {
-            if (VehicleFuel[vehicleid] >= MAX_FUEL)
+            if(VehicleFuel[vehicleid] > MAX_FUEL)
             {
                 VehicleFuel[vehicleid] = MAX_FUEL;
                 SendClientMessage(playerid, COLOR_LIGHTBLUE, "This car can't be refueled because the tank is already full !");
             }
-            else if (GetPlayerMoney(playerid) < REFUEL_COST)
+            else if(GetPlayerMoney(playerid) < REFUEL_COST)
             {
                 SendClientMessage(playerid, COLOR_LIGHTBLUE, "You dont have money to refuel your car !");
             }
@@ -147,7 +140,7 @@ task UpdateVehicleSpeed[1000]()
                 VehicleFuel[GetPlayerVehicleID(playerid)] = VehicleFuel[GetPlayerVehicleID(playerid)] + REFUEL_VALUE;
             }
         }
-        else
+        else 
         {
             VehicleFuel[vehicleid] = VehicleFuel[vehicleid] - VehicleLostFuel;
             if (VehicleFuel[vehicleid] <= 0)
@@ -160,17 +153,17 @@ task UpdateVehicleSpeed[1000]()
         }
 
         new fuel_indicator = (VehicleFuel[vehicleid] * 10) / MAX_FUEL;
-        if (fuel_indicator < 0)
+        if(fuel_indicator < 0)
         {
             fuel_indicator = 0;
         }
-        if (fuel_indicator > 10)
+        if(fuel_indicator > 10)
         {
             fuel_indicator = 10;
         }
-
+        
         new indicator[128];
-        if (PlayerData[playerid][pSpeedometer] == 2)
+        if(PlayerData[playerid][pSpeedometer] == 2)
         {
             format(indicator, sizeof(indicator),"~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~g~MP/H: ~w~%0.0f ", VehicleSpeed[vehicleid] / 62.1371);
         }
@@ -179,21 +172,21 @@ task UpdateVehicleSpeed[1000]()
             format(indicator, sizeof(indicator),"~n~~n~~n~~n~~n~~n~~n~~n~~n~~n~~g~KM/H: ~w~%0.0f ", VehicleSpeed[vehicleid]);
         }
 
-        if (fuel_indicator > 0)
+        if(fuel_indicator > 0)
         {
             format(indicator, sizeof(indicator), "%s ~g~", indicator);
         }
-        for (new i=0;i<fuel_indicator;i++)
+        for(new i=0;i<fuel_indicator;i++)
         {
             format(indicator, sizeof(indicator), "%sI", indicator);
         }
         format(indicator, sizeof(indicator), "%s~l~", indicator);
-        for (new i=fuel_indicator;i<10;i++)
+        for(new i=fuel_indicator;i<10;i++)
         {
             format(indicator, sizeof(indicator), "%sI", indicator);
         }
-
-        if (VehicleLostFuel > 0)
+        
+        if(VehicleLostFuel > 0)
         {
             format(indicator, sizeof(indicator), "%s ~r~", indicator);
         }
@@ -201,12 +194,12 @@ task UpdateVehicleSpeed[1000]()
         {
             format(indicator, sizeof(indicator), "%s ", indicator);
         }
-        for (new i=0;i<VehicleLostFuel;i++)
+        for(new i=0;i<VehicleLostFuel;i++)
         {
             format(indicator, sizeof(indicator), "%sI", indicator);
         }
         format(indicator, sizeof(indicator), "%s~l~", indicator);
-        for (new i=VehicleLostFuel;i<5;i++)
+        for(new i=VehicleLostFuel;i<5;i++)
         {
             format(indicator, sizeof(indicator), "%sI", indicator);
         }
@@ -219,9 +212,9 @@ task UpdateVehicleSpeed[1000]()
 
 IsAtGasStation(playerid)
 {
-    for (new index = 0; index < sizeof(RefuelPositions); index++)
+    for(new index = 0; index < sizeof(RefuelPositions); index++)
     {
-        if (PlayerToPoint(6.0, playerid, RefuelPositions[index][0], RefuelPositions[index][1], RefuelPositions[index][2]))
+        if(PlayerToPoint(6.0, playerid, RefuelPositions[index][0], RefuelPositions[index][1], RefuelPositions[index][2]))
         {
             return true;
         }
@@ -249,56 +242,49 @@ CMD:refuel(playerid, params[])
 {
     return callcmd::gascan(playerid, params);
 }
-
 CMD:gascan(playerid, params[])
 {
-    new vehicleid = GetPlayerVehicleID(playerid);
+    new vehicleid = GetPlayerVehicleID(playerid), amount;
 
-    if (!PlayerData[playerid][pGasCan])
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "Your gas can is empty.");
-    }
-    if (!vehicleid || GetPlayerState(playerid) != PLAYER_STATE_DRIVER)
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "You must be driving a vehicle to use this command.");
-    }
-    if (!VehicleHasEngine(vehicleid))
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "This vehicle has no engine which runs off gas.");
-    }
-    new emptyVolume = MAX_FUEL - VehicleFuel[vehicleid];
-    new volumeToFill = 0;
-    if (emptyVolume <= 0)
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "Your vehicle fuel tank is full.");
-    }
-    else if (emptyVolume > PlayerData[playerid][pGasCan])
-    {
-        volumeToFill = PlayerData[playerid][pGasCan];
-    }
-    else
-    {
-        volumeToFill = emptyVolume;
-    }
+	if(!vehicleid || GetPlayerState(playerid) != PLAYER_STATE_DRIVER)
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "You must be driving a vehicle to use this command.");
+	}
+	if(!IsEngineVehicle(vehicleid))
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "This vehicle has no engine which runs off gas.");
+	}
+	if(sscanf(params, "i", amount))
+	{
+	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gascan [amount]");
+	}
+	if(amount < 1 || amount > PlayerData[playerid][pGasCan])
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "Insufficient amount.");
+	}
+	if(VehicleFuel[vehicleid] + amount > 100)
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "You can't add that much gasoline to the vehicle.");
+	}
 
-    PlayerData[playerid][pGasCan] -= volumeToFill;
-    VehicleFuel[vehicleid] += volumeToFill;
+	PlayerData[playerid][pGasCan] -= amount;
+	VehicleFuel[vehicleid] += amount;
 
-    DBQuery("UPDATE "#TABLE_USERS" SET gascan = %i WHERE uid = %i", PlayerData[playerid][pGasCan], PlayerData[playerid][pID]);
+	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET gascan = %i WHERE uid = %i", PlayerData[playerid][pGasCan], PlayerData[playerid][pID]);
+	mysql_tquery(connectionID, queryBuffer);
 
-    SendClientMessageEx(playerid, COLOR_GREY, "You refilled the %s's gas tank with %i liters of gasoline.", GetVehicleName(vehicleid), volumeToFill);
-    SendClientMessageEx(playerid, COLOR_GREY, "You have now %i/%i liters in your gascan.", PlayerData[playerid][pGasCan], GetPlayerCapacity(playerid, CAPACITY_GASCAN));
-    ShowActionBubble(playerid, "* %s refills the %s's gas tank with %i liters of gasoline.", GetRPName(playerid), GetVehicleName(vehicleid), volumeToFill);
-    return 1;
+	ShowActionBubble(playerid, "* %s refills the %s's gas tank with %i liters of gasoline.", GetRPName(playerid), GetVehicleName(vehicleid), amount);
+	return 1;
 }
+
 
 IsBiciyle(playerid)
 {
-    if (IsPlayerInAnyVehicle(playerid))
+    if(IsPlayerInAnyVehicle(playerid))
         {
-        if (GetVehicleModel(GetPlayerVehicleID(playerid))== 481) return 1;
-        else if (GetVehicleModel(GetPlayerVehicleID(playerid))== 509) return 1;
-        else if (GetVehicleModel(GetPlayerVehicleID(playerid))== 510) return 1;
+        if(GetVehicleModel(GetPlayerVehicleID(playerid))== 481) return 1;
+        else if(GetVehicleModel(GetPlayerVehicleID(playerid))== 509) return 1;
+        else if(GetVehicleModel(GetPlayerVehicleID(playerid))== 510) return 1;
         else return 0;
         }
     return 1;

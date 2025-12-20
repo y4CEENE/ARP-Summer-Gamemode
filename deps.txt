@@ -1,0 +1,14 @@
+For 64 bits install ia32-libs or lib32z1
+ $ sudo apt-get install ia32-libs
+ $ sudo apt-get install lib32z1
+
+For mysql server use process available on dev.mysql.com
+ $ sudo apt install mysql-server
+ $ wget https://dev.mysql.com/get/mysql-apt-config_0.8.16-1_all.deb
+ $ sudo dpkg -i mysql-apt-config_0.8.16-1_all.deb
+ $ sudo apt-get update
+ $ sudo apt-get install mysql-server
+ $ systemctl status mysql
+
+
+For issue libmysqlclient.so.18 use static version of mysql

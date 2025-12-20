@@ -1,8 +1,3 @@
-/// @file      CustomWantedLevel.pwn
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2022-02-17 14:09:36 +0100
-/// @copyright Copyright (c) 2022
-
 #include <YSI\y_hooks>
 
 // Fix for mobile
@@ -40,33 +35,33 @@ hook OnPlayerConnect(playerid)
 hook OnPlayerHeartBeat(playerid)
 {
     // Old version: GetPlayerWantedLevel doesn't work in samp mobile
-    // if (GetPlayerWantedLevel(playerid) != GetWantedLevel(playerid))
+    // if(GetPlayerWantedLevel(playerid) != PlayerData[playerid][pWantedLevel])
     // {
-    //     SetPlayerWantedLevel(playerid, GetWantedLevel(playerid));
+    //     SetPlayerWantedLevel(playerid, PlayerData[playerid][pWantedLevel]); 
     // }
-    new wantedlevel = GetWantedLevel(playerid);
-    if (GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
+    new wantedlevel = PlayerData[playerid][pWantedLevel];
+    if(GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
     {
         wantedlevel = 0;
     }
 
-    if (LastWantedLevel[playerid] != wantedlevel)
+    if(LastWantedLevel[playerid] != wantedlevel)
     {
         LastWantedLevel[playerid] = wantedlevel;
-        if (wantedlevel == 0)
+        if(wantedlevel == 0)
         {
-            PlayerTextDrawHide(playerid, WantedLevelUI[playerid][0]);
-            PlayerTextDrawHide(playerid, WantedLevelUI[playerid][1]);
+    		PlayerTextDrawHide(playerid, WantedLevelUI[playerid][0]);
+    		PlayerTextDrawHide(playerid, WantedLevelUI[playerid][1]);
             return 1;
         }
-
+        
         new stars[]="]]]]]]";// Using font 0 the char ']' will be displayed as a star
         new bgstars[14],fgstars[14];
-        if (wantedlevel < 0)
+        if(wantedlevel < 0)
         {
             wantedlevel=0;
         }
-        else if (wantedlevel > 6)
+        else if(wantedlevel > 6)
         {
             wantedlevel=6;
         }
@@ -74,8 +69,8 @@ hook OnPlayerHeartBeat(playerid)
         strcpy(fgstars, stars, 1 + wantedlevel);
         PlayerTextDrawSetString(playerid, WantedLevelUI[playerid][0], bgstars);
         PlayerTextDrawSetString(playerid, WantedLevelUI[playerid][1], fgstars);
-        PlayerTextDrawShow(playerid, WantedLevelUI[playerid][0]);
-        PlayerTextDrawShow(playerid, WantedLevelUI[playerid][1]);
+		PlayerTextDrawShow(playerid, WantedLevelUI[playerid][0]);
+		PlayerTextDrawShow(playerid, WantedLevelUI[playerid][1]);
     }
     return 1;
 }

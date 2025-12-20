@@ -1,5 +1,5 @@
 /// @file      IsMobile.pwn
-/// @author    BOURAOUI Al-Moez L.A
+/// @author    ARP
 /// @date      Created at 2022-05-08 21:25:01 +0200
 /// @copyright Copyright (c) 2022
 

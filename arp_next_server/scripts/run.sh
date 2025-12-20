@@ -1,4 +1,4 @@
 cd gamemodes/
-unzip arp_next.zip
+unzip NLRP.zip
 cd ..
 ./samp03svr

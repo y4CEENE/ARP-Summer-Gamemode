@@ -1,0 +1,8 @@
+#include "core/events/events.cmd.inc"
+#include "core/estates/estates.cmd.inc"
+#include "core\admin\admin.cmd.pwn"
+#include "core\jobs\jobs.cmd.pwn"
+#include "core\membership\membership.cmd.inc"
+#include "core\media\media.cmd.pwn"
+#include "core\extra\extra.inc"
+#include "core\vip\vip.cmd.pwn"

@@ -1,0 +1,5 @@
+#include "core/estates/biz/biz.def.pwn"
+#include "core/estates/entrance/entrance.def.pwn"
+#include "core/estates/garage/garage.def.pwn"
+#include "core/estates/house/house.def.pwn"
+#include "core/estates/land/land.def.pwn"

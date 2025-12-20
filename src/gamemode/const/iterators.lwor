@@ -1,0 +1,7 @@
+
+new Iterator:House<MAX_HOUSES>;
+new Iterator:Garage<MAX_GARAGES>;
+new Iterator:Entrance<MAX_ENTRANCES>;
+new Iterator:Business<MAX_BUSINESSES>;
+new Iterator:Land<MAX_LANDS>;
+new Iterator:Turf<MAX_TURFS>;

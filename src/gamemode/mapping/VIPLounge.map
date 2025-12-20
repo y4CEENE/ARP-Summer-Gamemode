@@ -1,0 +1,36 @@
+#include <YSI\y_hooks>
+
+hook OnGameModeInit()
+{
+    VIPLounge_LoadMap();
+}
+
+hook OnRemoveBuildings(playerid)
+{
+    VIPLounge_RemoveBuildings(playerid);
+}
+
+VIPLounge_LoadMap()
+{
+    CreateDynamicObject(5397, 1782.96, -1563.40, 20.57,   0.00, 0.00, -4.00);
+    CreateDynamicObject(3623, 1756.68, -1578.90, 16.63,   0.00, 0.00, 171.00);
+    CreateDynamicObject(9946, 1777.26, -1581.90, 12.23,   0.00, 0.00, 0.00);
+    CreateDynamicObject(9946, 1787.87, -1555.69, 12.23,   0.00, 0.00, 0.00);
+    CreateDynamicObject(1557, 1781.43, -1564.99, 12.29,   0.00, 0.00, -4.00);
+    CreateDynamicObject(1557, 1784.42, -1565.20, 12.29,   0.00, 0.00, 176.00);
+    CreateDynamicObject(6057, 1766.17, -1540.20, 13.28,   0.00, 0.00, 180.00);
+    CreateDynamicObject(6057, 1798.54, -1541.37, 13.24,   0.00, 0.00, 178.00);
+    CreateDynamicObject(9339, 1765.43, -1593.55, 12.08,   0.00, 0.00, 84.00);
+    CreateDynamicObject(3660, 1773.95, -1593.39, 14.19,   0.00, 0.00, -4.00);
+    CreateDynamicObject(18766, 1821.13, -1537.24, 17.44,   90.00, 0.00, 73.00);
+    CreateDynamicObject(18766, 1819.97, -1540.89, 17.44,   90.00, 0.00, 73.00);
+    CreateDynamicObject(3623, 1761.02, -1551.50, 16.63,   0.00, 0.00, 171.00);
+}
+
+VIPLounge_RemoveBuildings(playerid)
+{
+    RemoveBuildingForPlayer(playerid, 3999, 1785.9766, -1564.8594, 25.2500, 0.25);
+    RemoveBuildingForPlayer(playerid, 4079, 1785.9766, -1564.8594, 25.2500, 0.25);
+    RemoveBuildingForPlayer(playerid, 4189, 1794.6172, -1576.7344, 17.7578, 0.25);
+    RemoveBuildingForPlayer(playerid, 1308, 1822.1563, -1543.7891, 12.6328, 0.25);
+}

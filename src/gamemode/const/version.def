@@ -1,17 +1,12 @@
-/// @file      version.def
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2021-03-29 12:23:11 +0100
-/// @copyright Copyright (c) 2022
-
 /*
  * You must ask the permission from the owner of the sc-
  * ript before using it. Just search in the internet for
  * ab*a*m*ez.
  * Keep in mind this script is not for newbies so please
- * respect what i just said else i'm not responsible for
+ * respect what i just said else i'm not responsible for 
  * any damage that can affect your server.
  */
 
 #define SERVER_SHORT_NAME   "ARP_NEXT"
-#define SERVER_REVISION     "V5.5.7-RC1"
-#define SERVER_ANTICHEAT    "Rex"
+#define SERVER_REVISION  	"V1.2-RC2"
+#define SERVER_ANTICHEAT 	"Rex"

@@ -1,0 +1,19 @@
+#include <YSI\y_hooks>
+
+hook OnGameModeInit()
+{
+    Club2Interior_LoadMap();
+}
+
+Club2Interior_LoadMap()
+{
+    CreateDynamicObject(2948,968.48669434,-53.18999100,1000.12457275,0.00000000,0.00000000,0.00000000, .interiorid = 3); //object(cr_door_02) (1)
+    CreateDynamicObject(2948,968.48632812,-53.18945312,1000.12457275,0.00000000,0.00000000,180.00000000, .interiorid = 3); //object(cr_door_02) (5)
+    CreateDynamicObject(2885,968.70294189,-56.50698090,1005.57806396,0.00000000,0.00000000,90.00000000, .interiorid = 3); //object(xref_garagedoor) (1)
+    CreateDynamicObject(2714,968.44470215,-53.15001678,1003.11096191,0.00000000,0.00000000,270.00000000, .interiorid = 3); //object(cj_open_sign_2) (1)
+    CreateDynamicObject(2885,963.42553711,-56.52644730,1003.82830811,270.00000000,180.69543457,270.69543457, .interiorid = 3); //object(xref_garagedoor) (3)
+    CreateDynamicObject(10671,680.26983643,-444.72039795,-24.75238800,0.00000000,0.00000000,0.00000000, .interiorid = 1); //object(savehousegdoor_sfs) (1)
+    CreateDynamicObject(10671,682.69573975,-444.75363159,-24.75238800,0.00000000,0.00000000,0.00000000, .interiorid = 1); //object(savehousegdoor_sfs) (2)
+    CreateDynamicObject(10671,680.79193115,-447.47885132,-26.72739220,0.00000000,90.00000000,0.00000000, .interiorid = 1); //object(savehousegdoor_sfs) (3)
+    CreateDynamicObject(11319,680.67449951,-443.91644287,-26.69394875,0.00000000,0.00000000,270.00000000, .interiorid = 1); //object(sprayshpdr2_sfse) (1)
+}

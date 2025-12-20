@@ -1,44 +1,16 @@
 #include <YSI\y_hooks>
 
-static bool:FPSPlayerState[MAX_PLAYERS];
-static FPSCameraObject[MAX_PLAYERS];
+static FPSPlayerState[MAX_PLAYERS];
 
 hook OnPlayerInit(playerid)
 {
-    FPSPlayerState[playerid] = false;
+    FPSPlayerState[playerid] = 0;
     return 1;
-}
-
-public SetThirdPersonView(playerid, bool:status)
-{
-	FPSPlayerState[playerid] = status;
-	if(status)
-	{
-		SetCameraBehindPlayer(playerid);
-    }
-	else
-	{
-		SyncCamera(playerid);
-    }
-}
-
-public IsThirdPersonView(playerid)
-{
-    return FPSPlayerState[playerid];
 }
 
 hook OnPlayerUpdate(playerid)
 {
-
-    return 1;
-}
-public SyncCamera(playerid)
-{
-    if(!IsThirdPersonView(playerid))
-    {
-        SetCameraBehindPlayer(playerid);
-    }
-    else
+    if(FPSPlayerState[playerid])
 	{
         if(!IsPlayerInAnyVehicle(playerid))
         {
@@ -47,8 +19,47 @@ public SyncCamera(playerid)
         }
 		else
         {
-            SetCameraBehindPlayer(playerid)
+                SetCameraBehindPlayer(playerid)
         }
     }
-	return 1
+    else
+    {
+        SetCameraBehindPlayer(playerid);
+    }
+
+    return 1;
 }
+public SyncCamera(playerid)
+(
+	
+	return 1
+)
+
+// SetThirdPerson(playerid, 1) (= connect
+// SetThirdPerson(playerid, 0) (= ustaw FPS
+// GetViewMode(playerid) == MODE_FIRSTPERSON
+public SetThirdPerson(playerid, status)
+(
+	if(status)
+	(
+		PlayerCache(playerid)(pFPS) = false
+		SetCameraBehindPlayer(playerid)
+	)
+	else if(!status)
+	(
+	    PlayerCache(playerid)(pFPS) = true
+		SyncCamera(playerid)
+	)
+)
+
+public GetViewMode(playerid)
+(
+	if(PlayerCache(playerid)(pFPS))
+	(
+		return MODE_FIRSTPERSON
+	)
+	else
+	(
+		return MODE_THIRDPERSON
+	)
+)

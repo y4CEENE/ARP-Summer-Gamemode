@@ -1,8 +1,3 @@
-/// @file      AFKSystem.pwn
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2021-04-16 01:03:54 +0100
-/// @copyright Copyright (c) 2022
-
 #include <YSI\y_hooks>
 
 
@@ -25,7 +20,7 @@ stock GetPlayerPauseTime(playerid)
 {
     new diff = gettime() - PlayerLastUpdate[playerid];
 
-    if (diff < 5)
+    if(diff < 5)
     {
         return 0;
     }
@@ -39,13 +34,13 @@ IsPlayerPaused(playerid)
 
 hook OnPlayerInit(playerid)
 {
-    AFKPosition[playerid][0] = 0.0;
-    AFKPosition[playerid][1] = 0.0;
-    AFKPosition[playerid][2] = 0.0;
-    AFKPosition[playerid][3] = 0.0;
-    AFKPosition[playerid][4] = 0.0;
-    AFKPosition[playerid][5] = 0.0;
-    PlayerLastUpdate[playerid] = 0;
+	AFKPosition[playerid][0] = 0.0;
+	AFKPosition[playerid][1] = 0.0;
+	AFKPosition[playerid][2] = 0.0;
+	AFKPosition[playerid][3] = 0.0;
+	AFKPosition[playerid][4] = 0.0;
+	AFKPosition[playerid][5] = 0.0;
+	PlayerLastUpdate[playerid] = 0;
     AFKTime[playerid] = 0;
 }
 
@@ -63,123 +58,55 @@ hook OnPlayerCommandReceived(playerid, cmd[], params[], flags)
 
 hook OnPlayerHeartBeat(playerid)
 {
-    new
-        Float:x,
-        Float:y,
-        Float:z,
-        Float:cx,
-        Float:cy,
-        Float:cz;
+	new
+	    Float:x,
+	    Float:y,
+	    Float:z,
+	    Float:cx,
+	    Float:cy,
+	    Float:cz;
 
-    GetPlayerPos(playerid, x, y, z);
-    GetPlayerCameraPos(playerid, cx, cy, cz);
+	GetPlayerPos(playerid, x, y, z);
+	GetPlayerCameraPos(playerid, cx, cy, cz);
 
-    if (AFKPosition[playerid][0] == x && AFKPosition[playerid][1] == y && AFKPosition[playerid][2] == z && AFKPosition[playerid][3] == cx && AFKPosition[playerid][4] == cy && AFKPosition[playerid][5] == cz)
-    {
-        if (AFKTime[playerid] == 60)
-        {
-            SendClientMessageEx(playerid, COLOR_LIGHTORANGE, ">>{FFFFFF} You are now marked as {00AA00}Away from keyboard{FFFFFF} as you haven't moved in one minute.");
-        }
+	if(AFKPosition[playerid][0] == x && AFKPosition[playerid][1] == y && AFKPosition[playerid][2] == z && AFKPosition[playerid][3] == cx && AFKPosition[playerid][4] == cy && AFKPosition[playerid][5] == cz)
+	{
+	    if(AFKTime[playerid] == 60)
+	    {
+		    SendClientMessageEx(playerid, COLOR_LIGHTORANGE, ">>{FFFFFF} You are now marked as {00AA00}Away from keyboard{FFFFFF} as you haven't moved in one minute.");
+		}
 
-        AFKTime[playerid]++;
-    }
-    else
-    {
-        if (AFKTime[playerid] >= 60)
-        {
-            if (AFKTime[playerid] < 120)
+		AFKTime[playerid]++;
+	}
+	else
+	{
+		if(AFKTime[playerid] >= 60)
+		{
+		    if(AFKTime[playerid] < 120)
             {
-                SendClientMessageEx(playerid, COLOR_LIGHTORANGE, ">>{FFFFFF} You are no longer marked as {00AA00}Away from keyboard{FFFFFF} after %i seconds.", AFKTime[playerid]);
-            }
-            else
+		        SendClientMessageEx(playerid, COLOR_LIGHTORANGE, ">>{FFFFFF} You are no longer marked as {00AA00}Away from keyboard{FFFFFF} after %i seconds.", AFKTime[playerid]);
+			} 
+            else 
             {
-                SendClientMessageEx(playerid, COLOR_LIGHTORANGE, ">>{FFFFFF} You are no longer marked as {00AA00}Away from keyboard{FFFFFF} after %i minutes.", AFKTime[playerid] / 60);
-            }
-        }
+		        SendClientMessageEx(playerid, COLOR_LIGHTORANGE, ">>{FFFFFF} You are no longer marked as {00AA00}Away from keyboard{FFFFFF} after %i minutes.", AFKTime[playerid] / 60);
+			}
+		}
 
-        AFKTime[playerid] = 0;
-    }
+		AFKTime[playerid] = 0;
+	}
 
-    AFKPosition[playerid][0] = x;
-    AFKPosition[playerid][1] = y;
-    AFKPosition[playerid][2] = z;
-    AFKPosition[playerid][3] = cx;
-    AFKPosition[playerid][4] = cy;
-    AFKPosition[playerid][5] = cz;
+	AFKPosition[playerid][0] = x;
+	AFKPosition[playerid][1] = y;
+	AFKPosition[playerid][2] = z;
+	AFKPosition[playerid][3] = cx;
+	AFKPosition[playerid][4] = cy;
+	AFKPosition[playerid][5] = cz;
     return 1;
 }
 
 
 hook OnPlayerUpdate(playerid)
 {
-    PlayerLastUpdate[playerid] = gettime();
-    return 1;
-}
-
-CMD:afk(playerid, params[])
-{
-    new targetid;
-
-    if (!IsAdmin(playerid, ADMIN_LVL_3))
-    {
-        return SendUnauthorized(playerid);
-    }
-
-    if (sscanf(params, "u", targetid))
-    {
-        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /afk [playerid]");
-    }
-
-    if (!IsPlayerConnected(targetid))
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected.");
-    }
-
-    if (IsAdmin(targetid, ADMIN_LVL_8) && !IsAdmin(playerid, ADMIN_LVL_10))
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "You're not authorized to check that player's AFK status.");
-    }
-
-    if (IsPlayerAFK(targetid))
-    {
-        new time = GetAFKTime(targetid);
-
-        if (time < 120)
-        {
-            SendClientMessageEx(playerid, COLOR_WHITE, "* %s has been marked as Away from keyboard for %i seconds.", GetRPName(targetid), time);
-        }
-        else
-        {
-            SendClientMessageEx(playerid, COLOR_WHITE, "* %s has been marked as Away from keyboard for %i minutes.", GetRPName(targetid), time / 60);
-        }
-    }
-    else
-    {
-        SendClientMessageEx(playerid, COLOR_WHITE, "* %s is currently not marked as Away from keyboard.", GetRPName(targetid));
-    }
-
-    return 1;
-}
-
-CMD:afklist(playerid, params[])
-{
-    if (!IsAdmin(playerid, ADMIN_LVL_3))
-    {
-        return SendUnauthorized(playerid);
-    }
-
-    SendClientMessage(playerid, COLOR_NAVYBLUE, "_______ Away from Keyboard _______");
-
-    foreach(new i : Player)
-    {
-        if (IsAdmin(i, ADMIN_LVL_10) && !IsAdmin(playerid, ADMIN_LVL_10))
-            continue;
-
-        if (IsPlayerAFK(i))
-        {
-            SendClientMessageEx(playerid, COLOR_GREY2, "(ID: %i) %s - Time: %i seconds", i, GetRPName(i), GetAFKTime(i));
-        }
-    }
-
+	PlayerLastUpdate[playerid] = gettime();
     return 1;
 }

@@ -42,8 +42,8 @@ static GraffitiData[MAX_GRAFFITI_POINTS][graffitiData];
 
 hook OnLoadDatabase(timestamp)
 {
-    DBQueryWithCallback("SELECT * FROM "#TABLE_GRAFFITI, "Graffiti_Load", "");
-    return 1;
+	mysql_tquery(connectionID, "SELECT * FROM "#TABLE_GRAFFITI, "db_Graffiti_Load", "");
+	return 1;
 }
 
 hook OnPlayerReset(playerid)
@@ -105,17 +105,18 @@ Graffiti_Create(Float:x, Float:y, Float:z, Float:angle)
             format(GraffitiData[i][graffitiText], 32, "Gang Tag");
             format(GraffitiData[i][graffitiFont], 50, "Arial");
 
-            Graffiti_Refresh(i);
-            DBQueryWithCallback("INSERT INTO "#TABLE_GRAFFITI" (graffitiColor) VALUES(0)", "OnGraffitiCreated", "d", i);
-            return i;
-        }
-    }
-    return -1;
+			Graffiti_Refresh(i);
+			mysql_tquery(connectionID, "INSERT INTO "#TABLE_GRAFFITI" (graffitiColor) VALUES(0)", "db_OnGraffitiCreated", "d", i);
+
+			return i;
+		}
+	}
+	return -1;
 }
 
 DB:OnGraffitiCreated(id)
 {
-    GraffitiData[id][graffitiID] = GetDBInsertID();
+    GraffitiData[id][graffitiID] = cache_insert_id();
     Graffiti_Save(id);
     return 1;
 }
@@ -159,19 +160,18 @@ Graffiti_Refresh(id)
 
 Graffiti_Save(id)
 {
-    DBQuery("UPDATE "#TABLE_GRAFFITI" SET graffitiX = '%.4f', graffitiY = '%.4f', graffitiZ = '%.4f', "\
-            "graffitiAngle = '%.4f', graffitiDefault = '%d', graffitiColor = '%d', graffitiFont = '%e', "\
-            "graffitiText = '%e' WHERE graffitiID = '%d'",
-            GraffitiData[id][graffitiPos][0],
-            GraffitiData[id][graffitiPos][1],
-            GraffitiData[id][graffitiPos][2],
-            GraffitiData[id][graffitiPos][3],
-            GraffitiData[id][graffitiDefault],
-            GraffitiData[id][graffitiColor],
-            GraffitiData[id][graffitiFont],
-            GraffitiData[id][graffitiText],
-            GraffitiData[id][graffitiID]);
-    return 1;
+	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGTAGS" SET graffitiX = '%.4f', graffitiY = '%.4f',\
+		graffitiZ = '%.4f', graffitiAngle = '%.4f', graffitiDefault = '%d', graffitiColor = '%d', graffitiFont = '%e', graffitiText = '%e' WHERE graffitiID = '%d'",
+        GraffitiData[id][graffitiPos][0],
+        GraffitiData[id][graffitiPos][1],
+        GraffitiData[id][graffitiPos][2],
+        GraffitiData[id][graffitiPos][3],
+        GraffitiData[id][graffitiDefault],
+		GraffitiData[id][graffitiColor],
+  		MySqlEscape(GraffitiData[id][graffitiFont]),
+		MySqlEscape(GraffitiData[id][graffitiText]),
+		GraffitiData[id][graffitiID]);
+	return mysql_tquery(connectionID, queryBuffer);
 }
 
 Graffiti_Delete(id)
@@ -188,8 +188,8 @@ Graffiti_Delete(id)
             DestroyDynamicObject(GraffitiData[id][graffitiObject]);
         }
 
-        DBQuery("DELETE FROM "#TABLE_GRAFFITI" WHERE graffitiID = '%d'", GraffitiData[id][graffitiID]);
-
+		mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "DELETE FROM "#TABLE_GRAFFITI" WHERE graffitiID = '%d'", GraffitiData[id][graffitiID]);
+		mysql_tquery(connectionID, queryBuffer);
 
         GraffitiData[id][graffitiExists] = false;
         GraffitiData[id][graffitiText][0] = 0;
@@ -200,25 +200,24 @@ Graffiti_Delete(id)
 
 DB:Graffiti_Load()
 {
-    new rows = GetDBNumRows();
+    new rows = cache_get_row_count();
 
-    for (new i = 0; i < rows; i ++)
+    for (new i = 0; i < rows; i++)
     {
         if (i < MAX_GRAFFITI_POINTS)
         {
-            GetDBStringField(i, "graffitiText", GraffitiData[i][graffitiText], 64);
-            GetDBStringField(i, "graffitiFont", GraffitiData[i][graffitiFont], 50);
+            cache_get_field_content(i, "graffitiText", GraffitiData[i][graffitiText], 64);
+            cache_get_field_content(i, "graffitiFont", GraffitiData[i][graffitiFont], 50);
 
-            GraffitiData[i][graffitiExists]  = 1;
-            GraffitiData[i][graffitiID]      = GetDBIntField(i, "graffitiID");
-            GraffitiData[i][graffitiPos][0]  = GetDBFloatField(i, "graffitiX");
-            GraffitiData[i][graffitiPos][1]  = GetDBFloatField(i, "graffitiY");
-            GraffitiData[i][graffitiPos][2]  = GetDBFloatField(i, "graffitiZ");
-            GraffitiData[i][graffitiPos][3]  = GetDBFloatField(i, "graffitiAngle");
-            GraffitiData[i][graffitiColor]   = GetDBIntField(i, "graffitiColor");
-            GraffitiData[i][graffitiDefault] = GetDBIntField(i, "graffitiDefault");
+            GraffitiData[i][graffitiExists]  = true;
+            GraffitiData[i][graffitiID]      = cache_get_field_content_int(i, "graffitiID");
+            GraffitiData[i][graffitiDefault] = cache_get_field_content_int(i, "graffitiDefault");
+            GraffitiData[i][graffitiColor]   = cache_get_field_content_int(i, "graffitiColor");
 
-            Graffiti_Refresh(i);
+            GraffitiData[i][graffitiPos][0]  = cache_get_field_content_float(i, "graffitiX");
+            GraffitiData[i][graffitiPos][1]  = cache_get_field_content_float(i, "graffitiY");
+            GraffitiData[i][graffitiPos][2]  = cache_get_field_content_float(i, "graffitiZ");
+            GraffitiData[i][graffitiPos][3]  = cache_get_field_content_float(i, "graffitiAngle");
         }
     }
     return 1;
@@ -228,7 +227,7 @@ CMD:creategangtag(playerid, params[])
 {
     if (!IsGodAdmin(playerid) && !PlayerData[playerid][pGangMod])
     {
-        return SendNoPermission(playerid);
+        return SendClientErrorUnauthorizedCmd(playerid);
     }
 
     if (GetPlayerInterior(playerid) > 0 || GetPlayerVirtualWorld(playerid) > 0)
@@ -256,7 +255,7 @@ CMD:removegangtag(playerid, params[])
 {
     if (!IsGodAdmin(playerid) && !PlayerData[playerid][pGangMod])
     {
-        return SendNoPermission(playerid);
+        return SendClientErrorUnauthorizedCmd(playerid);
     }
 
     new id = 0;
@@ -278,7 +277,7 @@ CMD:editgangtag(playerid, params[])
 {
     if (!IsGodAdmin(playerid) && !PlayerData[playerid][pGangMod])
     {
-        return SendNoPermission(playerid);
+        return SendClientErrorUnauthorizedCmd(playerid);
     }
 
     new id = GetNearbyGraffiti(playerid);
@@ -377,9 +376,13 @@ CMD:gotogangtag(playerid, params[])
 {
     new gangtagid;
 
-    if (!IsAdmin(playerid, ADMIN_LVL_6))
+	if(PlayerData[playerid][pAdmin] < GENERAL_ADMIN)
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
+	if(!IsAdminOnDuty(playerid) && !IsAdmin(playerid, 7))
     {
-        return SendUnauthorized(playerid);
+    	return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");
     }
     if (!IsAdminOnDuty(playerid))
     {
@@ -479,13 +482,16 @@ Dialog:Dialog_Tag_Default(playerid, response, listitem, inputtext[])
         }
 
         PlayerData[playerid][pSpraycans] -= 1;
-        DBQuery("UPDATE "#TABLE_USERS" SET spraycans = %i WHERE uid = %i", PlayerData[playerid][pSpraycans], PlayerData[playerid][pID]);
+        format("UPDATE "#TABLE_USERS" SET spraycans = %i WHERE uid = %i", PlayerData[playerid][pSpraycans], PlayerData[playerid][pID]);
 
         PlayerGraffiti[playerid] = GetNearbyGraffiti(playerid);
         PlayerGraffitiTime[playerid] = 15;
         PlayAnim(playerid, "GRAFFITI", "spraycan_fire", 4.1, 1, 0, 0, 0, 0);
         SendAdminMessage(COLOR_LIGHTRED, "%s[ID %i] has started spraying a gang tag %s", GetRPName(playerid), playerid, inputtext);
-        GameTextForPlayer(playerid, "~n~~n~~n~~n~~n~~n~~n~~n~~n~~b~Spraying...~w~ please wait!", 15000, 3);
+		new gangid = PlayerData[playerid][pGang];
+		SendGangMessage(gangid, COLOR_YELLOW, "%s has started spraying a gang tag: %s.", GetRPName(playerid), inputtext);
+
+        GameTextForPlayer(playerid, "~n~~n~~n~~n~~n~~n~~n~~n~~n~~b~Spraying...~w~ please wait!", 25000, 3);
         SendProximityMessage(playerid, 30.0, COLOR_PURPLE, "* %s takes out a can of spray paint and sprays the wall.", GetRPName(playerid));
     }
     return 1;
@@ -524,7 +530,7 @@ Dialog:Graffiti_Text(playerid, response, listitem, inputtext[])
         }
 
         PlayerData[playerid][pSpraycans] -= 1;
-        DBQuery("UPDATE "#TABLE_USERS" SET spraycans = %i WHERE uid = %i", PlayerData[playerid][pSpraycans], PlayerData[playerid][pID]);
+        format("UPDATE "#TABLE_USERS" SET spraycans = %i WHERE uid = %i", PlayerData[playerid][pSpraycans], PlayerData[playerid][pID]);
 
         PlayerGraffiti[playerid] = id;
         PlayerGraffitiTime[playerid] = 15;

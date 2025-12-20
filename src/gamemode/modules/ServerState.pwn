@@ -1,7 +1,7 @@
 /// @file      ServerState.pwn
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2021-09-10 10:59:45 +0100
-/// @copyright Copyright (c) 2022
+/// @author    ARP
+/// @date      Created at 2023-09-10 10:59:45 +0100
+/// @copyright Copyright (c) 2023
 
 #include <YSI\y_hooks>
 
@@ -9,15 +9,12 @@
 
 static gCharity = 0;
 static gWeather = 1;
-static gAnticheat = 1;
 static MaxTurfCap = 1;
 static gGangInviteCooldown=0;
 static gTax = 15, gTaxVault = 0, gNewsVault = 0;
 static gDoubleXP = 0, gVPNState = 1, gHourReward = 0;
 static gServerMOTD[128], gAdminMOTD[128], gHelperMOTD[128];
 static gStateIsUpToDate=true;
-static gLottoJackpot = 0;
-static gLottoTicketsSold = 0;
 
 SetAntiCheatState(s)
 {
@@ -25,10 +22,6 @@ SetAntiCheatState(s)
     gStateIsUpToDate = false;
 }
 
-IsAntiCheatEnabled()
-{
-    return gAnticheat;
-}
 SetMaxTurfCap(value)
 {
     MaxTurfCap = value;
@@ -75,7 +68,7 @@ SetDoubleXPState(s)
 {
     gDoubleXP = (s!=0);
     gStateIsUpToDate = false;
-    if (gDoubleXP)
+    /*if(gDoubleXP)
     {
         new hostname[256];
         format(hostname, sizeof(hostname), "%s | Double XP!", GetHostName());
@@ -84,7 +77,7 @@ SetDoubleXPState(s)
     else
     {
         SetServerHostName(GetHostName());
-    }
+    }*/
 }
 
 IsDoubleXPEnabled()
@@ -136,9 +129,9 @@ GetTaxVault()
     return gTaxVault;
 }
 
-stock SetTaxPercent(value)
+SetTaxPercent(value)
 {
-    if (0 < value <= 75)
+    if(0 < value <= 75)
     {
         gTax = value;
         gStateIsUpToDate = false;
@@ -174,7 +167,7 @@ GetDBWeatherID()
 
 AddToCharity(value)
 {
-    if (value > 0)
+    if(value > 0)
     {
         gCharity = value;
         gStateIsUpToDate = false;
@@ -186,159 +179,121 @@ GetCharity()
     return gCharity;
 }
 
-SetLottoJackpot(cash)
-{
-    if (cash != gLottoJackpot)
-    {
-        gLottoJackpot = cash;
-        gStateIsUpToDate = false;
-    }
-}
-
-GetLottoTicketsSold()
-{
-    return gLottoTicketsSold;
-}
-
-SetLottoTicketsSold(value)
-{
-    if (value != gLottoTicketsSold)
-    {
-        gLottoTicketsSold = value;
-        gStateIsUpToDate = false;
-    }
-}
-
-AddToLottoJackpot(cash)
-{
-    if (cash != 0)
-    {
-        gLottoJackpot += cash;
-        gStateIsUpToDate = false;
-    }
-}
-
-GetLottoJackpot()
-{
-    return gLottoJackpot;
-}
-
 hook OnLoadGameMode()
 {
-    DBQueryWithCallback("select * from "#TABLE_SERVER_STATE, "OnLoadServerState");
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "select * from "#TABLE_SERVER_STATE);
+    mysql_tquery(connectionID, queryBuffer, "OnLoadServerState");
     return 1;
 }
-
-DB:OnLoadServerState()
+publish OnLoadServerState()
 {
-    gCharity             = GetDBIntField(0, "charity");
-    gWeather             = GetDBIntField(0, "weather");
-    gAnticheat           = GetDBIntField(0, "anticheat");
-    MaxTurfCap           = GetDBIntField(0, "max_turf_cap");
-    gGangInviteCooldown  = GetDBIntField(0, "gang_invite_cooldown");
-    gTax                 = GetDBIntField(0, "tax");
-    gTaxVault            = GetDBIntField(0, "taxvault");
-    gNewsVault           = GetDBIntField(0, "newsvault");
-    gDoubleXP            = GetDBIntField(0, "doublexp");
-    gVPNState            = GetDBIntField(0, "vpn_state");
-    gHourReward          = GetDBIntField(0, "hour_reward");
-    gLottoJackpot        = GetDBIntField(0, "lotto_jackpot");
-    gLottoTicketsSold    = GetDBIntField(0, "lotto_tickets_sold");
+    gCharity             = cache_get_field_content_int(0, "charity");
+    gWeather             = cache_get_field_content_int(0, "weather");
+    gAnticheat           = cache_get_field_content_int(0, "anticheat");
+    MaxTurfCap           = cache_get_field_content_int(0, "max_turf_cap");
+    gGangInviteCooldown  = cache_get_field_content_int(0, "gang_invite_cooldown");
+    gTax                 = cache_get_field_content_int(0, "tax");
+    gTaxVault            = cache_get_field_content_int(0, "taxvault");
+    gNewsVault           = cache_get_field_content_int(0, "newsvault");
+    gDoubleXP            = cache_get_field_content_int(0, "doublexp");
+    gVPNState            = cache_get_field_content_int(0, "vpn_state");
+    gHourReward          = cache_get_field_content_int(0, "hour_reward");
 
-    GetDBStringField(0, "server_motd", gServerMOTD);
-    GetDBStringField(0, "admin_motd", gAdminMOTD);
-    GetDBStringField(0, "helper_motd", gHelperMOTD);
+    cache_get_field_content(0, "server_motd", gServerMOTD);
+    cache_get_field_content(0, "admin_motd", gAdminMOTD);
+    cache_get_field_content(0, "helper_motd", gHelperMOTD);
+    nextWeather=GetDBWeatherID();
+	autoWeather();
 
-    ChangeWeather(GetDBWeatherID());
     SetDoubleXPState(gDoubleXP); // Force update hostname
 }
 
 hook OnServerBeacon(timestamp)
 {
-    if (!gStateIsUpToDate)
+    if(!gStateIsUpToDate)
     {
         gStateIsUpToDate = true;
-        DBQuery("UPDATE "#TABLE_SERVER_STATE" SET \
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_SERVER_STATE" SET \
         charity=%i, weather=%i, anticheat=%i, max_turf_cap=%i, gang_invite_cooldown=%i, tax=%i, taxvault=%i, \
-        newsvault=%i, doublexp=%i, vpn_state=%i, hour_reward=%i, server_motd='%e', admin_motd='%e', helper_motd='%e',\
-        lotto_jackpot=%i, lotto_tickets_sold=%i", gCharity, gWeather, gAnticheat, MaxTurfCap, gGangInviteCooldown, gTax, gTaxVault,
-        gNewsVault, gDoubleXP, gVPNState, gHourReward, gServerMOTD, gAdminMOTD, gHelperMOTD,
-        gLottoJackpot, gLottoTicketsSold);
+        newsvault=%i, doublexp=%i, vpn_state=%i, hour_reward=%i, server_motd='%e', admin_motd='%e', helper_motd='%e'", 
+        gCharity, gWeather, gAnticheat, MaxTurfCap, gGangInviteCooldown, gTax, gTaxVault, 
+        gNewsVault, gDoubleXP, gVPNState, gHourReward, gServerMOTD, gAdminMOTD, gHelperMOTD);
+        mysql_tquery(connectionID, queryBuffer);
     }
     return 1;
 }
 
 CMD:doublexp(playerid, params[])
 {
-    if (IsAdmin(playerid, ADMIN_LVL_10))
-    {
+	if(PlayerData[playerid][pAdmin] >= MANAGEMENT)
+	{
         SendClientMessage(playerid, COLOR_GREY, "Check the new command /rewards");
-    }
-    return 1;
+	}
+	return 1;
 }
 
 CMD:enddoublexp(playerid, params[])
 {
-    if (IsAdmin(playerid, ADMIN_LVL_10))
-    {
-        SendClientMessage(playerid, COLOR_GREY, "Check the new command /rewards");
-    }
-    return 1;
+	if(PlayerData[playerid][pAdmin] >= MANAGEMENT)
+	{
+	    SendClientMessage(playerid, COLOR_GREY, "Check the new command /rewards");
+	}
+	return 1;
 }
 
 CMD:rewards(playerid, params[])
 {
-    if (!IsAdmin(playerid, ADMIN_LVL_10))
-    {
-        return SendUnauthorized(playerid);
+	if(!IsAdmin(playerid, 10))
+	{
+        return SendClientErrorUnauthorizedCmd(playerid);
     }
     new option[14], s = -1;
-    if (sscanf(params, "s[14]i()", option, s))
+	if(sscanf(params, "s[14]i()", option, s))
     {
-        SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /rewards [doublexp/hour_reward] [1/0]");
-        return SendClientMessageEx(playerid, COLOR_WHITE, "Current double XP state: %i, Current hour reward state: %i, ", IsDoubleXPEnabled(), IsHourRewardEnabled());
+	    SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /rewards [doublexp/hour_reward] [1/0]");
+	    return SendClientMessageEx(playerid, COLOR_WHITE, "Current double XP state: %i, Current hour reward state: %i, ", IsDoubleXPEnabled(), IsHourRewardEnabled());
     }
-
-    if (!strcmp(option, "doublexp", true))
-    {
-        if (s == -1)
+	
+    if(!strcmp(option, "doublexp", true))
+	{
+        if(s == -1)
         {
         }
-        else
+        else 
         {
             SetDoubleXPState(s != 0);
-            if (IsDoubleXPEnabled())
+            if(IsDoubleXPEnabled())
             {
                 SendClientMessageToAllEx(COLOR_AQUA, "* %s enabled happy hours. You will now get double xp for playing in the server.", GetRPName(playerid));
             }
             else
             {
-                SendAdminWarning(2, "%s has disabled double XP.", GetPlayerNameEx(playerid));
+	            SendAdminWarning(2, "%s has disabled double XP.", GetPlayerNameEx(playerid));
             }
         }
-    }
-    else if (!strcmp(option, "hour_reward", true))
-    {
-        if (s == -1)
+    }    
+    else if(!strcmp(option, "hour_reward", true))
+	{
+        if(s == -1)
         {
-            SendClientMessageEx(playerid, COLOR_WHITE, "Current hour reward state: %i", IsHourRewardEnabled());
+	        SendClientMessageEx(playerid, COLOR_WHITE, "Current hour reward state: %i", IsHourRewardEnabled());
         }
-        else
+        else 
         {
             SetHourRewardState(s != 0);
-            if (IsHourRewardEnabled())
+            if(IsHourRewardEnabled())
             {
                 SendClientMessageToAllEx(COLOR_AQUA, "* %s enabled happy hours. You will now get random gifts at signcheck.", GetRPName(playerid));
             }
             else
             {
-                SendAdminWarning(2, "%s has disabled hour reward.", GetPlayerNameEx(playerid));
+	            SendAdminWarning(2, "%s has disabled hour reward.", GetPlayerNameEx(playerid));
             }
         }
     }
     else
     {
-        SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /rewards [doublexp/hour_reward] [1/0]");
+	    SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /rewards [doublexp/hour_reward] [1/0]");
     }
     return 1;
 }
@@ -346,26 +301,27 @@ CMD:rewards(playerid, params[])
 
 CMD:anticheat(playerid, params[])
 {
-    new s;
+	new s;
 
-    if (!IsGodAdmin(playerid))
-    {
-        return SendUnauthorized(playerid);
-    }
-    if (sscanf(params, "i", s) || !(0 <= s <= 1))
-    {
-        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /anticheat [0/1]");
-    }
+	if(!IsGodAdmin(playerid))
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
+	if(sscanf(params, "i", s) || !(0 <= s <= 1))
+	{
+	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /anticheat [0/1]");
+	}
 
-    if (s)
+	if(s) 
     {
-        SendClientMessage(playerid, COLOR_LIGHTRED, "AdmCmd: You has enabled the server anticheat.");
-    }
+		SendClientMessage(playerid, COLOR_LIGHTRED, "AdmCmd: You has enabled the server anticheat.");
+	}
     else
     {
-        SendClientMessage(playerid, COLOR_LIGHTRED, "AdmCmd: You has disabled the server anticheat.");
-    }
+		SendClientMessage(playerid, COLOR_LIGHTRED, "AdmCmd: You has disabled the server anticheat.");
+	}
 
-    SetAntiCheatState(s);
-    return 1;
+	SetAntiCheatState(s);
+	return 1;
 }
+

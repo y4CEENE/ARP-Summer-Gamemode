@@ -1,0 +1,31 @@
+new MeAbdreviations[][][]={// '/me'
+    {"lol"      ,"laughs out loud."},
+    {"haha"     ,"laughs out loud."},
+    {"lmfao"    ,"laughs their fucking ass off!"},
+    {"lmao"     ,"laughs their ass off!"},
+    {"wtf"      ,"shouts, 'What the fuck?!'"},
+    {"rofl"     ,"rolls around on the ground, laughing hysterically!"},
+    {"stfu"     ,"shouts, 'Shut the fuck up!'"},
+    {"srs"      ,"sighs and then mumbles, 'Seriously?"},
+    {"sry"      ,"gasps, 'I'm so sorry!'"},
+    {":)"       ,"smiles."},
+    {":("       ,"frowns."},
+    {":P"       ,"sticks their tongue out to the side and winks."},
+    {":o"       ,"gasps."},
+    {":d"       ,"smiles largely."},
+    {"rip"      ,"raises their right hand pointing to the sky whilst looking down saying, 'Rest in Peace'."},
+    {"idk"      ,"shrugs and says, 'I don't know'."},
+    {"ty"       ,"smiles and then says 'Thanks!'"},
+    {"omg"      ,"gasps, 'Oh My God!'"},
+    {"gj"       ,"shouts, 'Good Job!'"},
+    {"gg"       ,"shouts, 'Good Game!'"},
+    {"w.e"      ,"mumbles, 'Whatever'"},
+    {"w/e"      ,"mumbles, 'Whatever'"},
+    {"ffs"      ,"looks around and then shouts, 'For fucks sake!"},
+    {"?"        ,"thinks, then says 'What?'"}
+};
+
+new OOCAbdreviations[][][]={// '/b'
+    {"brb"      ,"Be right back."},
+    {"bk"       ,"Back."}
+};

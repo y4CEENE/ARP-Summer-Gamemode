@@ -4,9 +4,9 @@ PID=samp03svr.pid
 DEAMON_LOG=samp03svr.log
 SERVER_LOG=server_log.txt
 COMMAND="./bootstrap.sh"
+LOCAL_BACKUP_DIR="./backup"
 
-status()
-{
+status() {
     echo
     echo "==== Server status ===="
 
@@ -22,8 +22,7 @@ status()
     fi
 }
 
-start()
-{
+start() {
     if [ -f $PID ]
     then
         echo
@@ -42,7 +41,7 @@ start()
     fi
 }
 
-kill_cmd()
+kill_cmd() 
 {
     echo "==== Killing server ===="
 
@@ -56,11 +55,12 @@ kill_cmd()
             ps -ef | grep -v grep | grep $( cat $PID )
             echo
             echo $LIST | xargs kill -9
+            
 
             while true
             do
                 sleep 1
-
+                        
                 LIST=`ps -ef | grep -v grep | grep $( cat $PID ) | awk '{print $2}'`
 
                 if [ "$LIST" ] ; then
@@ -71,23 +71,23 @@ kill_cmd()
             done
 
             /bin/rm $PID
-
+            
             echo
             echo "All killed..."
-            echo "[$(date '+%Y-%m-%d %T')] [Daemon] Server Killed" >>$SERVER_LOG
-            echo "[$(date '+%Y-%m-%d %T')] [Daemon] Server Killed" >>$DEAMON_LOG
+            echo "[$(date '+%Y-%m-%d %T')] [Daemon] Server Killed" >>$SERVER_LOG     
+            echo "[$(date '+%Y-%m-%d %T')] [Daemon] Server Killed" >>$DEAMON_LOG           
             echo
         else
             /bin/rm $PID
             echo "Process is already stopped."
-
+            
         fi
     else
         echo "No pid file. Already stopped?"
     fi
 }
 
-stop()
+stop() 
 {
     echo "==== Stop server ===="
 
@@ -101,12 +101,12 @@ stop()
             ps -ef | grep -v grep | grep $( cat $PID )
             echo
             echo $LIST | xargs kill
-
+            
 
             while true
             do
                 sleep 1
-
+                        
                 LIST=`ps -ef | grep -v grep | grep $( cat $PID ) | awk '{print $2}'`
 
                 if [ "$LIST" ] ; then
@@ -117,7 +117,7 @@ stop()
             done
 
             /bin/rm $PID
-
+            
             echo
             echo "All stopped..."
             echo "[$(date '+%Y-%m-%d %T')] [Daemon] Server Stopped" >>$SERVER_LOG
@@ -126,7 +126,7 @@ stop()
         else
             /bin/rm $PID
             echo "Process is already stopped."
-
+            
         fi
     else
         echo "No pid file. Already stopped?"
@@ -136,7 +136,7 @@ stop()
 case "$1" in
     'start')
             start
-            ;;
+            ;;    
     'kill')
             kill_cmd
             ;;

@@ -1,8 +1,3 @@
-/// @file      Meter.pwn
-/// @author    BOURAOUI Al-Moez L.A
-/// @date      Created at 2022-01-13 22:46:02 +0100
-/// @copyright Copyright (c) 2022
-
 #include <YSI\y_hooks>
 
 enum MeterEnum {
@@ -23,9 +18,9 @@ hook OnPlayerInit(playerid)
 
 CMD:meter(playerid, params[])
 {
-    if (Meter[playerid][meterStart])
+    if(Meter[playerid][meterStart])
     {
-        SendClientMessageEx(playerid, COLOR_GREY, " * The distance is %.2fm.",
+        SendClientMessageEx(playerid, COLOR_GREY, " * The distance is %.2fm.", 
             GetPlayerDistanceFromPoint(playerid, Meter[playerid][meterX], Meter[playerid][meterY], Meter[playerid][meterZ]));
         Meter[playerid][meterStart] = false;
     }

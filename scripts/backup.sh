@@ -3,18 +3,15 @@
 gamemode=$(./scripts/serverinfo.py | grep gamemode | cut -f2 -d=)
 version=$(echo ${gamemode}|cut -f2,3 -d-)
 
-mysql_database=$( jq -r ".mysql.database" server.conf.json )
-mysql_hostname=$( jq -r ".mysql.hostname" server.conf.json )
-mysql_username=$( jq -r ".mysql.username" server.conf.json )
-mysql_password=$( jq -r ".mysql.password" server.conf.json )
-mysql_port=$( jq -r ".mysql.port"     server.conf.json )
-
+mysql_database=$( grep mysql_database scriptfiles/server.cfg | cut -f2 -d= )
+mysql_hostname=$( grep mysql_hostname scriptfiles/server.cfg | cut -f2 -d= )
+mysql_username=$( grep mysql_username scriptfiles/server.cfg | cut -f2 -d= )
+mysql_password=$( grep mysql_password scriptfiles/server.cfg | cut -f2 -d= )
 echo "[$(date '+%Y-%m-%d %T')] [Backup]  +-> Exporting database \"${mysql_database}\""
-TABLES_TO_EXPORT=$(echo "SHOW TABLES WHERE tables_in_${mysql_database} NOT LIKE 'log\_%';" | mysql -h $mysql_hostname -P $mysql_port -u $mysql_username -p$mysql_password -Bs --database=$mysql_database )
+TABLES_TO_EXPORT=$(echo "SHOW TABLES WHERE tables_in_${mysql_database} NOT LIKE 'log\_%';" | mysql -h $mysql_hostname -u $mysql_username -p$mysql_password -Bs --database=$mysql_database )
 MYSQL_BACKUP_FILE=${mysql_database}.nologs.`date '+%Y-%m-%d_%H-%M-%S'`.sql
-mysqldump --routines --no-tablespaces --host=${mysql_hostname} --port=${mysql_port} --user=${mysql_username} --password=${mysql_password}  ${mysql_database} --no-data > ${MYSQL_BACKUP_FILE}
-mysqldump --no-tablespaces --host=${mysql_hostname} --port=${mysql_port} --user=${mysql_username} --password=${mysql_password}  ${mysql_database} --no-create-info ${TABLES_TO_EXPORT} >> ${MYSQL_BACKUP_FILE}
-unset mysql_port
+mysqldump --no-tablespaces --host=${mysql_hostname} --user=${mysql_username} --password=${mysql_password}  ${mysql_database} --no-data > ${MYSQL_BACKUP_FILE}
+mysqldump --no-tablespaces --host=${mysql_hostname} --user=${mysql_username} --password=${mysql_password}  ${mysql_database} --no-create-info ${TABLES_TO_EXPORT} >> ${MYSQL_BACKUP_FILE}
 unset mysql_password
 unset mysql_username
 unset mysql_hostname
