@@ -967,7 +967,7 @@ CMD:editturf(playerid, params[])
 {
 	new turfid, option[14], param[32];
 
-	if(PlayerData[playerid][pAdmin] < ASST_MANAGEMENT)
+    if(!IsGodAdmin(playerid) && !PlayerData[playerid][pGangMod])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}
@@ -1169,6 +1169,10 @@ CMD:claim(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You're not allowed to claim turfs as a law enforcer and a gang member.");
 	}
+    if(IsLawEnforcement(playerid) && TurfInfo[turfid][tCapturedGang] == -1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You cannot claim a turf that is currently unclaimed by gangs.");
+    }
 	if(PlayerData[playerid][pInjured])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't claim a turf while injured.");

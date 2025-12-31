@@ -76,8 +76,8 @@ new const jobLocations[][jobEnum] =
 	{"lumberjack",	"Lumberjack",     JOB_LUMBERJACK,		 2532.8455, -836.62140,   88.3442, 116.8363,  16, "/log"},
 	{"construction","Construction",   JOB_CONSTRUCTION,		-2061.0977, -109.87760,   35.3259, 224.0000,  16, "/makeciment"},
 	{"butcher",     "Butcher",        JOB_BUTCHER,			-2545.1672,  187.10340,   13.0391,  50.0000, 168, "/butcher"},
-	{"brinks",      "Brinks",         JOB_BRINKS,			-1495.6901,  841.2843,     7.1875, 162.2570,  30, "/loadcash"},
-	{"recycle",     "Recycle",        JOB_RECYCLE,			-1495.6901,  841.2843,     7.1875, 162.2570,  30, ""},
+	{"brinks",      "Brinks",         JOB_BRINKS,			-1495.6901,  841.2843,    7.1875, 162.2570,  30, "/loadcash"},
+	{"recycle",     "Recycle",        JOB_RECYCLE,			1118.905517, -1701.292114, 14.024138, 358.02,  30, ""},
 	{"milker",      "Milker",         JOB_MILKER,            1033.5572, -296.79769,   73.9921, 182.19,   161, "/buybocket, /milk, /sellmilk"}
 };
 

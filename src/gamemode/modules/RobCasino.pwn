@@ -43,12 +43,20 @@ hook OnGameModeInit() {
     g_CazinoObject[6] = CreateObject(1550, 2142.8161, 1639.5217, 993.5619, 87.1, 152.4, -175.4); // Money Bag
     g_CazinoObject[7] = CreateObject(1550, 2144.2661, 1640.9354, 993.6366, 87.1, 152.4, -175.4); // Money Bag
 
-    CreateDynamic3DTextLabel("Casino Entrance5\n/robcasino to start heist", COLOR_YELLOW, 2147.0524, 1604.7028, 1005.1768, 10.0);
+    CreateDynamic3DTextLabel("Casino Entrance\n/robcasino to start heist", COLOR_YELLOW, 2147.0524, 1604.7028, 1005.1768, 10.0);
     return 1;
 }
 
 CMD:robcasino(playerid)
 {
+    if(PlayerData[playerid][pGang] == -1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not apart of any gang at the moment.");
+	}
+    if (IsLawEnforcement(playerid))
+	{
+		return SendClientMessage(playerid, COLOR_GREY, "Law Enforcement Officials cannot rob a business.");
+	}
     if (HeistData[hActive])
         return SendClientMessage(playerid, COLOR_GREY, "Heist already in progress!");
 
@@ -75,6 +83,19 @@ CMD:robcasino(playerid)
         IsRobber[playersInRange[j]] = true;
     }
 
+    foreach(new i : Player)
+    {
+        if (IsLawEnforcement(i) && !PlayerData[i][pAdminDuty])
+        {
+            count++;
+        }
+    }
+
+    if (count < 5)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "There needs to be at least 5+ LEO online in order to rob the bank.");
+    }
+
     HeistData[hActive] = true;
     HeistData[hRobbers] = count;
 
@@ -90,9 +111,16 @@ CMD:robcasino(playerid)
     return 1;
 }
 
+CMD:resetcasino(playerid){
+    ResetHeist();
+    SCM(playerid, COLOR_RED, "Casino heist has been reset");
+    return 1;
+}
 
 CMD:takemoney(playerid) {
     new string[64];
+
+    ClearAnimations(playerid, 1);
     
     if(!HeistData[hVaultOpen])
 		return SendClientMessage(playerid,  COLOR_GREY, "Vault not open!");
@@ -100,13 +128,13 @@ CMD:takemoney(playerid) {
     if(!IsPlayerInRangeOfPoint(playerid, 2.0, 2143.0, 1640.0, 993.0))
         return SendClientMessage(playerid,  COLOR_GREY, "Not near the money stash!");
         
-    if (GetTickCount() - LastTakeMoneyTime[playerid] < 3000) // 3s
-        return SendClientMessage(playerid, COLOR_GREY, "You must wait 3 seconds before taking money again!");
+    if (GetTickCount() - LastTakeMoneyTime[playerid] < 5000) // 5s
+        return SendClientMessage(playerid, COLOR_GREY, "You must wait 5 seconds before taking money again!");
         
 	if (!IsRobber[playerid])
     	return SendClientMessage(playerid, COLOR_GREY, "You are not part of the heist!");
 
-    new amount = random(50000) + 25000;
+    new amount = random(500) + 500;
     if(HeistData[hLootTaken] + amount > TOTAL_LOOT) {
         amount = TOTAL_LOOT - HeistData[hLootTaken];
     }
@@ -117,9 +145,9 @@ CMD:takemoney(playerid) {
     SendClientMessageEx(playerid, COLOR_AQUA, "You have looted {00AA00}$%i{33CCFF}.", amount);
     SendClientMessageEx(playerid, COLOR_AQUA, "You can keep looting the box to get more money.");
     
- 	format(string, sizeof(string), "~w~You looted ~g~+$%i~w~ from the box...", amount);
-    GameTextForPlayer(playerid, string, 5000, 1);
-    ApplyAnimation(playerid, "BOMBER", "BOM_Plant_Loop", 4.1, 0, 0, 0, 0, 0, 1);
+ 	format(string, sizeof(string), "~w~~g~+$%i~w~", amount);
+    ApplyAnimation(playerid, "BOMBER", "BOM_Plant_Loop", 4.1, 1, 0, 0, 0, 0, 1);
+    GameTextForPlayer(playerid, "~w~Looting deposit box...", 5000, 3);
 
     if(HeistData[hLootTaken] >= TOTAL_LOOT) {
         DestroyObject(g_CazinoObject[6]);
@@ -203,8 +231,6 @@ public DetonateC4()
     {
         if (IsRobber[i])
         {
-            PlayerPlaySound(i, 5205, 0.0, 0.0, 0.0); // Vault alarm for player
-            PlayerPlaySound(i, 3401, 0.0, 0.0, 0.0); // Additional sound
             SetPlayerAttachedObject(i, 8, 19801, 2, 0.091000, 0.012000, 0.000000, 0.099999, 87.799957, 179.500015, 1.345999, 1.523000, 1.270001);
             SetPlayerAttachedObject(i, 9, 1550, 1, 0.116999, -0.170999, -0.016000, -3.099997, 87.800018, -179.400009, 0.602000, 0.640000, 0.625000);
             ApplyAnimation(i, "GOGGLES", "goggles_put_on", 4.1, 0, 0, 0, 0, 0, 1);
@@ -293,17 +319,5 @@ hook OnPlayerDeath(playerid, killerid, reason)
 public OnGameModeExit() {
     ResetHeist();
     for(new i = 0; i < sizeof(g_CazinoObject); i++) DestroyObject(g_CazinoObject[i]);
-    return 1;
-}
-
-
-// For Test
-
-CMD:go(playerid) {
-	SetPlayerSkin(playerid, 217);
-	GivePlayerWeapon(playerid, WEAPON_M4, 500);
-
-    SetPlayerInterior(playerid, 1);
-    SetPlayerPos(playerid, 2233.93, 1711.80, 1011.63);
     return 1;
 }

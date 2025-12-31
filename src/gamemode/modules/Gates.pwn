@@ -22,7 +22,6 @@ enum gateData {
 	Float:gateMove[6],
 	gateLinkID,
 	gateFaction,
-	gateGang,
 	gatePass[32],
 	gateTimer,
 	gateObject
@@ -213,7 +212,7 @@ stock Gate_Save(gateid)
 	new
 	    query[768];
 
-	format(query, sizeof(query), "UPDATE `gates` SET `gateModel` = '%d', `gateSpeed` = '%.4f', `gateRadius` = '%.4f', `gateTime` = '%d', `gateX` = '%.4f', `gateY` = '%.4f', `gateZ` = '%.4f', `gateRX` = '%.4f', `gateRY` = '%.4f', `gateRZ` = '%.4f', `gateInterior` = '%d', `gateWorld` = '%d', `gateMoveX` = '%.4f', `gateMoveY` = '%.4f', `gateMoveZ` = '%.4f', `gateMoveRX` = '%.4f', `gateMoveRY` = '%.4f', `gateMoveRZ` = '%.4f', `gateLinkID` = '%d', `gateFaction` = '%d', `gatePass` = '%s' WHERE `gateID` = '%d'",
+	format(query, sizeof(query), "UPDATE `gates` SET `gateModel` = '%d', `gateSpeed` = '%.4f', `gateRadius` = '%.4f', `gateTime` = '%d', `gateX` = '%.4f', `gateY` = '%.4f', `gateZ` = '%.4f', `gateRX` = '%.4f', `gateRY` = '%.4f', `gateRZ` = '%.4f', `gateInterior` = '%d', `gateWorld` = '%d', `gateMoveX` = '%.4f', `gateMoveY` = '%.4f', `gateMoveZ` = '%.4f', `gateMoveRX` = '%.4f', `gateMoveRY` = '%.4f', `gateMoveRZ` = '%.4f', `gateLinkID` = '%d', `gateFaction` = '%d', `gatePass` = '%s', `gateFaction` = '%s' WHERE `gateID` = '%d'",
 	    GateData[gateid][gateModel],
 	    GateData[gateid][gateSpeed],
 	    GateData[gateid][gateRadius],
@@ -359,37 +358,35 @@ CMD:creategate(playerid, params[])
 
 stock ToggleGate(playerid, id)
 {
-	if (id != -1)
-	{
-		if (strlen(GateData[id][gatePass]))
-		{
-			Dialog_Show(playerid, GatePass, DIALOG_STYLE_INPUT,  "Enter Password", "Please enter the password for this gate below:", "Submit", "Cancel");
-		}
-		else
-		{
-		    if (GateData[id][gateFaction] != -1 && PlayerData[playerid][pFaction] != GateData[id][gateFaction])
-			{
-				return SendClientMessageEx(playerid, COLOR_SYNTAX, "You can't open this gate/door.");
-			}
+    if (id != -1)
+    {
+        if (strlen(GateData[id][gatePass]))
+        {
+            Dialog_Show(playerid, GatePass, DIALOG_STYLE_INPUT,  "Enter Password", "Please enter the password for this gate below:", "Submit", "Cancel");
+        }
+        else
+        {
+            if (GateData[id][gateFaction] != -1 && PlayerData[playerid][pFaction] != GateData[id][gateFaction])
+            {
+                return SendClientMessageEx(playerid, COLOR_SYNTAX, "You can't open this gate/door.");
+            }
 
-			Gate_Operate(id);
+            Gate_Operate(id);
 
-			switch (GateData[id][gateOpened])
-			{
-			    case 0:
-				{
-				    SendClientMessage(playerid, COLOR_GREY, "You have closed the gate/door!");
-					SendProximityMessage(playerid, 20.0, COLOR_GREY, "**{C2A2DA} %s uses their card to close the gate/door.", GetRPName(playerid));
-				}
+            switch (GateData[id][gateOpened])
+            {
+                case 0:
+                {
+                    ShowActionBubble(playerid, "* %s uses their card to close the gate/door.", GetRPName(playerid));
+                }
                 case 1:
-				{
-				    SendClientMessage(playerid, COLOR_GREY, "You have opened the gate/door!");
-					SendProximityMessage(playerid, 20.0, COLOR_GREY, "**{C2A2DA} %s uses their card to open the gate/door.", GetRPName(playerid));
-				}
-			}
-		}
-	}
-	return 1;
+                {
+                    ShowActionBubble(playerid, "* %s uses their card to open the gate/door.", GetRPName(playerid));
+                }
+            }
+        }
+    }
+    return 1;
 }
 
 
@@ -643,35 +640,6 @@ CMD:editgate(playerid, params[])
 		{
 			return SendClientMessageEx(playerid, COLOR_SYNTAX, "Invalid faction.");
 		}
-	    else if (!strcmp(type, "gang", true))
-    {
-        new gangid = 0;
-
-        if (sscanf(string, "d", gangid))
-        {
-            return SendClientMessageEx(playerid, COLOR_WHITE, "Usage: /editgate [id] gang [gangid] (-1 for none)");
-        }
-
-        if (!(-1 <= gangid < MAX_GANGS) || (gangid >= 0 && !GangInfo[gangid][gSetup]))
-        {
-            return SendClientMessage(playerid, COLOR_SYNTAX, "Invalid gang.");
-        }
-
-
-        GateData[id][gateGang] = gangid;
-        Gate_Save(id);
-
-        if (gangid == -1)
-        {
-            SendAdminMessage(COLOR_LIGHTRED, "ACmd: %s has adjusted the gang of gate ID: %d to no gang.", GetRPName(playerid), id);
-        }
-        else
-        {
-            SendAdminMessage(COLOR_LIGHTRED, "ACmd: %s has adjusted the gang of gate ID: %d to \"%s\".", GetRPName(playerid), id, GangInfo[gangid][gName]);
-        }
-
-        return 1;
-    }
 
 
         GateData[id][gateFaction] = factionid;

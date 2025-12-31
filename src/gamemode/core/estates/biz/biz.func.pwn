@@ -856,28 +856,30 @@ public OnOChangeBizOwnerGotUsers(playerid,businessid)
         SendClientMessage(playerid, COLOR_GREY, "Unvalid username.");
     }
 }
-/*
+
 GetBusinessDefaultPickup(business)
 {
-	switch (BusinessInfo[business][bType]) {
-		case BUSINESS_STORE: return 1274;
-		case BUSINESS_CLOTHES: return 1275;
-		case BUSINESS_RESTAURANT: return 19094;
-		case BUSINESS_TOOLSHOP: return 1274;
-		case BUSINESS_AGENCY: return 1274;
-		case BUSINESS_BARCLUB:
-		{
-		    new rnd = random(4);
-		    if (rnd == 0) return 1486;
-		    if (rnd == 1) return 1543;
-		    if (rnd == 2) return 1544;
-		    if (rnd == 3) return 1951;
-		}
-		case BUSINESS_GYM: return 1318;
-		default: return 1274;
-	}
-	return 1318;
-}*/
+    switch (BusinessInfo[business][bType])
+    {
+        case BUSINESS_CLOTHES:    return 1275;
+        case BUSINESS_RESTAURANT: return 2768;
+        case BUSINESS_GUNSHOP:    return 2061;
+        case BUSINESS_STORE:      return 19592;
+        case BUSINESS_TOOLSHOP:   return 18633;
+        case BUSINESS_GYM:        return 2916;
+        case BUSINESS_AGENCY:     return 1274;
+        case BUSINESS_BARCLUB:
+        {
+            new rnd = random(4);
+            if (rnd == 0) return 1486;
+            if (rnd == 1) return 1543;
+            if (rnd == 2) return 1544;
+            if (rnd == 3) return 1951;
+        }
+        default: return 1272;
+    }
+    return 1272;
+}
 
 ReloadBusiness(businessid)
 {
@@ -900,9 +902,9 @@ ReloadBusiness(businessid)
 		    format(string, sizeof(string), "{AAC4E5}%s (ID %i)\n{FFFFFF}Owner: %s\nType: {AAC4E5}%s\n{FFFFFF}Entry Fee: $%i\n%s", BusinessInfo[businessid][bName], businessid, BusinessInfo[businessid][bOwner], bizInteriors[BusinessInfo[businessid][bType]][intType], BusinessInfo[businessid][bEntryFee], (BusinessInfo[businessid][bLocked]) ? ("{FFFF00}Closed") : ("{00AA00}Opened"));
 		}
 
-		BusinessInfo[businessid][bText] = CreateDynamic3DTextLabel(string, COLOR_GREY1, BusinessInfo[businessid][bPosX], BusinessInfo[businessid][bPosY], BusinessInfo[businessid][bPosZ] + 0.4, 20.0, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, 1, BusinessInfo[businessid][bOutsideVW], BusinessInfo[businessid][bOutsideInt], -1 , 10.0);
-	    BusinessInfo[businessid][bPickup] = CreateDynamicPickup(1272, 1, BusinessInfo[businessid][bPosX], BusinessInfo[businessid][bPosY], BusinessInfo[businessid][bPosZ], .worldid = BusinessInfo[businessid][bOutsideVW], .interiorid = BusinessInfo[businessid][bOutsideInt]);
-	    //BusinessInfo[businessid][bPickup] = CreateDynamicPickup(GetBusinessDefaultPickup(businessid), 1, BusinessInfo[businessid][bPosX], BusinessInfo[businessid][bPosY], BusinessInfo[businessid][bPosZ], .worldid = BusinessInfo[businessid][bOutsideVW], .interiorid = BusinessInfo[businessid][bOutsideInt]);
+        BusinessInfo[businessid][bText] = CreateDynamic3DTextLabel(string, COLOR_GREY1, BusinessInfo[businessid][bPosX], BusinessInfo[businessid][bPosY], BusinessInfo[businessid][bPosZ] + 0.4, 20.0, INVALID_PLAYER_ID, INVALID_VEHICLE_ID, 1, BusinessInfo[businessid][bOutsideVW], BusinessInfo[businessid][bOutsideInt], -1 , 10.0);
+        //BusinessInfo[businessid][bPickup] = CreateDynamicPickup(1272, 1, BusinessInfo[businessid][bPosX], BusinessInfo[businessid][bPosY], BusinessInfo[businessid][bPosZ], .worldid = BusinessInfo[businessid][bOutsideVW], .interiorid = BusinessInfo[businessid][bOutsideInt]);
+        BusinessInfo[businessid][bPickup] = CreateDynamicPickup(GetBusinessDefaultPickup(businessid), 1, BusinessInfo[businessid][bPosX], BusinessInfo[businessid][bPosY], BusinessInfo[businessid][bPosZ], .worldid = BusinessInfo[businessid][bOutsideVW], .interiorid = BusinessInfo[businessid][bOutsideInt]);
 		
 		if(BusinessInfo[businessid][bDisplayMapIcon]){ 			
 			switch(BusinessInfo[businessid][bType])

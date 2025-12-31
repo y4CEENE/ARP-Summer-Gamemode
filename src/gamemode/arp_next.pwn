@@ -79,8 +79,8 @@
 DEFINE_HOOK_REPLACEMENT(OnPlayer, OP_);
 
 #define Mysql_Hostname "db.velocityhost.tn"
-#define Mysql_Username "u109_CUf7vcnnbQ"
-#define Mysql_Password "imiwjbeVQi2LbPDJtw@WX+=e"
+#define Mysql_Username "u109_Zq484lG0Rx"
+#define Mysql_Password "iQKp!dkVSLH=+e+P+rXRGX8M"
 #define Mysql_Database "s109_arabica"
 
 //#define SM 		SendMessage // SendClientMessage with string formats
@@ -179,7 +179,6 @@ enum
 	DIALOG_CREATEQUIZ,
 	DIALOG_DELETEOBJECT,
 	DIALOG_PAINTBALL,
-	GotoEventMap,
 	DIALOG_BUYVEHICLE,
 	DIALOG_JOBCENTER
 }
@@ -746,6 +745,11 @@ enum pEnum
 	pIronItem,
 	pPlasticItem,
 	pRecycleStage,
+	pCapturingPoint,
+    pCaptureTime,
+    Float:pPointX,
+    Float:pPointY,
+    Float:pPointZ,
 	pCarOffer,
 	pCarOffered,
 	pCarPrice,
@@ -1288,7 +1292,7 @@ new gListedItems[MAX_PLAYERS][100], gTargetName[MAX_PLAYERS][MAX_PLAYER_NAME];
 new gPreviewFurniture[MAX_PLAYERS] = {-1, ...};
 new DamageData[MAX_PLAYERS][MAX_DAMAGES][e_Damages];
 new InsideShamal[MAX_PLAYERS];
-//new VehicleStatus[MAX_VEHICLES char] = 0; // 0 == none, 1 == vehicle dead about to respawn
+new VehicleStatus[MAX_VEHICLES char] = 0; // 0 == none, 1 == vehicle dead about to respawn
 new RobberyInfo[robberyEnum];
 new MarkedPositions[MAX_PLAYERS][3][mEnum];
 new PlayerData[MAX_PLAYERS+1][pEnum];
@@ -1777,7 +1781,8 @@ new const Float:arrestPoints[][] =
 	{  310.3752, -1515.3691,  24.9219}, // FBI garage
 	{ 1382.0898, -1393.6364, -33.7034}, // army garage
 	{ 2755.8171, -2515.4490,  13.6398}, // army hq
-	{-1605.5806,   674.8765,  -5.2422} // sfpd garage
+	{-1605.5806,   674.8765,  -5.2422}, // sfpd garage
+	{ 1153.9830, 2974.9168, 1003.4802}  // precinct
 };
 
 new Float:SpawnBolnica[ 3 ][ 3 ] = {
@@ -3473,7 +3478,12 @@ GetClosestDoor(playerid, Float:range)
 
 GateCheck(playerid)
 {
-	new id;
+	new id, gateid = GetNearbyGate(playerid);
+	if (gateid != -1)
+    {
+        ToggleGate(playerid, gateid);
+        return 1;
+    }
     for(new idx=0;idx<sizeof(gGates); idx++)
     {
         if(IsPlayerInRangeOfPoint(playerid, 10.0, gGates[idx][gateX], gGates[idx][gateY], gGates[idx][gateZ]))
@@ -3587,10 +3597,6 @@ GateCheck(playerid)
 
 		return 1;
 	}
-	else if((id = GetNearbyGate(playerid)) >= 0)
-	{
-		ToggleGate(playerid, id);
-	}
 	if((id = GetNearbyLand(playerid)) >= 0 && (IsLandOwner(playerid, id) || PlayerData[playerid][pLandPerms] == id))
 	{
 		for(new i = 0, j = Streamer_GetUpperBound(STREAMER_TYPE_OBJECT); i <= j; i ++)
@@ -3680,57 +3686,14 @@ EnterCheck(playerid)
 	}
 	new vehicleid = GetPlayerVehicleID(playerid);
 	new closestcar = GetClosestVehicle(playerid, vehicleid);
-    new bool:hasInterior = true;
-    switch (GetVehicleModel(closestcar))
-        {
-            case 519: // Shamal
-            {
-                TeleportToCoords(playerid, 2.509036, 23.118730, 1199.593750, 82.14, 1, closestcar, true, false);
-            }
-            case 431: // Bus
-            {
-                TeleportToCoords(playerid, 2022.0204, 2236.0549, 2103.9536, 2.01, 1, closestcar, true, false);
-            }
-            case 508: // Journey
-            {
-                TeleportToCoords(playerid, 2512.6985, -1729.2311, 778.6371, 85.67, 1, closestcar, true, false);
-            }
-            case 563: // Raindance
-            {
-                TeleportToCoords(playerid, -537.9229, 1303.6589, 2075.6223, 137.62, 1, closestcar, true, false);
-            }
-            case 433: // Barracks
-            {
-                TeleportToCoords(playerid, 1101.5210, 1074.7563, 3510.9238, 87.62, 1, closestcar, true, false);
-            }
-            case 548: // Cargobob
-            {
-                TeleportToCoords(playerid, 1472.1326, 1778.1577, -45.2152, 176.85, 1, closestcar, true, false);
-            }
-            case 417: // Leviathan
-            {
-                TeleportToCoords(playerid, 2650.8535, 858.0659, 633.7065, 201.70, 1, closestcar, true, false);
-            }
-            case 427: // Enfrocer
-            {
-                TeleportToCoords(playerid, -26.4598, 42.3772, 1000.1084, 179.77, 1, closestcar, true, false);
-            }
-            default:
-            {
-                hasInterior = false;
-            }
-        }
-    if (hasInterior)
-        {
-        SetCameraBehindPlayer(playerid);
-		PlayerData[playerid][pWorld] = closestcar;
-		SetPlayerVirtualWorld(playerid, closestcar);
-		PlayerData[playerid][pInterior] = 1;
-        SetPlayerInterior(playerid, 1);
-		InsideShamal[playerid] = closestcar;
-		SendClientMessage(playerid, COLOR_WHITE, "Type /exit near the door to exit the vehicle, or /window to look outside.");
+	if(IsPlayerInRangeOfVehicle(playerid, closestcar, 6.0) && GetVehicleModel(closestcar) == 519)
+	{
+	    if(VehicleStatus{closestcar} == 1) return SendClientMessage(playerid, COLOR_WHITE, "You're not allowed to enter this Shamal as it's been damaged!");
+   		ShowActionBubble(playerid, "* %s enters the Shamal airplane as a passenger.", GetRPName(playerid));
 
-	}
+     	SetPlayerPos(playerid, 2.509036, 23.118730, 1199.593750);
+     	SetPlayerFacingAngle(playerid, 82.14);
+    }
     if((id = GetNearbyHouse(playerid)) >= 0)
 	{
 	    if(HouseInfo[id][hLocked])
@@ -4036,14 +3999,12 @@ EnterCheck(playerid)
 
 ExitCheck(playerid)
 {
-	new id;
+    new id;
 
-    if((gettime() - PlayerData[playerid][pLastEnter]) < 3 && PlayerData[playerid][pAdminDuty] == 0)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "Please wait a moment before entering or exiting again.");
-	}
-    if(InsideShamal[playerid] != INVALID_VEHICLE_ID && IsPlayerInRangeOfPoint(playerid,3,2.509036, 23.118730, 1199.593750))
-	{
+    if ((gettime() - PlayerData[playerid][pLastEnter]) < 3 && PlayerData[playerid][pAdminDuty] == 0)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Please wait a moment before entering or exiting again.");
+    }
     if (InsideShamal[playerid] != INVALID_VEHICLE_ID && GetPlayerInterior(playerid) > 0)
     {
         ShowActionBubble(playerid, "* %s exits the %s.", GetRPName(playerid), GetVehicleName(InsideShamal[playerid]));
@@ -4058,134 +4019,133 @@ ExitCheck(playerid)
         SetPlayerInterior(playerid, 0);
         InsideShamal[playerid] = INVALID_VEHICLE_ID;
     }
-    if((id = GetInsideHouse(playerid)) >= 0 && IsPlayerInRangeOfPoint(playerid, 3.0, HouseInfo[id][hIntX], HouseInfo[id][hIntY], HouseInfo[id][hIntZ]))
-	{
+    if ((id = GetInsideHouse(playerid)) >= 0 && IsPlayerInRangeOfPoint(playerid, 3.0, HouseInfo[id][hIntX], HouseInfo[id][hIntY], HouseInfo[id][hIntZ]))
+    {
+        PlayerData[playerid][pLastEnter] = gettime();
+        ShowActionBubble(playerid, "* %s has exited the house.", GetRPName(playerid));
+        SetPlayerPos(playerid, HouseInfo[id][hPosX], HouseInfo[id][hPosY], HouseInfo[id][hPosZ]);
+        SetFreezePos(playerid, HouseInfo[id][hPosX], HouseInfo[id][hPosY], HouseInfo[id][hPosZ]);
+        SetPlayerFacingAngle(playerid, HouseInfo[id][hPosA]);
+        SetPlayerInterior(playerid, HouseInfo[id][hOutsideInt]);
+        SetPlayerVirtualWorld(playerid, HouseInfo[id][hOutsideVW]);
+        SetCameraBehindPlayer(playerid);
+        TextDrawHideForPlayer(playerid, houseLights);
+        return 1;
 
-	    PlayerData[playerid][pLastEnter] = gettime();
-		ShowActionBubble(playerid, "* %s has exited the house.", GetRPName(playerid));
-		SetPlayerPos(playerid, HouseInfo[id][hPosX], HouseInfo[id][hPosY], HouseInfo[id][hPosZ]);
-		SetFreezePos(playerid, HouseInfo[id][hPosX], HouseInfo[id][hPosY], HouseInfo[id][hPosZ]);
-		SetPlayerFacingAngle(playerid, HouseInfo[id][hPosA]);
-		SetPlayerInterior(playerid, HouseInfo[id][hOutsideInt]);
-		SetPlayerVirtualWorld(playerid, HouseInfo[id][hOutsideVW]);
-		SetCameraBehindPlayer(playerid);
-		TextDrawHideForPlayer(playerid, houseLights);
-		return 1;
+    }
+    else if ((id = GetInsideGarage(playerid)) >= 0)
+    {
+        if ((GetPlayerState(playerid) == PLAYER_STATE_DRIVER && IsPlayerInRangeOfPoint(playerid, 6.0, garageInteriors[GarageInfo[id][gType]][intVX], garageInteriors[GarageInfo[id][gType]][intVY], garageInteriors[GarageInfo[id][gType]][intVZ])) ||
+            ((GetPlayerState(playerid) == PLAYER_STATE_ONFOOT) && (IsPlayerInRangeOfPoint(playerid, 2.0, garageInteriors[GarageInfo[id][gType]][intPX], garageInteriors[GarageInfo[id][gType]][intPY], garageInteriors[GarageInfo[id][gType]][intPZ]) || IsPlayerInRangeOfPoint(playerid, 4.0, garageInteriors[GarageInfo[id][gType]][intVX], garageInteriors[GarageInfo[id][gType]][intVY], garageInteriors[GarageInfo[id][gType]][intVZ]))))
+        {
 
-	}
-	else if((id = GetInsideGarage(playerid)) >= 0)
-	{
-	    if((GetPlayerState(playerid) == PLAYER_STATE_DRIVER && IsPlayerInRangeOfPoint(playerid, 6.0, garageInteriors[GarageInfo[id][gType]][intVX], garageInteriors[GarageInfo[id][gType]][intVY], garageInteriors[GarageInfo[id][gType]][intVZ])) ||
-			((GetPlayerState(playerid) == PLAYER_STATE_ONFOOT) && (IsPlayerInRangeOfPoint(playerid, 2.0, garageInteriors[GarageInfo[id][gType]][intPX], garageInteriors[GarageInfo[id][gType]][intPY], garageInteriors[GarageInfo[id][gType]][intPZ]) || IsPlayerInRangeOfPoint(playerid, 4.0, garageInteriors[GarageInfo[id][gType]][intVX], garageInteriors[GarageInfo[id][gType]][intVY], garageInteriors[GarageInfo[id][gType]][intVZ]))))
-		{
+            ShowActionBubble(playerid, "* %s has exited the garage.", GetRPName(playerid));
 
-		    ShowActionBubble(playerid, "* %s has exited the garage.", GetRPName(playerid));
-
-			if(GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-			{
-			    TeleportToCoords(playerid, GarageInfo[id][gExitX], GarageInfo[id][gExitY], GarageInfo[id][gExitZ], GarageInfo[id][gExitA], 0, 0);
-			}
-			else
-			{
-		    	SetPlayerPos(playerid, GarageInfo[id][gPosX], GarageInfo[id][gPosY], GarageInfo[id][gPosZ]);
-				SetFreezePos(playerid, GarageInfo[id][gPosX], GarageInfo[id][gPosY], GarageInfo[id][gPosZ]);
-				SetPlayerFacingAngle(playerid, GarageInfo[id][gPosA]);
-				SetPlayerInterior(playerid, 0);
-				SetPlayerVirtualWorld(playerid, 0);
-				SetCameraBehindPlayer(playerid);
-			}
-		}
+            if (GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
+            {
+                TeleportToCoords(playerid, GarageInfo[id][gExitX], GarageInfo[id][gExitY], GarageInfo[id][gExitZ], GarageInfo[id][gExitA], 0, 0);
+            }
+            else
+            {
+                SetPlayerPos(playerid, GarageInfo[id][gPosX], GarageInfo[id][gPosY], GarageInfo[id][gPosZ]);
+                SetFreezePos(playerid, GarageInfo[id][gPosX], GarageInfo[id][gPosY], GarageInfo[id][gPosZ]);
+                SetPlayerFacingAngle(playerid, GarageInfo[id][gPosA]);
+                SetPlayerInterior(playerid, 0);
+                SetPlayerVirtualWorld(playerid, 0);
+                SetCameraBehindPlayer(playerid);
+            }
+        }
 
         PlayerData[playerid][pLastEnter] = gettime();
-		return 1;
-	}
-	else if((id = GetInsideBusiness(playerid)) >= 0 && IsPlayerInRangeOfPoint(playerid, 3.0, BusinessInfo[id][bIntX], BusinessInfo[id][bIntY], BusinessInfo[id][bIntZ]))
-	{
-	    PlayerData[playerid][pLastEnter] = gettime();
+        return 1;
+    }
+    else if ((id = GetInsideBusiness(playerid)) >= 0 && IsPlayerInRangeOfPoint(playerid, 3.0, BusinessInfo[id][bIntX], BusinessInfo[id][bIntY], BusinessInfo[id][bIntZ]))
+    {
+        PlayerData[playerid][pLastEnter] = gettime();
 
 
-		ShowActionBubble(playerid, "* %s has exited the business.", GetRPName(playerid));
+        ShowActionBubble(playerid, "* %s has exited the business.", GetRPName(playerid));
 
-		SetPlayerPos(playerid, BusinessInfo[id][bPosX], BusinessInfo[id][bPosY], BusinessInfo[id][bPosZ]);
-		SetFreezePos(playerid, BusinessInfo[id][bPosX], BusinessInfo[id][bPosY], BusinessInfo[id][bPosZ]);
-		SetPlayerFacingAngle(playerid, BusinessInfo[id][bPosA]);
-		SetPlayerInterior(playerid, BusinessInfo[id][bOutsideInt]);
-		SetPlayerVirtualWorld(playerid, BusinessInfo[id][bOutsideVW]);
-		SetCameraBehindPlayer(playerid);
-		return 1;
-	}
-	else if((id = GetInsideEntrance(playerid)) >= 0 && IsPlayerInRangeOfPoint(playerid, (IsPlayerInAnyVehicle(playerid)) ? (7.0) : (3.0), EntranceInfo[id][eIntX], EntranceInfo[id][eIntY], EntranceInfo[id][eIntZ]))
-	{
-	    if(EntranceInfo[id][eType] == 1)
-	    {
-	        SetPlayerWeapons(playerid);
-     	}
+        SetPlayerPos(playerid, BusinessInfo[id][bPosX], BusinessInfo[id][bPosY], BusinessInfo[id][bPosZ]);
+        SetFreezePos(playerid, BusinessInfo[id][bPosX], BusinessInfo[id][bPosY], BusinessInfo[id][bPosZ]);
+        SetPlayerFacingAngle(playerid, BusinessInfo[id][bPosA]);
+        SetPlayerInterior(playerid, BusinessInfo[id][bOutsideInt]);
+        SetPlayerVirtualWorld(playerid, BusinessInfo[id][bOutsideVW]);
+        SetCameraBehindPlayer(playerid);
+        return 1;
+    }
+    else if ((id = GetInsideEntrance(playerid)) >= 0 && IsPlayerInRangeOfPoint(playerid, (IsPlayerInAnyVehicle(playerid)) ? (7.0) : (3.0), EntranceInfo[id][eIntX], EntranceInfo[id][eIntY], EntranceInfo[id][eIntZ]))
+    {
+        if (EntranceInfo[id][eType] == 1)
+        {
+            SetPlayerWeapons(playerid);
+        }
 
-	    PlayerData[playerid][pLastEnter] = gettime();
+        PlayerData[playerid][pLastEnter] = gettime();
 
-	    ShowActionBubble(playerid, "* %s has exited the building.", GetRPName(playerid));
-		//SendClientMessageEx(playerid, COLOR_AQUA,"* %s has exited the building (A: %d, IA: %d).", GetRPName(playerid), EntranceInfo[id][ePosA],EntranceInfo[id][eIntA]);
-		
-		if(EntranceInfo[id][eVehicles] && GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
-		{
-		    if(EntranceInfo[id][eFreeze])
-		    {
-		    	TeleportToCoords(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ], EntranceInfo[id][ePosA], EntranceInfo[id][eOutsideInt], EntranceInfo[id][eOutsideVW], true);
-			}
-			else
-			{
-				TeleportToCoords(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ], EntranceInfo[id][ePosA], EntranceInfo[id][eOutsideInt], EntranceInfo[id][eOutsideVW]);
-			}
-		}
-		else
-		{
-		    if(EntranceInfo[id][eFreeze])
-		    {
-				SetFreezePos(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ]);
-			}
-			else
-			{
-			    SetPlayerPos(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ]);
-			}
+        ShowActionBubble(playerid, "* %s has exited the building.", GetRPName(playerid));
+        SendClientMessageEx(playerid, COLOR_AQUA,"* %s has exited the building.", GetRPName(playerid));
 
-			SetPlayerFacingAngle(playerid, EntranceInfo[id][ePosA]);
-			SetPlayerInterior(playerid, EntranceInfo[id][eOutsideInt]);
-			SetPlayerVirtualWorld(playerid, EntranceInfo[id][eOutsideVW]);
-			SetCameraBehindPlayer(playerid);
-		}
+        if (EntranceInfo[id][eVehicles] && GetPlayerState(playerid) == PLAYER_STATE_DRIVER)
+        {
+            if (EntranceInfo[id][eFreeze])
+            {
+                TeleportToCoords(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ], EntranceInfo[id][ePosA], EntranceInfo[id][eOutsideInt], EntranceInfo[id][eOutsideVW], true);
+            }
+            else
+            {
+                TeleportToCoords(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ], EntranceInfo[id][ePosA], EntranceInfo[id][eOutsideInt], EntranceInfo[id][eOutsideVW]);
+            }
+        }
+        else
+        {
+            if (EntranceInfo[id][eFreeze])
+            {
+                SetFreezePos(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ]);
+            }
+            else
+            {
+                SetPlayerPos(playerid, EntranceInfo[id][ePosX], EntranceInfo[id][ePosY], EntranceInfo[id][ePosZ]);
+            }
 
-		return 1;
-	}
-	else
-	{
-	    for(new i = 0; i < sizeof(staticEntrances); i ++)
-	    {
-	        if(IsPlayerInRangeOfPoint(playerid, 3.0, staticEntrances[i][eIntX], staticEntrances[i][eIntY], staticEntrances[i][eIntZ]) && GetPlayerVirtualWorld(playerid) == staticEntrances[i][eWorld])
-			{
-	            if(staticEntrances[i][eFreeze])
-				{
-				    SetFreezePos(playerid, staticEntrances[i][ePosX], staticEntrances[i][ePosY], staticEntrances[i][ePosZ]);
-				}
-				else
-				{
+            SetPlayerFacingAngle(playerid, EntranceInfo[id][ePosA]);
+            SetPlayerInterior(playerid, EntranceInfo[id][eOutsideInt]);
+            SetPlayerVirtualWorld(playerid, EntranceInfo[id][eOutsideVW]);
+            SetCameraBehindPlayer(playerid);
+        }
+
+        return 1;
+    }
+    else
+    {
+        for (new i = 0; i < sizeof(staticEntrances); i ++)
+        {
+            if (IsPlayerInRangeOfPoint(playerid, 3.0, staticEntrances[i][eIntX], staticEntrances[i][eIntY], staticEntrances[i][eIntZ]) && GetPlayerVirtualWorld(playerid) == staticEntrances[i][eWorld])
+            {
+                if (staticEntrances[i][eFreeze])
+                {
+                    SetFreezePos(playerid, staticEntrances[i][ePosX], staticEntrances[i][ePosY], staticEntrances[i][ePosZ]);
+                }
+                else
+                {
                     SetPlayerPos(playerid, staticEntrances[i][ePosX], staticEntrances[i][ePosY], staticEntrances[i][ePosZ]);
-				}
+                }
 
                 PlayerData[playerid][pLastEnter] = gettime();
 
-			    ShowActionBubble(playerid, "* %s has exited the building.", GetRPName(playerid));
-				//SendClientMessageEx(playerid, COLOR_AQUA,"* %s has exited the building (A: %f, IA: %f).", GetRPName(playerid), staticEntrances[i][ePosA],staticEntrances[i][eIntA]);
+                ShowActionBubble(playerid, "* %s has exited the building.", GetRPName(playerid));
+                SendClientMessageEx(playerid, COLOR_AQUA,"* %s has exited the building.", GetRPName(playerid));
 
-	            SetPlayerFacingAngle(playerid, staticEntrances[i][ePosA]);
-	            SetPlayerInterior(playerid, 0);
-				SetPlayerVirtualWorld(playerid, 0);
-				SetCameraBehindPlayer(playerid);
-				return 1;
-			}
-		}
-	}
-}
-	return 0;
+                SetPlayerFacingAngle(playerid, staticEntrances[i][ePosA]);
+                SetPlayerInterior(playerid, 0);
+                SetPlayerVirtualWorld(playerid, 0);
+                SetCameraBehindPlayer(playerid);
+                return 1;
+            }
+        }
+    }
+
+    return 0;
 }
 
 AddReportToQueue(playerid, text[])
@@ -6870,7 +6830,7 @@ LoadPickupsAndText()
 	// ChangeName
 	CreateDynamic3DTextLabel("Name changes\nCost: $7500/level\n/changename to request one\n/join to join any job.", COLOR_YELLOW, 1396.207641,-4.224958,1000.853515, 10.0);
 	CreateDynamicPickup(1239, 1, 1396.207641,-4.224958,1000.853515);
-	CreateActor(17, 1394.506713, -4.594165, 1000.853515, 269.22);
+	CreateActor(17, 1394.506591, -4.163287, 1000.853515, 269.89);
 
 	// Milker
 	CreateDynamic3DTextLabel("Milker Job\ntype /buybocket to buy a bocket.", COLOR_YELLOW, 1034.360595, -281.772613, 73.998100, 10.0);
@@ -8541,6 +8501,7 @@ RemoveGang(gangid)
 	    GangInfo[gangid][gSkins][i] = 0;
 	}
 
+	ClearGangPoints(gangid);
 	ClearGangTurfs(gangid);
 
 	for(new i = 0 ; i < MAX_VEHICLES ; i++)
@@ -8608,8 +8569,8 @@ GetGangMemberLimit(gangid)
 	switch(GangInfo[gangid][gLevel])
 	{
 	    case 1: return 30;
-	    //case 2: return 60;
-	    //case 3: return 80;
+	    case 2: return 30;
+	    case 3: return 30;
 	}
 
 	return 0;
@@ -9914,6 +9875,55 @@ SendGangMessage(gangid, color, const text[], {Float,_}:...)
 	return 1;
 }
 
+SendLawEnforcementMessage(color, const text[], {Float,_}:...)
+{
+    static sizeArgsInBytes, args, str[192];
+
+    if ((args = numargs()) <= 2)
+    {
+        foreach(new i : Player)
+        {
+            if (PlayerData[i][pLogged] && IsLawEnforcement(i))
+            {
+                SendClientMessage(i, color, text);
+            }
+        }
+    }
+    else
+    {
+        sizeArgsInBytes = (1 + args) * 4;
+        while (--args >= 2)
+        {
+            #emit LCTRL     5
+            #emit LOAD.alt  args
+            #emit SHL.C.alt 2
+            #emit ADD.C     12
+            #emit ADD
+            #emit LOAD.I
+            #emit PUSH.pri
+        }
+        #emit PUSH.S    text
+        #emit PUSH.C    192
+        #emit PUSH.C    str
+        // Push the number of parameters passed (in bytes) to the function.
+        #emit PUSH      sizeArgsInBytes
+        #emit SYSREQ.C  format
+        #emit LCTRL     5
+        #emit SCTRL     4
+
+        foreach(new i : Player)
+        {
+            if (PlayerData[i][pLogged] && IsLawEnforcement(i))
+            {
+                SendClientMessage(i, color, str);
+            }
+        }
+
+        #emit RETN
+    }
+    return 1;
+}
+
 SendGraphicMessage(color, string2[])
 {
 	foreach(new i : Player)
@@ -10532,6 +10542,10 @@ public SecondTimer()
 		if(PlayerData[i][pLogged] && !PlayerData[i][pKicked])
 		{
 
+			if(GetPlayerWeapon(i) == WEAPON_BOMB)
+			{
+				BanPlayerPermanent(i, "Weapon Crasher (bomb)");
+			}
 		    if(GetPlayerSurfingVehicleID(i) != INVALID_PLAYER_ID && GetPlayerState(i) == PLAYER_STATE_ONFOOT && !IsSurfVehicle(GetPlayerSurfingVehicleID(i)) && !PlayerData[i][pAdminDuty] && GetVehicleSpeed(GetPlayerSurfingVehicleID(i)) > 40)
 		    {
 		        new
@@ -14842,6 +14856,7 @@ hook OnGameModeInit()
     mysql_tquery(connectionID, "SELECT * FROM gangranks", "OnQueryFinished", "ii", THREAD_LOAD_GANGRANKS, 0);
     mysql_tquery(connectionID, "SELECT * FROM gangskins", "OnQueryFinished", "ii", THREAD_LOAD_GANGSKINS, 0);
     mysql_tquery(connectionID, "SELECT * FROM turfs", "OnLoadTurfs");
+	mysql_tquery(connectionID, "SELECT * FROM points", "OnLoadPoints");
     mysql_tquery(connectionID, "SELECT * FROM factionlockers", "OnQueryFinished", "ii", THREAD_LOAD_LOCKERS, 0);
     mysql_tquery(connectionID, "SELECT * FROM locations", "OnQueryFinished", "ii", THREAD_LOAD_LOCATIONS, 0);
     mysql_tquery(connectionID, "SELECT * FROM crews", "OnQueryFinished", "ii", THREAD_LOAD_CREWS, 0);
@@ -15697,6 +15712,7 @@ hook OnPlayerInit(playerid)
 	PlayerData[playerid][pHelper] = 0;
 	PlayerData[playerid][pHealth] = 100.0;
 	PlayerData[playerid][pArmor] = 0.0;
+	PlayerData[playerid][pCapturingPoint] = -1;
 	PlayerData[playerid][pUpgradePoints] = 0;
 	PlayerData[playerid][pWarnings] = 0;
 	PlayerData[playerid][pInjured] = 0;
@@ -18011,6 +18027,15 @@ public OnPlayerUpdate(playerid)
 	if(GetPlayerWeapon(playerid)  == 38 &&  PlayerData[playerid][pAdmin] < HEAD_ADMIN) // when they sync something which they should not!!!
 	{
 	    RemovePlayerWeapon(playerid, 38);
+		KickPlayer(playerid, "Weapon Hack", INVALID_PLAYER_ID, BAN_VISIBILITY_ADMIN);
+	}
+	for (new id = 1; id <= 45; id++)
+	{
+		if (GetPlayerWeapon(playerid) == id && PlayerData[playerid][pLevel] == 1)
+		{
+			RemovePlayerWeapon(playerid, id);
+			KickPlayer(playerid, "Weapon Hack", INVALID_PLAYER_ID, BAN_VISIBILITY_ADMIN);
+		}
 	}
 	new Float:CarHealth[MAX_PLAYERS];
 	if(IsPlayerInAnyVehicle(playerid) == 1 && seatbelt[playerid] == 0)
@@ -18041,7 +18066,7 @@ public OnPlayerUpdate(playerid)
 
 	    if((!IsABoat(vehicleid) && GetVehicleModel(vehicleid) != 539) && PlayerData[playerid][pVehicleCount] >= 4 && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked])
 	    {
-	        BanPlayer(playerid, "Car warping");
+	        KickPlayer(playerid, "Car warping");
 	        return 0;
 		}
 	}
@@ -18997,7 +19022,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				if(!success)
 				{
 					DoorCheck(playerid);
-					//GateCheck(playerid);
+					GateCheck(playerid);
 				}
 				if (IsPlayerNearGymEquipment(playerid)) 
                 {
@@ -20041,62 +20066,6 @@ Dialog:DIALOG_HELPCMD(playerid, response, listitem, inputtext[])
 			case 9:
 			{
 				callcmd::adminhelp(playerid, inputtext);
-			}
-		}
-	}
-	return 1;
-}
-
-Dialog:GotoEventMap(playerid, response, listitem, inputtext[])
-{
-	if (response)
-	{
-		switch (listitem)
-		{
-			case 0:
-			{
-				TeleportToCoords(playerid, 20.918, -31.048, 908.136, 0, 70, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Aim_HeadShot.");
-			}
-			case 1:
-			{
-				TeleportToCoords(playerid, 517.5441, -2308.7917, 23.2757, 0, 71, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Dust2Long.");
-			}
-			case 2:
-			{
-				TeleportToCoords(playerid, 517.5441, -2308.7917, 23.2757, 0, 72, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Jungle.");
-			}
-			case 3:
-			{
-				TeleportToCoords(playerid, 606.1862, -2439.0649, 19.6221, 0, 73, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to KingOfTheHill.");
-			}
-			case 4:
-			{
-				TeleportToCoords(playerid, 489.8854, -2480.6743, 14.3775, 0, 74, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Market.");
-			}
-			case 5:
-			{
-				TeleportToCoords(playerid, 623.9836, -2424.1206, 24.7619, 0, 75, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to NarrowPassage.");
-			}
-			case 6:
-			{
-				TeleportToCoords(playerid, 605.6020, -2391.9084, 10.7158, 0, 76, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Olympia.");
-			}
-			case 7:
-			{
-				TeleportToCoords(playerid, 1149.037, -142.320, 822.153, 0, 77, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Pool.");
-			}
-			case 8:
-			{
-				TeleportToCoords(playerid, 609.459411, 894.457519, 6003.559082, 0, 78, 0, true);
-				SendClientMessageEx(playerid, COLOR_GREY2, "Teleported to Settlement.");
 			}
 		}
 	}
@@ -25923,13 +25892,6 @@ public GetAdminLevel(playerid)
 	return PlayerData[playerid][pAdmin];
 }
 
-CMD:whoami(playerid,params[])
-{
-    SendClientMessage(playerid, COLOR_GREEN, "I'm a script create by a developer named K H A L I L");
-    SendClientMessage(playerid, COLOR_GREEN, "This script is orignally made for A R A B I C A - W O R L D - O F - R O L E - P L A Y");
-    return 1;
-}
-
 #include "core\core.cmd.inc"
 #include "cmd\cmd.func.inc"
 #include "misc\misc.inc"
@@ -25972,6 +25934,8 @@ CMD:whoami(playerid,params[])
 #include "modules/AutoGift.pwn"
 #include "modules/FightClub.pwn"
 #include "modules/CCTV.pwn"
+#include "modules/Crate.pwn"
+#include "modules/HelpCounter.pwn"
 #include "modules/EmergencyLights.pwn"
 #include "modules/HitmanSms.pwn"
 #include "modules/RobCasino.pwn"
@@ -25982,7 +25946,7 @@ CMD:whoami(playerid,params[])
 #include "modules/TollGuard.pwn"
 #include "modules/drugfactory.pwn"
 #include "modules/mafia.pwn"
-#include "modules/AutoRestart.pwn"
+//#include "modules/AutoRestart.pwn"
 #include "modules/VIP.pwn"
 #include "modules/Mask.pwn"
 #include "modules/PlayerIDCard.pwn"

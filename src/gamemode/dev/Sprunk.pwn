@@ -10,7 +10,7 @@
 // #define REMOVE_DEFAULT_MACHINES//Comment out to keep default vending machines
 #define TABLE_SPRUNKS "`sprunks`"
 
-#define MAX_SPRUNKS   100
+#define MAX_SPRUNKS   150
 #define SPRUNK_PRICE  5
 #define SPRUNK_HEALTH 10.0 // Adds 10 HP
 #define SPRUNK_KEY    KEY_SECONDARY_ATTACK // Enter Key
@@ -109,13 +109,15 @@ public OnPlayerUseMachine(playerid)
 {
     new Float:health;
     GetPlayerHealth(playerid, health);
-    if(health + SPRUNK_HEALTH <= 100.0)
+    if (health + SPRUNK_HEALTH <= 100.0)
     {
         SetPlayerHealth(playerid, health + SPRUNK_HEALTH);
+        PlayerData[playerid][pHealth] = health + SPRUNK_HEALTH; 
     }
     else
     {
         SetPlayerHealth(playerid, 100.0);
+        PlayerData[playerid][pHealth] = 100.0;
     }
     return ApplyAnimation(playerid, "VENDING", "VEND_Drink2_P", 4.1, 0, 0, 0, 0, 0);
 }

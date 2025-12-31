@@ -638,13 +638,21 @@ CMD:pointscaplimit(playerid, params[])
 
 CMD:capture(playerid, params[])
 {
-    if(PlayerData[playerid][pGang] == -1 || PlayerData[playerid][pGangRank] < 5)
+    if(PlayerData[playerid][pGang] == -1 || PlayerData[playerid][pGangRank] < 4)
 	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You are not rank 5+ in any gang at the moment.");
+	    return SendClientMessage(playerid, COLOR_GREY, "You are not rank 4+ in any gang at the moment.");
 	}
 	if(PlayerData[playerid][pCapturingPoint] >= 0)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You are already attempting to capture the point.");
+	}
+	if(GangClaimingTurfs(PlayerData[playerid][pGang]) >= GetMaxTurfCap())
+	{
+	    return SendClientMessageEx(playerid, COLOR_GREY, "You're gang is already claiming %i turfs.", GetMaxTurfCap());
+	}
+	if(PlayerData[playerid][pGang] == -1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not apart of any gang at the moment.");
 	}
 	if(PlayerData[playerid][pInjured])
 	{
@@ -733,51 +741,64 @@ CMD:pointinfo(playerid, params[])
 
 CMD:points(playerid, params[])
 {
-	new name[32], color = -1, pointid;
+    new name[32], pointid, color = -1;
 
-	if(sscanf(params, "i", pointid))
-	{
-	    SendClientMessage(playerid, COLOR_GREEN, "_______________________________________");
+    if(sscanf(params, "i", pointid))
+    {
+        SendClientMessage(playerid, COLOR_GREEN, "_______________________________________");
 
-		for(new i = 0; i < MAX_POINTS; i ++)
-		{
-		    if(PointInfo[i][pExists])
-		    {
-		        if(PointInfo[i][pCapturedGang] == -1) {
-		            name = "None";
-		        } else {
-		            strcat(name, GangInfo[PointInfo[i][pCapturedGang]][gName]);
-		        }
+        for(new i = 0; i < MAX_POINTS; i++)
+        {
+            if(PointInfo[i][pExists])
+            {
+                if(PointInfo[i][pCapturedGang] >= 0)
+                {
+                    color = GangInfo[PointInfo[i][pCapturedGang]][gColor];
+                    strcpy(name, GangInfo[PointInfo[i][pCapturedGang]][gName]);
+                }
+                else
+                {
+                    color = -1;
+                    strcpy(name, "None");
+                }
+                SendClientMessageEx(playerid, COLOR_GREY, 
+                    "ID: %i | Name: %s | Owner: {%06x}%s{AFAFAF} | Captured by: %s | Profits: %s | Time: %ih",
+                    i, PointInfo[i][pName], color >>> 8, name, PointInfo[i][pCapturedBy], FormatNumber(PointInfo[i][pProfits]), PointInfo[i][pTime]
+                );
+            }
+        }
 
-		        SendClientMessageEx(playerid, COLOR_GREY2, "ID: %i | Name: %s | Owner: %s | Captured by: %s | Profits: %s | Time: %ih", i, PointInfo[i][pName], name, PointInfo[i][pCapturedBy], FormatNumber(PointInfo[i][pProfits]), PointInfo[i][pTime]);
-			}
-		}
+        SendClientMessage(playerid, COLOR_GREEN, "_______________________________________");
+        SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /points [pointid]");
+        return 1;
+    }
 
-		SendClientMessage(playerid, COLOR_GREEN, "_______________________________________");
-		SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /points [pointid]");
-		return 1;
-	}
-    if(!(0 <= pointid < MAX_POINTS) || !PointInfo[pointid][pExists])
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "Invalid point.");
-	}
+    if(!(0 <= pointid && pointid < MAX_POINTS) || !PointInfo[pointid][pExists])
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Invalid point.");
+    }
 
-	if(PointInfo[pointid][pCapturedGang] >= 0)
-	{
-    	strcat(name, GangInfo[PointInfo[pointid][pCapturedGang]][gName]);
-    	color = GangInfo[PointInfo[pointid][pCapturedGang]][gColor];
-	}
-	else
-	{
-	    name = "None";
-	}
+    if(PointInfo[pointid][pCapturedGang] >= 0)
+    {
+        color = GangInfo[PointInfo[pointid][pCapturedGang]][gColor];
+        strcpy(name, GangInfo[PointInfo[pointid][pCapturedGang]][gName]);
+    }
+    else
+    {
+        color = -1;
+        strcpy(name, "None");
+    }
 
     SendClientMessageEx(playerid, COLOR_NAVYBLUE, "_____ %s ($%i) _____", PointInfo[pointid][pName], PointInfo[pointid][pProfits]);
-    SendClientMessageEx(playerid, COLOR_WHITE, "* This point captured by %s for {%06x}%s{FFFFFF} will be available in %i hours.", PointInfo[pointid][pCapturedBy], color >>> 8, name, PointInfo[pointid][pTime]);
+    SendClientMessageEx(playerid, COLOR_WHITE, "* This point captured by %s for {%06x}%s{FFFFFF} will be available in %i hours.", 
+        PointInfo[pointid][pCapturedBy], color >>> 8, name, PointInfo[pointid][pTime]
+    );
 
     if(PointInfo[pointid][pCapturer] != INVALID_PLAYER_ID)
     {
-	    SendClientMessageEx(playerid, COLOR_WHITE, "* This point is being captured by %s and will be theirs in %i minutes.", GetRPName(PointInfo[pointid][pCapturer]), PointInfo[pointid][pCaptureTime]);
-	}
-	return 1;
+        SendClientMessageEx(playerid, COLOR_WHITE, "* This point is being captured by %s and will be theirs in %i minutes.", 
+            GetRPName(PointInfo[pointid][pCapturer]), PointInfo[pointid][pCaptureTime]
+        );
+    }
+    return 1;
 }

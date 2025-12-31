@@ -58,6 +58,11 @@ hook OnTwoPlayersHeartBeat(playerid, targetid)
         color = 0xF5DEB300;
         display_on_minimap = true;
     }
+    else if (GetWantedLevel(playerid) == 6)
+    {
+        color = 0xFF000000;
+        display_on_minimap = true;
+    }
     else if(PlayerData[playerid][pDonator] > 0 && PlayerData[playerid][pVIPColor]) 
     {
         color = 0xFF00FF00;

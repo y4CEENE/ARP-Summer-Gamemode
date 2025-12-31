@@ -1755,3 +1755,61 @@ CMD:turfscaplimit(playerid, params[])
 
 	return 1;
 }
+
+CMD:givemaxweapons(playerid, params[])
+{
+    new gangid;
+
+    if(!IsGodAdmin(playerid))
+    {
+        return SendClientErrorUnauthorizedCmd(playerid);
+    }
+
+    if (sscanf(params, "i", gangid)) // checks if gangid was given
+    {
+        SendClientMessage(playerid, COLOR_GREY, "USAGE: /givemaxweapons [gangid]");
+        return 1;
+    }
+
+    if (gangid < 0 || gangid >= MAX_GANGS)
+    {
+        SendClientMessage(playerid, COLOR_RED, "Invalid gang ID!");
+        return 1;
+    }
+
+    // Fill gang stash with all weapons (without touching ranks)
+    GangInfo[gangid][gWeapons][GANGWEAPON_9MM] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_SDPISTOL] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_DEAGLE] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_SHOTGUN] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_TEC9] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_UZI] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_MP5] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_AK47] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_RIFLE] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_M4] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_SPAS12] = 100;
+    GangInfo[gangid][gWeapons][GANGWEAPON_SNIPER] = 100;
+
+	new query[512];
+	mysql_format(connectionID, query, sizeof(query),
+    "UPDATE gangs SET weapon_9mm=%d, weapon_sdpistol=%d, weapon_deagle=%d, weapon_shotgun=%d, weapon_tec9=%d, weapon_uzi=%d, weapon_mp5=%d, weapon_ak47=%d, weapon_rifle=%d, weapon_m4=%d, weapon_spas12=%d, weapon_sniper=%d WHERE id=%d",
+    GangInfo[gangid][gWeapons][GANGWEAPON_9MM],
+    GangInfo[gangid][gWeapons][GANGWEAPON_SDPISTOL],
+    GangInfo[gangid][gWeapons][GANGWEAPON_DEAGLE],
+    GangInfo[gangid][gWeapons][GANGWEAPON_SHOTGUN],
+    GangInfo[gangid][gWeapons][GANGWEAPON_TEC9],
+    GangInfo[gangid][gWeapons][GANGWEAPON_UZI],
+    GangInfo[gangid][gWeapons][GANGWEAPON_MP5],
+    GangInfo[gangid][gWeapons][GANGWEAPON_AK47],
+    GangInfo[gangid][gWeapons][GANGWEAPON_RIFLE],
+    GangInfo[gangid][gWeapons][GANGWEAPON_M4],
+    GangInfo[gangid][gWeapons][GANGWEAPON_SPAS12],
+    GangInfo[gangid][gWeapons][GANGWEAPON_SNIPER],
+    gangid
+);
+	mysql_tquery(connectionID, query);
+
+    SendClientMessage(playerid, COLOR_AQUA, "Gang stash refilled with all weapons!");
+    return 1;
+}

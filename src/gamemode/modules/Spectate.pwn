@@ -9,6 +9,13 @@ hook OnPlayerInit(playerid)
     return 1;
 }
 
+hook OnGameModeInit()
+{
+    CreateDynamic3DTextLabel("Body Camera\n/watchbodycams to start watch.", COLOR_YELLOW, 1579.379882, -1683.562133, 2110.538330, 10.0);
+
+    return 1;
+}
+
 hook OnPlayerDisconnect(playerid, reason)
 {
     foreach(new targetid: Player)
@@ -180,10 +187,6 @@ CMD:WatchBodyCams(playerid, params[])
 	    SetPlayerToSpawn(playerid);
 	    return 1;
  	}
-	if(GetPlayerFaction(playerid) >= 0 && GetPlayerFaction(targetid) != FACTION_POLICE)
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "Targetid is not a part of the Police Faction.");
-	}
     if(PlayerData[playerid][pFactionRank] < 1)
  	{
  	    return SendClientErrorUnauthorizedCmd(playerid);

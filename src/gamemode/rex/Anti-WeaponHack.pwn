@@ -75,55 +75,53 @@ CanPlayerShootWithWeapon(playerid, weaponid, hittype, hitid)
     {
         return 1;
     }
-	if((PlayerData[playerid][pPaintball] > 0) && (GetPlayerVirtualWorld(playerid) != 1001 && GetPlayerVirtualWorld(playerid) != 1000))
-	{
-	    if(gettime() - PlayerData[playerid][pLastShot] >= 3)
-	    {
-			PlayerData[playerid][pLastShot] = gettime();
+    if((PlayerData[playerid][pPaintball] > 0) && (GetPlayerVirtualWorld(playerid) != 1001 && GetPlayerVirtualWorld(playerid) != 1000))
+    {
+        if(gettime() - PlayerData[playerid][pLastShot] >= 3)
+        {
+            PlayerData[playerid][pLastShot] = gettime();
             ResetPlayerWeapons(playerid);
             SetPlayerWeapons(playerid);
-	    	SendAdminWarning(2, "%s[%i] is using paintball weapons outside of paintball (trying sync weapons).", GetRPName(playerid), playerid);
+            SendAdminWarning(2, "%s[%i] is using paintball weapons outside of paintball (trying sync weapons).", GetRPName(playerid), playerid);
             PlayerData[playerid][pACTime] = gettime() + 5;
-		}
+        }
+        return 0;
+    }
 
-		return 0;
-	}
-	
-	new entranceid;
-
-	if(PlayerData[playerid][pDueling] != INVALID_PLAYER_ID && !IsPlayerInRangeOfPoint(playerid, 150.0, 1419.6472, 4.0132, 1002.3906) && (entranceid = GetInsideEntrance(playerid)) != -1 && EntranceInfo[entranceid][eType] != 1)
-	{
-	    if(gettime() - PlayerData[playerid][pLastShot] >= 3)
-	    {
-			PlayerData[playerid][pLastShot] = gettime();
+    new entranceid;
+    if(PlayerData[playerid][pDueling] != INVALID_PLAYER_ID && !IsPlayerInRangeOfPoint(playerid, 150.0, 1419.6472, 4.0132, 1002.3906) && (entranceid = GetInsideEntrance(playerid)) != -1 && EntranceInfo[entranceid][eType] != 1)
+    {
+        if(gettime() - PlayerData[playerid][pLastShot] >= 3)
+        {
+            PlayerData[playerid][pLastShot] = gettime();
             ResetPlayerWeapons(playerid);
             SetPlayerWeapons(playerid);
-		    SendAdminWarning(2, "%s[%i] is using duel weapons outside of the duel arena (trying sync weapons).", GetRPName(playerid), playerid);
+            SendAdminWarning(2, "%s[%i] is using duel weapons outside of the duel arena (trying sync weapons).", GetRPName(playerid), playerid);
             PlayerData[playerid][pACTime] = gettime() + 5;
-		}
+        }
+        return 0;
+    }
 
-		return 0;
-	}
-
-	if(!IsPlayerInEvent(playerid)  && !PlayerHasWeapon(playerid, weaponid, true) && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked] && gettime() > PlayerData[playerid][pACTime])
-	{
+    if(!IsPlayerInEvent(playerid)  && !PlayerHasWeapon(playerid, weaponid, true) && PlayerData[playerid][pAdmin] < JUNIOR_ADMIN && !PlayerData[playerid][pKicked] && gettime() > PlayerData[playerid][pACTime])
+    {
         PlayerData[playerid][pACTime] = gettime() + 5;
         SendAdminWarning(2, "%s[%i] has+ a desynced %s (trying sync weapons).", GetPlayerNameEx(playerid), playerid, GetWeaponNameEx(weaponid));
-    	ResetPlayerWeapons(playerid);
-   		SetPlayerWeapons(playerid);
-	    return 0;
-	}
+        ResetPlayerWeapons(playerid);
+        SetPlayerWeapons(playerid);
+        return 0;
+    }
+    
+    if(hittype == BULLET_HIT_TYPE_PLAYER && hitid != INVALID_PLAYER_ID && 0 <= hitid < MAX_PLAYERS)
+    {
+        if(!IsPlayerInEvent(hitid) && !PlayerData[hitid][pPaintball] && PlayerData[hitid][pDueling] == INVALID_PLAYER_ID)
+        {
+            GetPlayerArmour(hitid, PlayerData[hitid][pArmor]);
+        }
+    }
 
-	if(hittype == BULLET_HIT_TYPE_PLAYER && hitid != INVALID_PLAYER_ID)
-	{
-	    if(!IsPlayerInEvent(hitid) && !PlayerData[hitid][pPaintball] && PlayerData[hitid][pDueling] == INVALID_PLAYER_ID)
-		{
-	    	GetPlayerArmour(hitid, PlayerData[hitid][pArmor]);
-		}
-	}
-    if(hitid != INVALID_PLAYER_ID && PlayerData[hitid][pNoDamage])
+    if(hittype == BULLET_HIT_TYPE_PLAYER && hitid != INVALID_PLAYER_ID && 0 <= hitid < MAX_PLAYERS && PlayerData[hitid][pNoDamage])
     {
         return 0;
     }
-	return 1;
+    return 1;
 }

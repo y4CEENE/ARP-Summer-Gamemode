@@ -15,6 +15,7 @@ static gTax = 15, gTaxVault = 0, gNewsVault = 0;
 static gDoubleXP = 0, gVPNState = 1, gHourReward = 0;
 static gServerMOTD[128], gAdminMOTD[128], gHelperMOTD[128];
 static gStateIsUpToDate=true;
+static MaxPointCap = 1;
 
 SetAntiCheatState(s)
 {
@@ -31,9 +32,18 @@ GetMaxTurfCap()
 {
     return MaxTurfCap;
 }
+GetMaxPointCap()
+{
+    return MaxPointCap;
+}
 SetServerMOTD(motd[])
 {
     strcpy(gServerMOTD, motd, sizeof(gServerMOTD));
+    gStateIsUpToDate = false;
+}
+SetMaxPointCap(value)
+{
+    MaxPointCap = value;
     gStateIsUpToDate = false;
 }
 
@@ -191,6 +201,7 @@ publish OnLoadServerState()
     gWeather             = cache_get_field_content_int(0, "weather");
     gAnticheat           = cache_get_field_content_int(0, "anticheat");
     MaxTurfCap           = cache_get_field_content_int(0, "max_turf_cap");
+    MaxPointCap          = cache_get_field_content_int(0, "max_point_cap");
     gGangInviteCooldown  = cache_get_field_content_int(0, "gang_invite_cooldown");
     gTax                 = cache_get_field_content_int(0, "tax");
     gTaxVault            = cache_get_field_content_int(0, "taxvault");

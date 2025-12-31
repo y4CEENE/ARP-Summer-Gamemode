@@ -124,7 +124,7 @@ public GiveRobberyReward(playerid)
     }
 
     new amount = random(REWARD_MAX - REWARD_MIN) + REWARD_MIN;
-    GivePlayerMoney(playerid, amount);
+    GivePlayerCash(playerid, amount);
     gRewardTotal += amount;
 
     if(gRewardTotal >= gMaxReward)
@@ -222,11 +222,4 @@ stock IsPlayerAimingAt(playerid, Float:x, Float:y, Float:z, Float:radius)
     distance = floatsqroot(distance) / floatsqroot(vector_x*vector_x + vector_y*vector_y + vector_z*vector_z);
 
     return (distance <= radius);
-}
-
-// DEBUG COMMAND
-CMD:tproys(playerid){
-	SetPlayerPos(playerid, 1291.407958, -1862.370361, 14.216876);
-	GivePlayerWeapon(playerid, 31, 400);
-	return 1;
 }

@@ -467,6 +467,10 @@ CMD:gangranks(playerid, params[])
 
 CMD:top(playerid, params[])
 {
+    if(PlayerData[playerid][pAdmin] < ASST_MANAGEMENT && !PlayerData[playerid][pDynamicAdmin])
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
     mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), 
         "SELECT username, cash, bank FROM "#TABLE_USERS" ORDER BY (cash + bank) DESC LIMIT 10");
     mysql_tquery(connectionID, queryBuffer, "OnGetTopRichestPlayers", "i", playerid);
@@ -482,7 +486,7 @@ public OnGetTopRichestPlayers(playerid)
         return SendClientMessage(playerid, COLOR_GREY, "No data found.");
     }
 
-    new username[MAX_PLAYER_NAME], cash, bank, total;
+    new username[MAX_PLAYER_NAME], cash, bank;
     new year, month, day;
     getdate(year, month, day);
 
@@ -493,11 +497,10 @@ public OnGetTopRichestPlayers(playerid)
         cache_get_field_content(i, "username", username, connectionID, sizeof(username));
         cash = cache_get_field_content_int(i, "cash");
         bank = cache_get_field_content_int(i, "bank");
-        total = cash + bank;
 
         SendClientMessageEx(playerid, COLOR_WHITE, 
-            "{FF7F27}#%d{FFFFFF} %s {22B14C}Total Money:{FFFFFF} $%s", 
-            i + 1, username, FormatNumber(total));
+            "{FF7F27}#%d{FFFFFF} %s {22B14C}Cash:{FFFFFF} $%s {22B14C}Bank:{FFFFFF} $%s", 
+            i + 1, username, FormatNumber(cash), FormatNumber(bank));
     }
 
     return 1;

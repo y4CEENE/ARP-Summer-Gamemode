@@ -53,6 +53,8 @@ CMD:join(playerid, params[])
         ID: 03\t{FF9900}Job Name:{FFFFFF} Arms Dealer\n\
         ID: 04\t{FF9900}Job Name:{FFFFFF} Mechanic\n\
         ID: 05\t{FF9900}Job Name:{FFFFFF} SF Mechanic\n\
+        ID: 05\t{FF9900}Job Name:{FFFFFF} Drug Dealer\n\
+        ID: 05\t{FF9900}Job Name:{FFFFFF} Drug Smuggler\n\
         ID: 06\t{FF9900}Job Name:{FFFFFF} Miner\n\
         ID: 07\t{FF9900}Job Name:{FFFFFF} Taxi Driver\n\
         ID: 08\t{FF9900}Job Name:{FFFFFF} Lawyer\n\
@@ -81,6 +83,8 @@ new const JobListMap[] =
     JOB_ARMSDEALER,
     JOB_MECHANIC,
     JOB_MECHANIC,
+    JOB_DRUGDEALER,
+	JOB_DRUGSMUGGLER,
     JOB_MINER,
     JOB_TAXIDRIVER,
     JOB_LAWYER,

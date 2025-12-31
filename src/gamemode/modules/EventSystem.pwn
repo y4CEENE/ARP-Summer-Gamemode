@@ -1716,10 +1716,10 @@ Dialog:EventEditArmor(playerid, response, listitem, inputtext[])
 
 CMD:event(playerid, params[])
 {
-    if(!IsAdmin(playerid, 5))
-    {
-        return SendClientErrorUnauthorizedCmd(playerid);
-    }
+	if(PlayerData[playerid][pAdmin] < SENIOR_ADMIN)
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
     if(!IsAdminOnDuty(playerid))
     {
         return SendClientMessage(playerid,COLOR_WHITE, "You're not on-duty as admin.");

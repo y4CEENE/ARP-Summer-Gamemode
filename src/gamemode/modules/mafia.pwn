@@ -27,11 +27,9 @@ hook OnPlayerDisconnect(playerid, reason)
 
 hook OnGameModeInit()
 {
-    CreateDynamic3DTextLabel("Type /gmats\nto start farming", COLOR_YELLOW,  1652.592895, -2567.482910, 210.193023, 10.0, .worldid = Mafia_Farming_World, .interiorid = Mafia_Farming_InteriorID);
-    CreateDynamicPickup(1575, 1, 1652.592895, -2567.482910, 210.193023, .worldid = Mafia_Farming_World, .interiorid = Mafia_Farming_InteriorID);
-    // FOR TEST
-    Create3DTextLabel("Checkpoint here", 0xFFFFFFFF, 1663.1552, -2554.1355, 210.193023, 40.0, Mafia_Farming_World, Mafia_Farming_InteriorID);
-
+    CreateDynamic3DTextLabel("Type /gmats\nto start farming", COLOR_YELLOW,  1342.766723, 799.112243, 8732.478515, 10.0);
+    CreateDynamic3DTextLabel("Materials Factory\nDeliver the stock.", COLOR_YELLOW, 1367.997924, 796.098571, 8732.478515, 10.0);
+    CreateDynamicPickup(1575, 1, 1342.766723, 799.112243, 8732.478515);
     return 1;
 }
 
@@ -41,9 +39,9 @@ CMD:gmats(playerid, params[])
 	{
 		return SendClientMessage(playerid, COLOR_GREY, "Only mafia can use this command.");
 	}
-    if (!IsPlayerInRangeOfPoint(playerid, 3.0,  1652.592895, -2567.482910, 210.193023))
-    {   
-        return SendClientMessage(playerid, COLOR_GREY, "You are not in range of materials pickup.");
+    if(!IsPlayerInRangeOfPoint(playerid, 3.0, 1342.766723, 799.112243, 8732.478515))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not at the material factory point!");
     }
     if (GetPlayerState(playerid) != PLAYER_STATE_ONFOOT)
     {     
@@ -68,8 +66,7 @@ public Farming_Timer(playerid)
     ApplyAnimation(playerid, "CARRY", "liftup", 4.1, 0, 0, 0, 0, 0, 1);
     SetPlayerAttachedObject(playerid, 9, 3014, 6);
 
-    SetPlayerCheckpoint(playerid, 1663.1552, -2554.1355, 210.2299, 2.5);
-    //SetActiveCheckpoint(playerid, MafiaFarmingCheckpoint, 2564.7836, -1292.9316, 1044.1250, 2.0);
+    SetPlayerCheckpoint(playerid, 1367.997924, 796.098571, 8732.478515, 2.5);
     return 1;
 }
 
@@ -91,16 +88,6 @@ hook OnPlayerEnterCheckpoint(playerid)
 
     IsFarming[playerid] = 0;
     DisablePlayerCheckpoint(playerid);
-    return 1;
-}
-
-
-// Debug command (remove it)
-CMD:goo1(playerid)
-{
-    SetPlayerVirtualWorld(playerid, Mafia_Farming_World);
-    SetPlayerInterior(playerid, Mafia_Farming_InteriorID);
-    SetPlayerPos(playerid, 1652.592895, -2567.482910, 210.193023);
     return 1;
 }
 

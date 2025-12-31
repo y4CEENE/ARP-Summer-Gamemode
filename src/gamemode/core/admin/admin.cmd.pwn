@@ -240,7 +240,7 @@ CMD:setpassword(playerid, params[])
 {
 	new username[MAX_PLAYER_NAME], password[128];
 
-    if(!IsGodAdmin(playerid))
+    if(PlayerData[playerid][pAdmin] < ASST_MANAGEMENT && ! PlayerData[playerid][pAdminPersonnel])
 	{
 	    return SendClientErrorUnauthorizedCmd(playerid);
 	}

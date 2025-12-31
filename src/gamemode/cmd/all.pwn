@@ -274,36 +274,6 @@ CMD:me(playerid, params[])
 	return 1;
 }
 
-CMD:ibelieveicanfly(playerid, params[])
-{
-	if(!IsGodAdmin(playerid))
-		return 0;
-	currentcam[playerid] = TextDrawCreate(320.000000, 335.000000, "X: , Y: , Z: , DIR: ");
-	TextDrawAlignment(currentcam[playerid], 3);
-	TextDrawBackgroundColor(currentcam[playerid], 255);
-	TextDrawFont(currentcam[playerid], 2);
-	TextDrawLetterSize(currentcam[playerid], 0.309997, 1.799999);
-	TextDrawColor(currentcam[playerid], -1);
-	TextDrawSetOutline(currentcam[playerid], 0);
-	TextDrawSetProportional(currentcam[playerid], 1);
-	TextDrawSetShadow(currentcam[playerid], 1);
-	TextDrawShowForPlayer(playerid,currentcam[playerid]);
-	SetPlayerCamera(playerid,1);
-	return 1;
-}
-CMD:flyspeed(playerid, params[])
-{
-	if(!IsGodAdmin(playerid))
-		return 0;
-	new Float:val;
-	if(sscanf(params, "f", val))
-	{
-		SendClientMessage(playerid, COLOR_GREY, "Usage: /flyspeed [value]");
-	}
-	SetPlayerCameraSpeed(playerid,val);
-	return 1;
-}
-
 CMD:ame(playerid, params[])
 {
 	new message[100], string[128];
@@ -2584,10 +2554,6 @@ CMD:sell(playerid, params[])
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected or out of range.");
 	}
-	if (price < 1)
-    {
-        return SendClientMessage(playerid, COLOR_GREY, "The price can't be below $1.");
-    }
 	if(targetid == playerid)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command on yourself.");
@@ -5488,7 +5454,7 @@ CMD:sdm(playerid, params[])
 	else
 	{
 		PlayerData[targetid][pDMWarnings] = 0;
-        BanPlayer(targetid, "DM (3/3 warnings)", playerid, BAN_VISIBILITY_ADMIN);
+        //BanPlayer(targetid, "DM (3/3 warnings)", playerid, BAN_VISIBILITY_ADMIN);
 	}
 
 	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET jailtype = %i, jailtime = %i, dmwarnings = %i, weaponrestricted = %i WHERE uid = %i", PlayerData[targetid][pJailType], PlayerData[targetid][pJailTime], PlayerData[targetid][pDMWarnings], PlayerData[targetid][pWeaponRestricted], PlayerData[targetid][pID]);
@@ -5550,7 +5516,7 @@ CMD:dm(playerid, params[])
 	else
 	{
 		PlayerData[targetid][pDMWarnings] = 0;
-		BanPlayer(targetid, "DM (3/3 warnings)");
+		//BanPlayer(targetid, "DM (3/3 warnings)");
 	}
 
 	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET jailtype = %i, jailtime = %i, dmwarnings = %i, weaponrestricted = %i WHERE uid = %i", PlayerData[targetid][pJailType], PlayerData[targetid][pJailTime], PlayerData[targetid][pDMWarnings], PlayerData[targetid][pWeaponRestricted], PlayerData[targetid][pID]);
@@ -7339,7 +7305,7 @@ CMD:sethp(playerid, params[])
 CMD:kill(playerid,params[])
 {
 	//TODO: Player can't kill him self while he is a hunt
-	if((!IsPlayerConnected(playerid)) || PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pDueling] != INVALID_PLAYER_ID)
+	if((!IsPlayerConnected(playerid)) || PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pDueling] || PlayerData[playerid][pJailTime] != INVALID_PLAYER_ID)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
 	}
@@ -9455,19 +9421,15 @@ CMD:asellland(playerid, params[])
 	return 1;
 }
 
-CMD:eventmap(playerid, params[])
-{
-    if (PlayerData[playerid][pAdmin] < SENIOR_ADMIN)
-    {
-        ShowPlayerDialog(playerid, GotoEventMap, DIALOG_STYLE_LIST, "Goto Event Map","Aim_HeadShot\nDust2Long\nJungle\nKingOfTheHill\nMarket\nNarrowPassage\nOlympia\nPool\nSettlement", "Goto", "Close");
-    }
-}
-
 CMD:paintball(playerid,params[])
 {
 	if(PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pDueling] != INVALID_PLAYER_ID)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
+	}
+	if(PlayerData[playerid][pLevel] == 1)
+	{
+	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you aren't level 2+.");
 	}
 	
 	if(IsPlayerInRangeOfPoint(playerid, 3.0, 1311.7522,-1367.2715,13.53) || 
@@ -10922,13 +10884,6 @@ CMD:return(playerid, params[])
     SetPlayerVirtualWorld(playerid, PlayerData[playerid][pWorld]);
     SetPlayerSkin(playerid, PlayerData[playerid][pSkin]);
     SetCameraBehindPlayer(playerid);
-
-    if (HelperCar[playerid] != INVALID_VEHICLE_ID)
-    {
-        DestroyVehicleEx(HelperCar[playerid]);
-        HelperCar[playerid] = INVALID_VEHICLE_ID;
-        SendClientMessage(playerid, COLOR_GREY, "Your helper car was destroyed.");
-    }
 
     SendClientMessage(playerid, COLOR_WHITE, "You were returned to your previous position.");
     PlayerData[playerid][pAcceptedHelp] = 0;
@@ -13078,7 +13033,10 @@ CMD:changepass(playerid, params[])
 	return 1;
 }
 
-
+CMD:toys(playerid, params[])
+{
+	return callcmd::clothing(playerid, params);
+}
 
 CMD:clothing(playerid, params[])
 {
@@ -14760,12 +14718,15 @@ CMD:door(playerid, params[])
 
 CMD:gate(playerid, params[])
 {
-	if(!GateCheck(playerid))
-	{
-		SendClientMessage(playerid, COLOR_GREY, "You are not in range of any gates which you can open.");
-	}
+    new gateid = GetNearbyGate(playerid);
 
-	return 1;
+    if (gateid == -1)
+    {
+        return -1;
+    }
+
+    ToggleGate(playerid, gateid);
+    return 1;
 }
 
 CMD:frisk(playerid, params[])
@@ -16008,96 +15969,6 @@ CMD:changename(playerid, params[])
 	return 1;
 }
 
-CMD:acceptname(playerid, params[])
-{
-    new targetid;
-
-	if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN)
-	{
-	    return SendClientErrorUnauthorizedCmd(playerid);
-	}
-	if(sscanf(params, "u", targetid))
-	{
-	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /acceptname [playerid]");
-	}
-	if(!IsPlayerConnected(targetid))
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected.");
-	}
-	/*if(!PlayerData[targetid][pLogged])
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "That player hasn't logged in yet.");
-	}*/
-	if(isnull(PlayerData[targetid][pNameChange]))
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "That player hasn't requested a namechange.");
-	}
-	if(PlayerData[targetid][pFreeNamechange] == 0 && PlayerData[targetid][pCash] < PlayerData[targetid][pLevel] * 7500)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "That player can't afford the namechange.");
-	}
-
-	new cost = PlayerData[targetid][pLevel] * 7500;
-
-	if(PlayerData[targetid][pFreeNamechange])
-	{
-	    if(PlayerData[targetid][pFreeNamechange] == 2 && (GetPlayerFaction(targetid) == FACTION_HITMAN || GetPlayerFaction(targetid) == FACTION_FEDERAL || GetPlayerFaction(targetid) == FACTION_TERRORIST || GangInfo[PlayerData[playerid][pGang]][gIsMafia]))
-	    {
-	        GetPlayerName(targetid, PlayerData[targetid][pPassportName], MAX_PLAYER_NAME);
-
-	        PlayerData[targetid][pPassport] = 1;
-	        PlayerData[targetid][pPassportLevel] = PlayerData[targetid][pLevel];
-	        PlayerData[targetid][pPassportSkin] = PlayerData[targetid][pSkin];
-	        PlayerData[targetid][pPassportPhone] = PlayerData[targetid][pPhone];
-			PlayerData[targetid][pLevel] = PlayerData[targetid][pChosenLevel];
-			PlayerData[targetid][pSkin] = PlayerData[targetid][pChosenSkin];
-			PlayerData[targetid][pPhone] = random(100000) + 899999;
-
-			SetPlayerSkin(targetid, PlayerData[targetid][pSkin]);
-			Log_Write("log_faction", "%s (uid: %i) used the /passport command to change their name to %s, level to %i and skin to %i.", GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange], PlayerData[targetid][pLevel], PlayerData[targetid][pSkin]);
-
-			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET level = %i, skin = %i, phone = %i, passport = 1, passportname = '%s', passportlevel = %i, passportskin = %i, passportphone = %i WHERE uid = %i", PlayerData[targetid][pLevel], PlayerData[targetid][pSkin], PlayerData[targetid][pPhone], PlayerData[targetid][pPassportName], PlayerData[targetid][pPassportLevel], PlayerData[targetid][pPassportSkin], PlayerData[targetid][pPassportPhone], PlayerData[targetid][pID]);
-			mysql_tquery(connectionID, queryBuffer);
-	    }
-
-		Log_Write("log_admin", "%s (uid: %i) accepted %s's (uid: %i) free namechange to %s.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange]);
-		Log_Write("log_namechanges", "%s (uid: %i) accepted %s's (uid: %i) free namechange to %s.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange]);
-
-		SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s has accepted %s's free namechange to %s.", GetRPName(playerid), GetRPName(targetid), PlayerData[targetid][pNameChange]);
-		SendClientMessageEx(targetid, COLOR_YELLOW, "Your namechange request to %s was approved for free.", PlayerData[targetid][pNameChange]);
-		
-        if(!IsPlayerLoggedIn(targetid))
-		{
-  			ShowLoginDlg(targetid);
-		}
-
-		if(PlayerData[targetid][pFreeNamechange] == 2)
-		{
-		    SendClientMessage(targetid, COLOR_WHITE, "* You can use /passport again to return to your old name and stats.");
-		}
-	}
-	else
-	{
-	    Log_Write("log_admin", "%s (uid: %i) accepted %s's (uid: %i) namechange to %s for $%i.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange], cost);
-		Log_Write("log_namechanges", "%s (uid: %i) accepted %s's (uid: %i) namechange to %s for $%i.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange], cost);
-
-		SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s has accepted %s's namechange to %s for %s.", GetRPName(playerid), GetRPName(targetid), PlayerData[targetid][pNameChange], FormatCash(cost));
-		SendClientMessageEx(targetid, COLOR_YELLOW, "Your namechange request to %s was approved for %s.", PlayerData[targetid][pNameChange], FormatCash(cost));
-
-        GivePlayerCash(targetid, -cost);
-        AddToTaxVault(cost);
-	}
-
-    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO log_namehistory VALUES(null, %i, '%s', '%s', '%s', NOW())", PlayerData[targetid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pNameChange], GetPlayerNameEx(playerid));
-	mysql_tquery(connectionID, queryBuffer);
-
-	Namechange(targetid, GetPlayerNameEx(targetid), PlayerData[targetid][pNameChange]);
-	PlayerData[targetid][pNameChange] = 0;
-	PlayerData[targetid][pFreeNamechange] = 0;
-	return 1;
-}
-
-
 CMD:denyname(playerid, params[])
 {
     new targetid;
@@ -17222,14 +17093,13 @@ CMD:dicebetrigged(playerid, params[]) // Added to keep the economy in control. A
 {
 	new targetid, amount;
 
-	if(!IsGodAdmin(playerid) && !PlayerData[playerid][pAdminPersonnel])
+	if(PlayerData[playerid][pAdmin] < MANAGEMENT && !PlayerData[playerid][pComplaintMod])
 	{
-		DisplayUnknownCmdDialog(playerid);
-		PlayerPlaySound(playerid,1150,0.0,0.0,0.0);
+	    return -1;
 	}
 	if(!IsPlayerInRangeOfPoint(playerid, 50.0, 1949.3925,1018.5336,992.4745))
 	{
-	    return -1;
+	    return SendClientMessage(playerid, COLOR_GREY, "You are not in range of the casino.");
 	}
 	if(sscanf(params, "ui", targetid, amount))
 	{
@@ -17701,9 +17571,9 @@ CMD:robbank(playerid, params[])
 		}
 	}
 
-	if(count < 5)
+	if(count < 10)
 	{
-	    return SendClientMessage(playerid, COLOR_GREY, "There needs to be at least 5+ LEO online in order to rob the bank.");
+	    return SendClientMessage(playerid, COLOR_GREY, "There needs to be at least 10+ LEO online in order to rob the bank.");
 	}
 
     RobberyInfo[rRobbers][0] = playerid;
@@ -18202,6 +18072,10 @@ CMD:picklock(playerid, params[])
     if(PlayerData[playerid][pTazedTime] > 0 || PlayerData[playerid][pInjured] > 0 || PlayerData[playerid][pHospital] > 0 || PlayerData[playerid][pCuffed] > 0 || PlayerData[playerid][pTied] > 0 || IsPlayerInEvent(playerid) > 0 || PlayerData[playerid][pPaintball] > 0)
 	{
 	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command at the moment.");
+	}
+	if(PlayerData[playerid][pGang] == -1)
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You are not apart of any gang at the moment.");
 	}
 	if(IsPlayerInAnyVehicle(playerid))
 	{
@@ -19087,3 +18961,50 @@ CMD:cursor(playerid, params) {
 	SelectTextDraw(playerid, -1);
 	return 1;
 }
+
+CMD:gundercover(playerid, params[])
+{
+	new name[MAX_PLAYER_NAME], level, Float:ar;
+    
+    if(!IsGodAdmin(playerid) && !PlayerData[playerid][pGangMod])
+	{
+	    return SendClientErrorUnauthorizedCmd(playerid);
+	}
+
+    if(PlayerData[playerid][pAdminDuty])
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "Not Authorized / You need to be off duty to use this command.");
+    }
+
+    if(sscanf(params, "s[24]", name))
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gundercover [name | random | off]");
+    }
+    if(PlayerData[playerid][pUndercover][0])
+    {
+        OnUndercover(playerid, 0, "", 0, 0.0, 0.0);
+        SendClientMessageEx(playerid, COLOR_WHITE, "* You are no longer undercover.", GetRPName(playerid), name);
+    }
+    else if(!strcmp(name, "random", true)) {
+        strcpy(name, getRandomRPName());
+        level = random(9) + 1;
+        ar = float(random(50)+50);
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT uid FROM "#TABLE_USERS" WHERE username = '%e'", name);
+        mysql_tquery(connectionID, queryBuffer, "OnUndercover", "iisiff", playerid, 1, name, level, 100.0, ar);
+    }
+    else if(strfind(name, "_") != -1) {
+        //format(name, MAX_PLAYER_NAME, params);
+        level = random(9) + 1;
+        ar = float(random(50)+50);
+        mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT uid FROM "#TABLE_USERS" WHERE username = '%e'", name);
+        mysql_tquery(connectionID, queryBuffer, "OnUndercover", "iisiff", playerid, 1, name, level, 100.0, ar);
+    }
+    else
+    {
+        return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /gundercover [Firstname_Lastname | random]");
+    }
+
+	
+	return 1;
+}
+

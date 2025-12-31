@@ -101,9 +101,9 @@ CMD:arrest(playerid, params[])
             {
                 notorityfine = percent(PlayerData[targetid][pCash] + PlayerData[targetid][pBank], 10);
             }
-            if(notorityfine > 250000)
+            if(notorityfine > 10000)
             {
-                notorityfine = 250000;
+                notorityfine = 10000;
             }
             if(notorityfine > 0)
             {
@@ -470,8 +470,8 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		    PlayerData[targetid][pCrimes]++;
 		
 			new query[256];
-			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET wantedlevel = %i WHERE uid = %i", PlayerData[playerid][pWantedLevel], PlayerData[playerid][pID]);
-	    	mysql_tquery(connectionID, queryBuffer);
+			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET wantedlevel = %i WHERE uid = %i", PlayerData[targetid][pWantedLevel], PlayerData[targetid][pID]);
+			mysql_tquery(connectionID, queryBuffer);
 		    format(query, sizeof(query), "INSERT INTO charges VALUES(null, %i, '%e', NOW(), '%e')", PlayerData[targetid][pID], GetPlayerNameEx(playerid), reason);
 		    new year, month, day, hour, minute, second;
 		    getdate(year, month, day);

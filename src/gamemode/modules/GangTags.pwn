@@ -160,7 +160,7 @@ Graffiti_Refresh(id)
 
 Graffiti_Save(id)
 {
-	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GRAFFITI" SET graffitiX = '%.4f', graffitiY = '%.4f',\
+	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_GANGTAGS" SET graffitiX = '%.4f', graffitiY = '%.4f',\
 		graffitiZ = '%.4f', graffitiAngle = '%.4f', graffitiDefault = '%d', graffitiColor = '%d', graffitiFont = '%e', graffitiText = '%e' WHERE graffitiID = '%d'",
         GraffitiData[id][graffitiPos][0],
         GraffitiData[id][graffitiPos][1],

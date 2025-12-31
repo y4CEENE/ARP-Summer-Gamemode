@@ -10,7 +10,7 @@ static Text:WastedText[7];
 stock ShowGtaVWasted(playerid)
 {
     StopAudioStreamForPlayer(playerid);
-    PlayAudioStreamForPlayer(playerid, "http://l.top4top.io/m_3148x9tn71.mp3");
+    PlayAudioStreamForPlayer(playerid, "http://arabicarp-official.web.app/wasted.mp3");
     for (new i = 0; i < sizeof(WastedText); i++)
     {
         TextDrawShowForPlayer(playerid, WastedText[i]);

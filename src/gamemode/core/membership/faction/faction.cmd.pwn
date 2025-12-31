@@ -1384,10 +1384,14 @@ CMD:passport(playerid, params[])
 		return 1;
 	}
 
-	if(GetPlayerFaction(playerid) != FACTION_HITMAN && GetPlayerFaction(playerid) != FACTION_FEDERAL && GetPlayerFaction(playerid) != FACTION_TERRORIST && GetPlayerFaction(playerid) != FACTION_GOVERNMENT)
-	{
-	    return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you're not a hitman or federal agent.");
-	}
+ 	if (GetPlayerFaction(playerid) != FACTION_HITMAN &&
+        GetPlayerFaction(playerid) != FACTION_FEDERAL &&
+        GetPlayerFaction(playerid) != FACTION_TERRORIST &&
+        GetPlayerFaction(playerid) != FACTION_GOVERNMENT &&
+        !(PlayerData[playerid][pGang] != -1 && GangInfo[PlayerData[playerid][pGang]][gIsMafia]))
+    {
+        return SendClientMessage(playerid, COLOR_GREY, "You can't use this command as you're not a hitman or federal agent.");
+    }
 	if(sscanf(params, "s[24]ii", name, level, skinid))
 	{
 	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /passport [name] [level] [skinid]");
@@ -1423,6 +1427,91 @@ CMD:passport(playerid, params[])
 
 	mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "SELECT uid FROM "#TABLE_USERS" WHERE username = '%e'", name);
 	mysql_tquery(connectionID, queryBuffer, "OnHitmanPassport", "isii", playerid, name, level, skinid);
+	return 1;
+}
+
+
+CMD:acceptname(playerid, params[])
+{
+	new targetid;
+
+	if(PlayerData[playerid][pAdmin] < JUNIOR_ADMIN)
+	    return SendClientErrorUnauthorizedCmd(playerid);
+
+	if(sscanf(params, "u", targetid))
+	    return SendClientMessage(playerid, COLOR_SYNTAX, "USAGE: /acceptname [playerid]");
+
+	if(!IsPlayerConnected(targetid))
+	    return SendClientMessage(playerid, COLOR_GREY, "The player specified is disconnected.");
+
+	if(isnull(PlayerData[targetid][pNameChange]))
+	    return SendClientMessage(playerid, COLOR_GREY, "That player hasn't requested a namechange.");
+
+	if(PlayerData[targetid][pFreeNamechange] == 0 && PlayerData[targetid][pCash] < PlayerData[targetid][pLevel] * 7500)
+	    return SendClientMessage(playerid, COLOR_GREY, "That player can't afford the namechange.");
+
+	new cost = PlayerData[targetid][pLevel] * 7500;
+
+	if(PlayerData[targetid][pFreeNamechange])
+	{
+	    if (PlayerData[targetid][pFreeNamechange] == 2 &&
+	        (
+	            GetPlayerFaction(targetid) == FACTION_HITMAN ||
+	            GetPlayerFaction(targetid) == FACTION_FEDERAL ||
+	            GetPlayerFaction(targetid) == FACTION_TERRORIST ||
+	            GetPlayerFaction(targetid) == FACTION_GOVERNMENT ||
+	            (PlayerData[targetid][pGang] != -1 && GangInfo[PlayerData[targetid][pGang]][gIsMafia])
+	        ))
+	    {
+	        GetPlayerName(targetid, PlayerData[targetid][pPassportName], MAX_PLAYER_NAME);
+
+	        PlayerData[targetid][pPassport] = 1;
+	        PlayerData[targetid][pPassportLevel] = PlayerData[targetid][pLevel];
+	        PlayerData[targetid][pPassportSkin] = PlayerData[targetid][pSkin];
+	        PlayerData[targetid][pPassportPhone] = PlayerData[targetid][pPhone];
+			PlayerData[targetid][pLevel] = PlayerData[targetid][pChosenLevel];
+			PlayerData[targetid][pSkin] = PlayerData[targetid][pChosenSkin];
+			PlayerData[targetid][pPhone] = random(100000) + 899999;
+
+			SetPlayerSkin(targetid, PlayerData[targetid][pSkin]);
+
+			Log_Write("log_faction", "%s (uid: %i) used the /passport command to change their name to %s, level to %i and skin to %i.", GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange], PlayerData[targetid][pLevel], PlayerData[targetid][pSkin]);
+
+			mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "UPDATE "#TABLE_USERS" SET level = %i, skin = %i, phone = %i, passport = 1, passportname = '%s', passportlevel = %i, passportskin = %i, passportphone = %i WHERE uid = %i",
+			PlayerData[targetid][pLevel], PlayerData[targetid][pSkin], PlayerData[targetid][pPhone], PlayerData[targetid][pPassportName], PlayerData[targetid][pPassportLevel], PlayerData[targetid][pPassportSkin], PlayerData[targetid][pPassportPhone], PlayerData[targetid][pID]);
+			mysql_tquery(connectionID, queryBuffer);
+	    }
+
+		Log_Write("log_admin", "%s (uid: %i) accepted %s's (uid: %i) free namechange to %s.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange]);
+		Log_Write("log_namechanges", "%s (uid: %i) accepted %s's (uid: %i) free namechange to %s.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange]);
+
+		SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s has accepted %s's free namechange to %s.", GetRPName(playerid), GetRPName(targetid), PlayerData[targetid][pNameChange]);
+		SendClientMessageEx(targetid, COLOR_YELLOW, "Your namechange request to %s was approved for free.", PlayerData[targetid][pNameChange]);
+
+        if(!IsPlayerLoggedIn(targetid))
+  			ShowLoginDlg(targetid);
+
+		if(PlayerData[targetid][pFreeNamechange] == 2)
+		    SendClientMessage(targetid, COLOR_WHITE, "* You can use /passport again to return to your old name and stats.");
+	}
+	else
+	{
+	    Log_Write("log_admin", "%s (uid: %i) accepted %s's (uid: %i) namechange to %s for $%i.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange], cost);
+		Log_Write("log_namechanges", "%s (uid: %i) accepted %s's (uid: %i) namechange to %s for $%i.", GetPlayerNameEx(playerid), PlayerData[playerid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pID], PlayerData[targetid][pNameChange], cost);
+
+		SendAdminMessage(COLOR_LIGHTRED, "AdmCmd: %s has accepted %s's namechange to %s for %s.", GetRPName(playerid), GetRPName(targetid), PlayerData[targetid][pNameChange], FormatCash(cost));
+		SendClientMessageEx(targetid, COLOR_YELLOW, "Your namechange request to %s was approved for %s.", PlayerData[targetid][pNameChange], FormatCash(cost));
+
+        GivePlayerCash(targetid, -cost);
+        AddToTaxVault(cost);
+	}
+
+    mysql_format(connectionID, queryBuffer, sizeof(queryBuffer), "INSERT INTO log_namehistory VALUES(null, %i, '%s', '%s', '%s', NOW())", PlayerData[targetid][pID], GetPlayerNameEx(targetid), PlayerData[targetid][pNameChange], GetPlayerNameEx(playerid));
+	mysql_tquery(connectionID, queryBuffer);
+
+	Namechange(targetid, GetPlayerNameEx(targetid), PlayerData[targetid][pNameChange]);
+	PlayerData[targetid][pNameChange] = 0;
+	PlayerData[targetid][pFreeNamechange] = 0;
 	return 1;
 }
 

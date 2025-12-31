@@ -45,7 +45,7 @@ hook OnPlayerHeartBeat(playerid)
                 SetPlayerSpecialAction(playerid, SPECIAL_ACTION_CARRY);
 
                 ApplyAnimation(playerid, "CARRY", "liftup", 4.1, 0, 0, 0, 0, 0, 1);
-                SetPlayerCheckpoint(playerid, 421.1654, -848.9248, 25.8200, 2.0);
+                SetPlayerCheckpoint(playerid, 610.829772, 891.420837, -87.986389, 2.0);
 
                 if(1 <= number <= 5)
                 {
